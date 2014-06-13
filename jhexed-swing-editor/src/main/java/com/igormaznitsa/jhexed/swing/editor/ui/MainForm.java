@@ -667,38 +667,42 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   @Override
   public void mouseClicked(final MouseEvent e) {
     switch (e.getButton()) {
-      case MouseEvent.BUTTON1:{
+      case MouseEvent.BUTTON1: {
         final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
         useCurrentToolAtPosition(hexNumber);
-      }break;
+      }
+      break;
     }
   }
 
   @Override
   public void mousePressed(final MouseEvent e) {
-    switch(e.getButton()){
-      case MouseEvent.BUTTON1:{
+    switch (e.getButton()) {
+      case MouseEvent.BUTTON1: {
         if (selectedToolType != null && this.selectedLayer != null) {
           this.selectedLayer.addUndo();
           updateRedoUndoForCurrentLayer();
           final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
           useCurrentToolAtPosition(hexNumber);
         }
-      }break;
-      case MouseEvent.BUTTON3:{
+      }
+      break;
+      case MouseEvent.BUTTON3: {
         this.dragging = true;
         this.hexMapPanelDesktop.initDrag(e.getPoint());
-      }break;
+      }
+      break;
     }
   }
 
   @Override
   public void mouseReleased(final MouseEvent e) {
-    switch(e.getButton()){
-      case MouseEvent.BUTTON3:{
+    switch (e.getButton()) {
+      case MouseEvent.BUTTON3: {
         this.dragging = false;
         this.hexMapPanelDesktop.endDrag();
-      }break;
+      }
+      break;
     }
   }
 
@@ -713,10 +717,11 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void mouseDragged(final MouseEvent e) {
-    if (SwingUtilities.isLeftMouseButton(e)){
+    if (SwingUtilities.isLeftMouseButton(e)) {
       final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
       useCurrentToolAtPosition(hexNumber);
-    }else{
+    }
+    else {
       if (this.dragging) {
         this.hexMapPanelDesktop.processDrag(e.getPoint());
       }
@@ -834,12 +839,14 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void mouseWheelMoved(MouseWheelEvent e) {
-    final int rotation = e.getWheelRotation();
-    if (rotation < 0) {
-      menuViewZoomInActionPerformed(null);
-    }
-    else {
-      menuViewZoomOutActionPerformed(null);
+    if ((e.getModifiers() & MouseEvent.CTRL_MASK) != 0) {
+      final int rotation = e.getWheelRotation();
+      if (rotation < 0) {
+        menuViewZoomInActionPerformed(null);
+      }
+      else {
+        menuViewZoomOutActionPerformed(null);
+      }
     }
   }
 }
