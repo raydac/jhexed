@@ -26,11 +26,6 @@ public class ColorHexRender implements HexEngineRender<Graphics2D>, HexEngineLis
     return this.antialias;
   }
   
-  @SuppressWarnings("unchecked")
-  public void attachedToEngine(final HexEngine<?> engine) {
-    engine.addHexLayerListener(this);
-  }
-
   public void detachedFromEngine(final HexEngine<?> engine) {
     engine.removeHexLayerListener(this);
   }
@@ -151,6 +146,12 @@ public class ColorHexRender implements HexEngineRender<Graphics2D>, HexEngineLis
 
   public void detachedRenderer(HexEngine<Graphics2D> canvas) {
     canvas.removeHexLayerListener(this);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void attachedToEngine(final HexEngine<?> engine) {
+    engine.addHexLayerListener(this);
+    onEngineReconfigured(engine);
   }
 
   public void onRenderChanged(final HexEngine<?> source, final HexEngineRender<?> oldRenderer, final HexEngineRender<?> newRenderer) {
