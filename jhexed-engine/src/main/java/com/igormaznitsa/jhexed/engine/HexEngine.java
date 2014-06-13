@@ -468,6 +468,16 @@ public final class HexEngine<G> {
   }
 
   /**
+   * Calculate the covered hex position by a point coordinates in the hex
+   * @param pointX the point x
+   * @param pointY the point y
+   * @return the hex coordinate
+   */
+  public HexPosition pointToHex(final float pointX, final float pointY){
+    return new HexPosition(calculateColumn(pointX, pointY), calculateRow(pointX, pointY));
+  }
+  
+  /**
    * Calculate hexagon column for X,Y coordinates. It takes in count the scale
    * factor.
    *
