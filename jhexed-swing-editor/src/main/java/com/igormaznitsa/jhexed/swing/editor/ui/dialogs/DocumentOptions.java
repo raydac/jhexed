@@ -25,7 +25,7 @@ public class DocumentOptions {
     this.hexOrientation = hexOrientation;
     this.lineWidth = lineWidth;
     this.border = border;
-    this.comments = comments;
+    this.comments = comments == null ? "" : comments;
   }
 
   public DocumentOptions(final byte[] array) throws IOException {

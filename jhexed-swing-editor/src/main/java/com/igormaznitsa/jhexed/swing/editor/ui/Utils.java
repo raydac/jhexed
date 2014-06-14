@@ -73,13 +73,20 @@ public final class Utils {
             + color.getBlue() * color.getBlue() * .068d);
   }
 
-  public static String color2html(final Color c) {
+  public static String color2html(final Color c, final boolean alpha) {
+    final String ac = Integer.toHexString(c.getAlpha()).toUpperCase(Locale.ENGLISH);
     final String rc = Integer.toHexString(c.getRed()).toUpperCase(Locale.ENGLISH);
     final String gc = Integer.toHexString(c.getGreen()).toUpperCase(Locale.ENGLISH);
     final String bc = Integer.toHexString(c.getBlue()).toUpperCase(Locale.ENGLISH);
 
     final StringBuilder result = new StringBuilder(7);
     result.append('#');
+    if (alpha) {
+      if (ac.length() == 1) {
+        result.append('0');
+      }
+      result.append(ac);
+    }
     if (rc.length() == 1) {
       result.append('0');
     }
@@ -174,33 +181,36 @@ public final class Utils {
       IOUtils.closeQuietly(inStream);
     }
   }
-  
-  public static String byteArray2String(final byte [] array, final boolean signed, final boolean hex){
-    final StringBuilder result = new StringBuilder(array.length*3);
-  
+
+  public static String byteArray2String(final byte[] array, final boolean signed, final boolean hex) {
+    final StringBuilder result = new StringBuilder(array.length * 3);
+
     boolean nofirst = false;
-    
-    for(final byte b : array){
-      if (nofirst){
+
+    for (final byte b : array) {
+      if (nofirst) {
         result.append(',');
-      }else{
+      }
+      else {
         nofirst = true;
       }
-      
+
       final int val = signed ? b : b & 0xFF;
-      if (hex){
+      if (hex) {
         final String hx = Integer.toHexString(val).toUpperCase(Locale.ENGLISH);
         result.append("0x");
-        if (hx.length()<2){
+        if (hx.length() < 2) {
           result.append('0').append(hx);
-        }else{
+        }
+        else {
           result.append(hx);
         }
-      }else{
+      }
+      else {
         result.append(val);
       }
     }
-    
+
     return result.toString();
   }
 }

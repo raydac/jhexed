@@ -118,6 +118,10 @@ public class LayerDataField implements HexEngineModel<Byte> {
     return new LayerDataField(this);
   }
 
+  public byte[] getArray() {
+    return this.array;
+  }  
+  
   public void loadFromAnotherInstance(final LayerDataField layer) {
     this.visible = layer.visible;
     this.columns = layer.columns;
