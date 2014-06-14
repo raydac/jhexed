@@ -85,7 +85,9 @@ public class LayerDataField implements HexEngineModel<Byte> {
 
     final int valuesNum = din.readShort() & 0xFFFF;
     for (int i = 0; i < valuesNum; i++) {
-      this.values.add(HexValue.readValue(in));
+      final HexValue value = HexValue.readValue(in);
+      value.setIndex(i);
+      this.values.add(value);
     }
 
     this.columns = din.readInt();

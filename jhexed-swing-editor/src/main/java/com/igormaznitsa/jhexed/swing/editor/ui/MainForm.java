@@ -797,6 +797,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   public void loadState(final FileContainer container) throws IOException {
+    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED, (Object)null);
+    
     final FileContainerSection docsettings = container.findSectionForName("docsettings");
     final FileContainerSection layers = container.findSectionForName("layers");
 
