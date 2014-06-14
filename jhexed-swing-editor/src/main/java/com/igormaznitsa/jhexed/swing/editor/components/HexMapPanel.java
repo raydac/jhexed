@@ -43,7 +43,7 @@ public class HexMapPanel extends JPanel {
     init();
   }
 
-  public void init(){
+  public final void init(){
     this.hexField.getRenderer().setLineWidth(0.2f);
     this.hexField.getRenderer().setCommonBorderColor(Color.black);
     this.getHexEngine().changeEngineBaseParameters(32, 32, HexEngine.ORIENTATION_HORIZONTAL);

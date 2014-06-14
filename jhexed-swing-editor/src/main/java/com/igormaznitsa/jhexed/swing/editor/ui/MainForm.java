@@ -13,7 +13,11 @@ import com.igormaznitsa.jhexed.swing.editor.components.*;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainer;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainerSection;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
+import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogSelectLayersForExport;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DocumentOptions;
+import com.igormaznitsa.jhexed.swing.editor.ui.exporters.ImageExporter;
+import com.igormaznitsa.jhexed.swing.editor.ui.exporters.XmlExporter;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameUtils;
 import java.awt.*;
 import java.awt.event.*;
@@ -23,6 +27,7 @@ import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 public class MainForm extends javax.swing.JFrame implements MouseListener, MouseMotionListener, MouseWheelListener, HexMapPanelListener, AppBus.AppBusListener {
 
@@ -41,6 +46,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private LayerDataField selectedLayer;
 
   private File destinationFile;
+  private File lastExportedFile;
   private String documentComments = "";
 
   private boolean dragging = false;
@@ -163,6 +169,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     menuFileSave = new javax.swing.JMenuItem();
     menuFileSaveAs = new javax.swing.JMenuItem();
     jSeparator1 = new javax.swing.JPopupMenu.Separator();
+    menuFileExportAs = new javax.swing.JMenu();
+    menuFileExportAsImage = new javax.swing.JMenuItem();
+    menuFileExportAsXML = new javax.swing.JMenuItem();
+    jSeparator3 = new javax.swing.JPopupMenu.Separator();
     menuFileDocumentOptions = new javax.swing.JMenuItem();
     jSeparator4 = new javax.swing.JPopupMenu.Separator();
     menuFileExit = new javax.swing.JMenuItem();
@@ -264,7 +274,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     menuFile.add(menuFileSave);
 
     menuFileSaveAs.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
-    menuFileSaveAs.setText("Save As");
+    menuFileSaveAs.setText("Save As...");
     menuFileSaveAs.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         menuFileSaveAsActionPerformed(evt);
@@ -272,6 +282,28 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     });
     menuFile.add(menuFileSaveAs);
     menuFile.add(jSeparator1);
+
+    menuFileExportAs.setText("Export as...");
+
+    menuFileExportAsImage.setText("Image");
+    menuFileExportAsImage.setEnabled(false);
+    menuFileExportAsImage.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        menuFileExportAsImageActionPerformed(evt);
+      }
+    });
+    menuFileExportAs.add(menuFileExportAsImage);
+
+    menuFileExportAsXML.setText("Xml file");
+    menuFileExportAsXML.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        menuFileExportAsXMLActionPerformed(evt);
+      }
+    });
+    menuFileExportAs.add(menuFileExportAsXML);
+
+    menuFile.add(menuFileExportAs);
+    menuFile.add(jSeparator3);
 
     menuFileDocumentOptions.setText("Document options");
     menuFileDocumentOptions.addActionListener(new java.awt.event.ActionListener() {
@@ -619,6 +651,69 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     new DialogAbout(this).setVisible(true);
   }//GEN-LAST:event_menuHelpAboutActionPerformed
 
+  private void menuFileExportAsImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsImageActionPerformed
+    DialogSelectLayersForExport.SelectLayersExportData toExport = prepareExportData();
+
+    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, toExport);
+    dlg.setTitle("Select data for export as Image");
+    dlg.setVisible(true);
+    toExport = dlg.getResult();
+    if (toExport != null) {
+      final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
+      fileChooser.setFileFilter(Utils.PNG_FILE_FILTER);
+      if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+        this.lastExportedFile = fileChooser.getSelectedFile();
+
+        final ImageExporter exporter = new ImageExporter(getDocumentOptions(), toExport);
+        try {
+          exporter.export(this.lastExportedFile);
+        }
+        catch (IOException ex) {
+          Log.error("Can't export Image", ex);
+          JOptionPane.showMessageDialog(null, "Can't export as Image for error", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+  }//GEN-LAST:event_menuFileExportAsImageActionPerformed
+
+  private void menuFileExportAsXMLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsXMLActionPerformed
+    DialogSelectLayersForExport.SelectLayersExportData toExport = prepareExportData();
+
+    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, toExport);
+    dlg.setTitle("Select data for XML export");
+    dlg.setVisible(true);
+    toExport = dlg.getResult();
+    if (toExport != null) {
+      final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
+      fileChooser.setFileFilter(Utils.XML_FILE_FILTER);
+      if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+        this.lastExportedFile = fileChooser.getSelectedFile();
+
+        final XmlExporter exporter = new XmlExporter(getDocumentOptions(), toExport);
+        try {
+          exporter.export(this.lastExportedFile);
+        }
+        catch (IOException ex) {
+          Log.error("Can't export XML", ex);
+          JOptionPane.showMessageDialog(null, "Can't export as XML for error", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+  }//GEN-LAST:event_menuFileExportAsXMLActionPerformed
+
+  private DialogSelectLayersForExport.SelectLayersExportData prepareExportData() {
+    final DialogSelectLayersForExport.SelectLayersExportData result = new DialogSelectLayersForExport.SelectLayersExportData();
+
+    result.setBackgroundImageExport(this.menuViewBackImage.isSelected());
+
+    for (int i = 0; i < this.layers.getSize(); i++) {
+      final LayerDataField field = this.layers.getElementAt(i).getLayer();
+      result.addLayer(field.isLayerVisible(), field);
+    }
+
+    return result;
+  }
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JMenu jMenu1;
   private javax.swing.JMenu jMenu2;
@@ -626,6 +721,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPopupMenu.Separator jSeparator1;
   private javax.swing.JPopupMenu.Separator jSeparator2;
+  private javax.swing.JPopupMenu.Separator jSeparator3;
   private javax.swing.JPopupMenu.Separator jSeparator4;
   private javax.swing.JLabel labelCellUnderMouse;
   private javax.swing.JLabel labelZoomStatus;
@@ -634,6 +730,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private javax.swing.JMenu menuFile;
   private javax.swing.JMenuItem menuFileDocumentOptions;
   private javax.swing.JMenuItem menuFileExit;
+  private javax.swing.JMenu menuFileExportAs;
+  private javax.swing.JMenuItem menuFileExportAsImage;
+  private javax.swing.JMenuItem menuFileExportAsXML;
   private javax.swing.JMenuItem menuFileNew;
   private javax.swing.JMenuItem menuFileSave;
   private javax.swing.JMenuItem menuFileSaveAs;
@@ -652,13 +751,39 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private javax.swing.JPanel panelMainArea;
   // End of variables declaration//GEN-END:variables
 
-  private void drawHexCoords(final HexPosition position) {
+  private void updateActivehexCoord(final HexPosition position) {
     this.labelCellUnderMouse.setText("Hex " + position.getColumn() + ',' + position.getRow());
+    if (this.hexMapPanel.isValidPosition(position)) {
+      final StringBuilder buffer = new StringBuilder();
+      for (int i = 0; i < this.layers.getSize(); i++) {
+        if (buffer.length()>0) {
+          buffer.append("<br>");
+        }
+        final LayerDataField field = this.layers.getElementAt(i).getLayer();
+        if (field.isLayerVisible()) {
+          final String layerName = field.getLayerName().isEmpty() ? "Untitled layer" : field.getLayerName();
+          final HexValue layerValue = field.getHexValueAtPos(position.getColumn(), position.getRow());
+          if (layerValue != null) {
+            final String valueName = layerValue.getName().isEmpty() ? layerValue.getComment() : layerValue.getName();
+            buffer.append("<b>").append(StringEscapeUtils.escapeHtml4(layerName)).append(":</b>").append(StringEscapeUtils.escapeHtml4(valueName));
+          }
+        }
+      }
+      if (buffer.length() > 0) {
+        this.hexMapPanel.setToolTipText("<html>" + buffer + "</html>");
+      }
+      else {
+        this.hexMapPanel.setToolTipText(null);
+      }
+    }
+    else {
+      this.hexMapPanel.setToolTipText(null);
+    }
   }
 
   private void useCurrentToolAtPosition(final HexPosition position) {
     if (this.selectedToolType != null && this.selectedLayer != null && this.hexMapPanel.isValidPosition(position)) {
-      drawHexCoords(position);
+      updateActivehexCoord(position);
       this.selectedToolType.processTool(this.hexMapPanel.getHexEngine(), this.selectedLayer, position);
       this.hexMapPanel.repaint();
     }
@@ -731,7 +856,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   @Override
   public void mouseMoved(final MouseEvent e) {
     final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
-    drawHexCoords(hexNumber);
+    updateActivehexCoord(hexNumber);
+    ToolTipManager.sharedInstance().mouseMoved(e);
   }
 
   @Override
@@ -797,8 +923,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   public void loadState(final FileContainer container) throws IOException {
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED, (Object)null);
-    
+    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED, (Object) null);
+
     final FileContainerSection docsettings = container.findSectionForName("docsettings");
     final FileContainerSection layers = container.findSectionForName("layers");
 

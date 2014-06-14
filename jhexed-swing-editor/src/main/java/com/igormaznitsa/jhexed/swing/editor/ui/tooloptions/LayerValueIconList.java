@@ -9,9 +9,10 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.Border;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.jdesktop.swingx.WrapLayout;
 
-public class LayerIconList extends JScrollPane {
+public class LayerValueIconList extends JScrollPane {
   private static final long serialVersionUID = 4067088203855017500L;
  
   private static final int ICON_SIZE = 48;
@@ -28,13 +29,13 @@ public class LayerIconList extends JScrollPane {
   public static class HexButton extends JLabel {
     private static final long serialVersionUID = -6733971540369351944L;
     private final HexValue value;
-    private final LayerIconList parent;
+    private final LayerValueIconList parent;
     
     public HexValue getHexValue(){
       return this.value;
     }
     
-    public HexButton(final LayerIconList parent, final HexValue hex){
+    public HexButton(final LayerValueIconList parent, final HexValue hex){
       super();
       this.setBorder(EMPTY_BORDER);
       
@@ -68,6 +69,12 @@ public class LayerIconList extends JScrollPane {
         public void mouseExited(MouseEvent e) {
         }
       });
+
+      if (!hex.getName().isEmpty() || !hex.getComment().isEmpty()){
+        final String name = hex.getName().isEmpty() ? "": "<h3>"+StringEscapeUtils.escapeHtml4(hex.getName())+"</h3>";
+        final String comment = hex.getComment().isEmpty() ? "": "<p>"+StringEscapeUtils.escapeHtml4(hex.getComment())+"</p>";
+        this.setToolTipText("<html>"+name+comment+"</html>");
+      }
     }
 
     public ImageIcon getHexIcon(){
@@ -80,7 +87,7 @@ public class LayerIconList extends JScrollPane {
   
   private final List<LayerIconListListener> listeners = new ArrayList<LayerIconListListener>();
   
-  public LayerIconList(){
+  public LayerValueIconList(){
     super();
     
     this.content = new JPanel(new WrapLayout(WrapLayout.LEFT));

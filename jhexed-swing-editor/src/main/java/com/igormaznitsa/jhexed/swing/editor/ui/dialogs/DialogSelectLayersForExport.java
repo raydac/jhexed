@@ -1,0 +1,273 @@
+/*
+ * Copyright 2014 Igor Maznitsa.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.igormaznitsa.jhexed.swing.editor.ui.dialogs;
+
+import com.igormaznitsa.jhexed.swing.editor.model.LayerDataField;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
+
+/**
+ *
+ * @author Igor Maznitsa (http://www.igormaznitsa.com)
+ */
+public class DialogSelectLayersForExport extends javax.swing.JDialog {
+  private static final long serialVersionUID = -6786553292919498744L;
+
+  public static class SelectLayersExportData{
+    private boolean exportBackgroundImage;
+    private List<LayerExportRecord> layers = new ArrayList<LayerExportRecord>();
+    public SelectLayersExportData(){
+      
+    }
+    
+    public boolean isBackgroundImageExport(){
+      return this.exportBackgroundImage;
+    }
+    
+    public void setBackgroundImageExport(final boolean flag){
+      this.exportBackgroundImage = flag;
+    }
+    
+    public List<LayerExportRecord> getLayers(){
+      return this.layers;
+    }
+    
+    public void addLayer(final boolean export, final LayerDataField layer){
+      this.layers.add(new LayerExportRecord(export, layer));
+    }
+  }
+  
+  public static class LayerExportRecord{
+    private boolean allowed;
+    private final LayerDataField layer;
+    
+    public LayerExportRecord(final boolean allowed, final LayerDataField dataField){
+      this.allowed = allowed;
+      this.layer = dataField;
+    }
+    
+    public boolean isAllowed(){
+      return this.allowed;
+    }
+    
+    public void setAllowed(final boolean flag){
+      this.allowed = flag;
+    }
+    
+    public LayerDataField getLayer(){
+      return this.layer;
+    }
+  }
+  
+  private static class LayersModel implements TableModel{
+
+    private final List<TableModelListener> listeners = new ArrayList<TableModelListener>();
+    private final SelectLayersExportData data;
+    
+    public LayersModel(final SelectLayersExportData data){
+      this.data = data;
+    }
+    
+    @Override
+    public int getRowCount() {
+      return this.data.getLayers().size();
+    }
+
+    @Override
+    public int getColumnCount() {
+      return 2;
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+      switch(columnIndex){
+        case 0: return "Export";
+        case 1: return "Layer";
+      }
+      throw new Error("Unsupported column");
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+      switch(columnIndex){
+        case 0: return Boolean.class;
+        case 1: return String.class;
+      }
+      throw new Error("Unsupported column");
+    }
+
+    @Override
+    public boolean isCellEditable(final int rowIndex, final int columnIndex) {
+      return columnIndex == 0;
+    }
+
+    @Override
+    public Object getValueAt(final int rowIndex, final int columnIndex) {
+      final LayerExportRecord record = this.data.getLayers().get(rowIndex);
+      switch(columnIndex){
+        case 0: return record.isAllowed();
+        case 1: return record.getLayer().getLayerName();
+      }
+      throw new Error("Unsupported column");
+    }
+
+    @Override
+    public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
+      final LayerExportRecord record = this.data.getLayers().get(rowIndex);
+      if (columnIndex==0){
+        final Boolean bool = (Boolean)aValue;
+        record.setAllowed(bool);
+      }
+    }
+
+    @Override
+    public void addTableModelListener(final TableModelListener l) {
+      this.listeners.add(l);
+    }
+
+    @Override
+    public void removeTableModelListener(final TableModelListener l) {
+      this.listeners.remove(l);
+    }
+    
+  }
+  
+  private final SelectLayersExportData data;
+  private SelectLayersExportData result;
+  
+  public DialogSelectLayersForExport(final java.awt.Frame parent, final boolean allowsBackgroundImageExport, final SelectLayersExportData data) {
+    super(parent, true);
+    initComponents();
+    
+    this.checkBoxExportBackgroundImage.setEnabled(allowsBackgroundImageExport);
+    this.checkBoxExportBackgroundImage.setSelected(data.isBackgroundImageExport());
+    
+    this.data = data;
+    this.tableListOfLayers.setModel(new LayersModel(data));
+  }
+
+  public SelectLayersExportData getResult(){
+      return this.result;
+  }
+  
+  /**
+   * This method is called from within the constructor to initialize the form.
+   * WARNING: Do NOT modify this code. The content of this method is always
+   * regenerated by the Form Editor.
+   */
+  @SuppressWarnings("unchecked")
+  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+  private void initComponents() {
+
+    checkBoxExportBackgroundImage = new javax.swing.JCheckBox();
+    jScrollPane1 = new javax.swing.JScrollPane();
+    tableListOfLayers = new javax.swing.JTable();
+    buttonCancel = new javax.swing.JButton();
+    buttonOk = new javax.swing.JButton();
+
+    setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+    setLocationByPlatform(true);
+
+    checkBoxExportBackgroundImage.setText("Export background image");
+
+    tableListOfLayers.setModel(new javax.swing.table.DefaultTableModel(
+      new Object [][] {
+        {null, null, null, null},
+        {null, null, null, null},
+        {null, null, null, null},
+        {null, null, null, null}
+      },
+      new String [] {
+        "Title 1", "Title 2", "Title 3", "Title 4"
+      }
+    ));
+    jScrollPane1.setViewportView(tableListOfLayers);
+
+    buttonCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/cross.png"))); // NOI18N
+    buttonCancel.setText("Cancel");
+    buttonCancel.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        buttonCancelActionPerformed(evt);
+      }
+    });
+
+    buttonOk.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/tick.png"))); // NOI18N
+    buttonOk.setText("Ok");
+    buttonOk.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        buttonOkActionPerformed(evt);
+      }
+    });
+
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+    getContentPane().setLayout(layout);
+    layout.setHorizontalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(layout.createSequentialGroup()
+        .addContainerGap()
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(checkBoxExportBackgroundImage)
+          .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(13, Short.MAX_VALUE))
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addComponent(buttonOk)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(buttonCancel)
+        .addContainerGap())
+    );
+
+    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {buttonCancel, buttonOk});
+
+    layout.setVerticalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(layout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(checkBoxExportBackgroundImage)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 360, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(buttonCancel)
+          .addComponent(buttonOk))
+        .addContainerGap())
+    );
+
+    pack();
+  }// </editor-fold>//GEN-END:initComponents
+
+  private void buttonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOkActionPerformed
+    this.result = this.data;
+    dispose();
+  }//GEN-LAST:event_buttonOkActionPerformed
+
+  private void buttonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelActionPerformed
+    this.result = null;
+    dispose();
+  }//GEN-LAST:event_buttonCancelActionPerformed
+  
+
+  // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton buttonCancel;
+  private javax.swing.JButton buttonOk;
+  private javax.swing.JCheckBox checkBoxExportBackgroundImage;
+  private javax.swing.JScrollPane jScrollPane1;
+  private javax.swing.JTable tableListOfLayers;
+  // End of variables declaration//GEN-END:variables
+}

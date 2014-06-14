@@ -37,6 +37,19 @@ public final class Utils {
     }
   };
 
+  public static final FileFilter PNG_FILE_FILTER = new FileFilter() {
+
+    @Override
+    public boolean accept(File f) {
+      return f.isDirectory() || f.getName().toLowerCase(Locale.ENGLISH).endsWith(".png");
+    }
+
+    @Override
+    public String getDescription() {
+      return "PNG Image files (*.png)";
+    }
+  };
+
   public static final FileFilter XML_FILE_FILTER = new FileFilter() {
 
     @Override
@@ -160,5 +173,34 @@ public final class Utils {
     finally {
       IOUtils.closeQuietly(inStream);
     }
+  }
+  
+  public static String byteArray2String(final byte [] array, final boolean signed, final boolean hex){
+    final StringBuilder result = new StringBuilder(array.length*3);
+  
+    boolean nofirst = false;
+    
+    for(final byte b : array){
+      if (nofirst){
+        result.append(',');
+      }else{
+        nofirst = true;
+      }
+      
+      final int val = signed ? b : b & 0xFF;
+      if (hex){
+        final String hx = Integer.toHexString(val).toUpperCase(Locale.ENGLISH);
+        result.append("0x");
+        if (hx.length()<2){
+          result.append('0').append(hx);
+        }else{
+          result.append(hx);
+        }
+      }else{
+        result.append(val);
+      }
+    }
+    
+    return result.toString();
   }
 }

@@ -5,7 +5,7 @@ import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
 import java.awt.geom.Path2D;
 import javax.swing.ImageIcon;
 
-public class EraserOptions extends javax.swing.JPanel implements AppBus.AppBusListener, LayerIconList.LayerIconListListener {
+public class EraserOptions extends javax.swing.JPanel implements AppBus.AppBusListener, LayerValueIconList.LayerIconListListener {
   private static final long serialVersionUID = 2906524676479899740L;
   
   private HexValue selectedValue;
@@ -32,7 +32,7 @@ public class EraserOptions extends javax.swing.JPanel implements AppBus.AppBusLi
 
     jPanel1 = new javax.swing.JPanel();
     sliderWidth = new javax.swing.JSlider();
-    layerIconList = new com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerIconList();
+    layerIconList = new com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerValueIconList();
 
     jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Radius of the eraser"));
 
@@ -65,7 +65,7 @@ public class EraserOptions extends javax.swing.JPanel implements AppBus.AppBusLi
 
     sliderWidth.getAccessibleContext().setAccessibleDescription("Width of the pencil");
 
-    layerIconList.setBorder(javax.swing.BorderFactory.createTitledBorder("Value to erase"));
+    layerIconList.setBorder(javax.swing.BorderFactory.createTitledBorder("Allowable layer values"));
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -92,7 +92,7 @@ public class EraserOptions extends javax.swing.JPanel implements AppBus.AppBusLi
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel jPanel1;
-  private com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerIconList layerIconList;
+  private com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerValueIconList layerIconList;
   private javax.swing.JSlider sliderWidth;
   // End of variables declaration//GEN-END:variables
 

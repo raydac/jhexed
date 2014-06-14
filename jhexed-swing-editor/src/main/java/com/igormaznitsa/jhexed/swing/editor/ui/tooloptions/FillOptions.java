@@ -5,7 +5,7 @@ import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
 import java.awt.geom.Path2D;
 import javax.swing.ImageIcon;
 
-public class FillOptions extends javax.swing.JPanel implements AppBus.AppBusListener, LayerIconList.LayerIconListListener {
+public class FillOptions extends javax.swing.JPanel implements AppBus.AppBusListener, LayerValueIconList.LayerIconListListener {
 
   private static final long serialVersionUID = 2906524676479899740L;
 
@@ -33,13 +33,13 @@ public class FillOptions extends javax.swing.JPanel implements AppBus.AppBusList
   private void initComponents() {
 
     jScrollPane1 = new javax.swing.JScrollPane();
-    layerIconList = new com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerIconList();
+    layerIconList = new com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerValueIconList();
     jPanel1 = new javax.swing.JPanel();
     labelFillValue = new javax.swing.JLabel();
     jPanel2 = new javax.swing.JPanel();
     labelBorderValue = new javax.swing.JLabel();
 
-    jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Allowed values"));
+    jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Allowable layer values"));
     jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     jScrollPane1.setViewportView(layerIconList);
 
@@ -92,7 +92,7 @@ public class FillOptions extends javax.swing.JPanel implements AppBus.AppBusList
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JLabel labelBorderValue;
   private javax.swing.JLabel labelFillValue;
-  private com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerIconList layerIconList;
+  private com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerValueIconList layerIconList;
   // End of variables declaration//GEN-END:variables
 
 
