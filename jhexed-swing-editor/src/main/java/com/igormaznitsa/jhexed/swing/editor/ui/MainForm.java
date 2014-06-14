@@ -756,14 +756,14 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     if (this.hexMapPanel.isValidPosition(position)) {
       final StringBuilder buffer = new StringBuilder();
       for (int i = 0; i < this.layers.getSize(); i++) {
-        if (buffer.length()>0) {
-          buffer.append("<br>");
-        }
         final LayerDataField field = this.layers.getElementAt(i).getLayer();
         if (field.isLayerVisible()) {
-          final String layerName = field.getLayerName().isEmpty() ? "Untitled layer" : field.getLayerName();
+          final String layerName = field.getLayerName().isEmpty() ? "Untitled" : field.getLayerName();
           final HexValue layerValue = field.getHexValueAtPos(position.getColumn(), position.getRow());
           if (layerValue != null) {
+            if (buffer.length() > 0) {
+              buffer.append("<br>");
+            }
             final String valueName = layerValue.getName().isEmpty() ? layerValue.getComment() : layerValue.getName();
             buffer.append("<b>").append(StringEscapeUtils.escapeHtml4(layerName)).append(":</b>").append(StringEscapeUtils.escapeHtml4(valueName));
           }
