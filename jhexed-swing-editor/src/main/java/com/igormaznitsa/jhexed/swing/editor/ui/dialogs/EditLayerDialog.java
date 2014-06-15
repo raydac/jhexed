@@ -418,7 +418,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
       case 0:
         return rowIndex;
       case 1: {
-        final Image prerasterized = value.makeIcon(ICON_SIZE, ICON_SIZE, this.iconShape);
+        final Image prerasterized = value.makeIcon(ICON_SIZE, ICON_SIZE, this.iconShape, false);
         return new ImageIcon(prerasterized);
       }
       case 2:

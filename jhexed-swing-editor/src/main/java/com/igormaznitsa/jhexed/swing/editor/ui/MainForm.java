@@ -18,6 +18,7 @@ import com.igormaznitsa.jhexed.swing.editor.model.*;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogSelectLayersForExport;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DocumentOptions;
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.SelectLayersExportData;
 import com.igormaznitsa.jhexed.swing.editor.ui.exporters.ImageExporter;
 import com.igormaznitsa.jhexed.swing.editor.ui.exporters.XmlExporter;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameUtils;
@@ -287,7 +288,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     menuFileExportAs.setText("Export as...");
 
-    menuFileExportAsImage.setText("Image");
+    menuFileExportAsImage.setText("PNG Image");
     menuFileExportAsImage.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         menuFileExportAsImageActionPerformed(evt);
@@ -653,7 +654,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }//GEN-LAST:event_menuHelpAboutActionPerformed
 
   private void menuFileExportAsImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsImageActionPerformed
-    DialogSelectLayersForExport.SelectLayersExportData toExport = prepareExportData();
+    SelectLayersExportData toExport = prepareExportData();
 
     final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, toExport);
     dlg.setTitle("Select data for export as Image");
@@ -678,7 +679,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }//GEN-LAST:event_menuFileExportAsImageActionPerformed
 
   private void menuFileExportAsXMLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsXMLActionPerformed
-    DialogSelectLayersForExport.SelectLayersExportData toExport = prepareExportData();
+    SelectLayersExportData toExport = prepareExportData();
 
     final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, toExport);
     dlg.setTitle("Select data for XML export");
@@ -702,8 +703,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }//GEN-LAST:event_menuFileExportAsXMLActionPerformed
 
-  private DialogSelectLayersForExport.SelectLayersExportData prepareExportData() {
-    final DialogSelectLayersForExport.SelectLayersExportData result = new DialogSelectLayersForExport.SelectLayersExportData();
+  private SelectLayersExportData prepareExportData() {
+    final SelectLayersExportData result = new SelectLayersExportData();
 
     result.setBackgroundImageExport(this.menuViewBackImage.isSelected());
 

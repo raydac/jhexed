@@ -33,9 +33,9 @@ import org.apache.commons.lang3.StringEscapeUtils;
  */
 public class XmlExporter implements Exporter {
   private final DocumentOptions docOptions;
-  private final DialogSelectLayersForExport.SelectLayersExportData exportData;
+  private final SelectLayersExportData exportData;
   
-  public XmlExporter(final DocumentOptions docOptions, final DialogSelectLayersForExport.SelectLayersExportData exportData){
+  public XmlExporter(final DocumentOptions docOptions, final SelectLayersExportData exportData){
     this.docOptions = docOptions;
     this.exportData = exportData;
   }
@@ -59,7 +59,7 @@ public class XmlExporter implements Exporter {
       buffer.append("\t<backImage>").append(Utils.byteArray2String(this.docOptions.getImage().getImageData(), true, true)).append("</backImage>\n");
     }
     buffer.append("\t<layers>\n");
-    for(final DialogSelectLayersForExport.LayerExportRecord f : exportData.getLayers()){
+    for(final LayerExportRecord f : exportData.getLayers()){
       if (f.isAllowed()){
         buffer.append("\t\t<layer name=\"").append(StringEscapeUtils.escapeXml10(f.getLayer().getLayerName())).append("\" commentary=\"").append(StringEscapeUtils.escapeXml10(f.getLayer().getComments())).append("\">\n");
         buffer.append("\t\t\t<values>\n");

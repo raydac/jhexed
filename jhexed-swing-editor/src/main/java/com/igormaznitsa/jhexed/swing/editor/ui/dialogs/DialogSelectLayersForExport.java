@@ -16,7 +16,6 @@
 
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs;
 
-import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.event.TableModelListener;
@@ -29,51 +28,7 @@ import javax.swing.table.TableModel;
 public class DialogSelectLayersForExport extends javax.swing.JDialog {
   private static final long serialVersionUID = -6786553292919498744L;
 
-  public static class SelectLayersExportData{
-    private boolean exportBackgroundImage;
-    private List<LayerExportRecord> layers = new ArrayList<LayerExportRecord>();
-    public SelectLayersExportData(){
-      
-    }
-    
-    public boolean isBackgroundImageExport(){
-      return this.exportBackgroundImage;
-    }
-    
-    public void setBackgroundImageExport(final boolean flag){
-      this.exportBackgroundImage = flag;
-    }
-    
-    public List<LayerExportRecord> getLayers(){
-      return this.layers;
-    }
-    
-    public void addLayer(final boolean export, final HexFieldLayer layer){
-      this.layers.add(new LayerExportRecord(export, layer));
-    }
-  }
   
-  public static class LayerExportRecord{
-    private boolean allowed;
-    private final HexFieldLayer layer;
-    
-    public LayerExportRecord(final boolean allowed, final HexFieldLayer dataField){
-      this.allowed = allowed;
-      this.layer = dataField;
-    }
-    
-    public boolean isAllowed(){
-      return this.allowed;
-    }
-    
-    public void setAllowed(final boolean flag){
-      this.allowed = flag;
-    }
-    
-    public HexFieldLayer getLayer(){
-      return this.layer;
-    }
-  }
   
   private static class LayersModel implements TableModel{
 
@@ -253,6 +208,7 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
   }// </editor-fold>//GEN-END:initComponents
 
   private void buttonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOkActionPerformed
+    this.data.setBackgroundImageExport(this.checkBoxExportBackgroundImage.isSelected());
     this.result = this.data;
     dispose();
   }//GEN-LAST:event_buttonOkActionPerformed

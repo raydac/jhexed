@@ -42,7 +42,7 @@ public class LayerValueIconList extends JScrollPane {
       this.parent = parent;
       this.value = hex;
       setOpaque(false);
-      setIcon(new ImageIcon(hex.makeIcon(ICON_SIZE, ICON_SIZE, this.parent.iconHexShape)));
+      setIcon(new ImageIcon(hex.makeIcon(ICON_SIZE, ICON_SIZE, this.parent.iconHexShape, false)));
 
       final HexButton theInstance = this;
       

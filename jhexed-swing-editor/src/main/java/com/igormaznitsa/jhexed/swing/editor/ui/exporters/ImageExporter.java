@@ -25,7 +25,8 @@ import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.Arrays;
+import java.util.*;
+import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
@@ -35,9 +36,9 @@ import javax.imageio.ImageIO;
 public class ImageExporter implements Exporter {
 
   private final DocumentOptions docOptions;
-  private final DialogSelectLayersForExport.SelectLayersExportData exportData;
+  private final SelectLayersExportData exportData;
 
-  public ImageExporter(final DocumentOptions docOptions, final DialogSelectLayersForExport.SelectLayersExportData exportData) {
+  public ImageExporter(final DocumentOptions docOptions, final SelectLayersExportData exportData) {
     this.docOptions = docOptions;
     this.exportData = exportData;
   }
@@ -64,8 +65,16 @@ public class ImageExporter implements Exporter {
 
     final HexEngine<Graphics2D> engine = new HexEngine<Graphics2D>(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT, this.docOptions.getHexOrientation());
 
-    final HexFieldValue [] stackOfValues = new HexFieldValue[this.exportData.getLayers().size()];
-    
+    final List<HexFieldLayer> reversedNormalizedStack = new ArrayList<HexFieldLayer>();
+    for (int i = this.exportData.getLayers().size() - 1; i >= 0; i--) {
+      final LayerExportRecord rec = this.exportData.getLayers().get(i);
+      if (rec.isAllowed()) {
+        reversedNormalizedStack.add(rec.getLayer());
+      }
+    }
+
+    final HexFieldValue[] stackOfValues = new HexFieldValue[reversedNormalizedStack.size()];
+
     engine.setModel(new HexEngineModel<HexFieldValue[]>() {
 
       @Override
@@ -81,13 +90,9 @@ public class ImageExporter implements Exporter {
       @Override
       public HexFieldValue[] getValueAt(final int col, final int row) {
         Arrays.fill(stackOfValues, null);
-        
-        int index = 0;
-        for(final DialogSelectLayersForExport.LayerExportRecord r : exportData.getLayers()){
-          if (r.isAllowed()){
-            stackOfValues[index] = r.getLayer().getHexValueAtPos(col, row);
-          }
-          index ++;
+
+        for (int index = 0; index < reversedNormalizedStack.size(); index++) {
+          stackOfValues[index] = reversedNormalizedStack.get(index).getHexValueAtPos(col, row);
         }
         return stackOfValues;
       }
@@ -155,29 +160,29 @@ public class ImageExporter implements Exporter {
 
       @Override
       public void drawUnderBorder(final HexEngine<Graphics2D> engine, final Graphics2D g, final int col, final int row, final Color borderColor, final Color fillColor) {
-        final HexFieldValue [] stackValues = (HexFieldValue[])engine.getModel().getValueAt(col, row);
-        for(int i=0;i<stackValues.length;i++){
+        final HexFieldValue[] stackValues = (HexFieldValue[]) engine.getModel().getValueAt(col, row);
+        for (int i = 0; i < stackValues.length; i++) {
           final HexFieldValue valueToDraw = stackValues[i];
-          if (valueToDraw == null) continue;
+          if (valueToDraw == null) {
+            continue;
+          }
           g.drawImage(cachedIcons[i][valueToDraw.getIndex()], 0, 0, null);
         }
       }
 
     });
-    
-    final Path2D hexShape = ((ColorHexRender)engine.getRenderer()).getHexPath();
+
+    final Path2D hexShape = ((ColorHexRender) engine.getRenderer()).getHexPath();
     final int cellWidth = hexShape.getBounds().width;
     final int cellHeight = hexShape.getBounds().height;
-    
-    for (int i = 0; i<this.exportData.getLayers().size(); i++) {
-      final DialogSelectLayersForExport.LayerExportRecord record = this.exportData.getLayers().get(i);
-      if (record.isAllowed()) {
-        final Image[] cacheLineForLayer = new Image[record.getLayer().getHexValuesNumber()];
-        for (int v = 1; v < record.getLayer().getHexValuesNumber(); v++) {
-          cacheLineForLayer[v] = record.getLayer().getHexValueForIndex(v).makeIcon(cellWidth, cellHeight, hexShape);
-        }
-        cachedIcons[i] = cacheLineForLayer;
+
+    for (int layerIndex = 0; layerIndex < reversedNormalizedStack.size(); layerIndex++) {
+      final HexFieldLayer theLayer = reversedNormalizedStack.get(layerIndex);
+      final Image[] cacheLineForLayer = new Image[theLayer.getHexValuesNumber()];
+      for (int valueIndex = 1; valueIndex < theLayer.getHexValuesNumber(); valueIndex++) {
+        cacheLineForLayer[valueIndex] = theLayer.getHexValueForIndex(valueIndex).makeIcon(cellWidth, cellHeight, hexShape, true);
       }
+      cachedIcons[layerIndex] = cacheLineForLayer;
     }
 
     engine.draw(gfx);

@@ -75,7 +75,7 @@
               <SubComponents>
                 <MenuItem class="javax.swing.JMenuItem" name="menuFileExportAsImage">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Image"/>
+                    <Property name="text" type="java.lang.String" value="PNG Image"/>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuFileExportAsImageActionPerformed"/>
