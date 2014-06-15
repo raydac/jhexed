@@ -67,7 +67,7 @@ public abstract class HexFieldValue {
   
   public abstract void prerasterizeIcon(final Shape shape);
   
-  public abstract BufferedImage makeIcon(final int width, final int height, final Path2D shape);
+  public abstract BufferedImage makeIcon(final int width, final int height, final Path2D shape, boolean allowAlpha);
  
   public abstract HexFieldValue cloneValue();
   

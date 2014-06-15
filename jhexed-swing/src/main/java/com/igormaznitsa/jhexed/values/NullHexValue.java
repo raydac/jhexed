@@ -29,7 +29,7 @@ public class NullHexValue extends HexFieldValue {
   
   
   @Override
-    public BufferedImage makeIcon(final int width, final int height, final Path2D shape) {
+    public BufferedImage makeIcon(final int width, final int height, final Path2D shape, final boolean allowAlpha) {
     final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     final Graphics2D g = img.createGraphics();
     g.setColor(Color.BLACK);

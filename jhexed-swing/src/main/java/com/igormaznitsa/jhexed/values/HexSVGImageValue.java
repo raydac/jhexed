@@ -65,7 +65,7 @@ public class HexSVGImageValue extends HexFieldValue {
   }
 
   @Override
-  public BufferedImage makeIcon(final int width, final int height, final Path2D shape) {
+  public BufferedImage makeIcon(final int width, final int height, final Path2D shape, final boolean allowAlpha) {
     try {
       final BufferedImage img = this.image.rasterize(width, height, BufferedImage.TYPE_INT_ARGB);
       if (shape == null) {
