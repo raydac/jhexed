@@ -1,20 +1,18 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.frames.layers;
 
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
 import com.igormaznitsa.jhexed.swing.editor.ui.Utils;
 import static com.igormaznitsa.jhexed.swing.editor.ui.Utils.*;
 import java.awt.*;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 
 public class LayerRecordPanel extends javax.swing.JPanel {
   private static final long serialVersionUID = -6730121049908309123L;
 
-  private final LayerDataField layer;
+  private final HexFieldLayer layer;
   private final LayerListModel parent;
   
-  public LayerRecordPanel(final LayerListModel parent, final LayerDataField layer) {
+  public LayerRecordPanel(final LayerListModel parent, final HexFieldLayer layer) {
     initComponents();
     this.layer = layer;
     this.parent = parent;
@@ -28,11 +26,11 @@ public class LayerRecordPanel extends javax.swing.JPanel {
     repaint();
   }
   
-  public LayerDataField getLayer(){
+  public HexFieldLayer getLayer(){
     return this.layer;
   }
 
-  public void updateLayer(final LayerDataField data){
+  public void updateLayer(final HexFieldLayer data){
     this.layer.loadFromAnotherInstance(data);
     refreshView();
     this.parent.changedItem(this);
@@ -77,7 +75,7 @@ public class LayerRecordPanel extends javax.swing.JPanel {
 
   private void checkBoxVisibilityStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_checkBoxVisibilityStateChanged
     this.layer.setVisible(this.checkBoxVisibility.isSelected());
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT, this.layer);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT, this.layer);
   }//GEN-LAST:event_checkBoxVisibilityStateChanged
 
 

@@ -1,5 +1,8 @@
 package com.igormaznitsa.jhexed.swing.editor.ui;
 
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
+import com.igormaznitsa.jhexed.hexmap.HexMapPanelListener;
+import com.igormaznitsa.jhexed.hexmap.HexMapPanel;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.layers.LayerRecordPanel;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameTools;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameToolOptions;
@@ -9,11 +12,10 @@ import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogDocumentOptions;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogAbout;
 import com.igormaznitsa.jhexed.engine.misc.*;
 import com.igormaznitsa.jhexed.swing.editor.Log;
-import com.igormaznitsa.jhexed.swing.editor.components.*;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainer;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainerSection;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogSelectLayersForExport;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DocumentOptions;
 import com.igormaznitsa.jhexed.swing.editor.ui.exporters.ImageExporter;
@@ -29,7 +31,7 @@ import javax.swing.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
-public class MainForm extends javax.swing.JFrame implements MouseListener, MouseMotionListener, MouseWheelListener, HexMapPanelListener, AppBus.AppBusListener {
+public class MainForm extends javax.swing.JFrame implements MouseListener, MouseMotionListener, MouseWheelListener, HexMapPanelListener, InsideApplicationBus.AppBusListener {
 
   private static final long serialVersionUID = 3235266727080222251L;
 
@@ -43,7 +45,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private final LayerListModel layers;
 
   private ToolType selectedToolType;
-  private LayerDataField selectedLayer;
+  private HexFieldLayer selectedLayer;
 
   private File destinationFile;
   private File lastExportedFile;
@@ -88,7 +90,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     hexMapPanelDesktop.setContentPane(hexMapPanel);
 
-    AppBus.getInstance().addAppBusListener(this);
+    InsideApplicationBus.getInstance().addAppBusListener(this);
 
     loadSettings();
 
@@ -286,7 +288,6 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     menuFileExportAs.setText("Export as...");
 
     menuFileExportAsImage.setText("Image");
-    menuFileExportAsImage.setEnabled(false);
     menuFileExportAsImage.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         menuFileExportAsImageActionPerformed(evt);
@@ -630,7 +631,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     this.hexMapPanel.setImage(value.getImage());
 
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.HEX_SHAPE, this.hexMapPanel.getHexShape());
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.HEX_SHAPE, this.hexMapPanel.getHexShape());
   }
 
   private void menuFileDocumentOptionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileDocumentOptionsActionPerformed
@@ -707,7 +708,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     result.setBackgroundImageExport(this.menuViewBackImage.isSelected());
 
     for (int i = 0; i < this.layers.getSize(); i++) {
-      final LayerDataField field = this.layers.getElementAt(i).getLayer();
+      final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
       result.addLayer(field.isLayerVisible(), field);
     }
 
@@ -756,10 +757,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     if (this.hexMapPanel.isValidPosition(position)) {
       final StringBuilder buffer = new StringBuilder();
       for (int i = 0; i < this.layers.getSize(); i++) {
-        final LayerDataField field = this.layers.getElementAt(i).getLayer();
+        final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
         if (field.isLayerVisible()) {
           final String layerName = field.getLayerName().isEmpty() ? "Untitled" : field.getLayerName();
-          final HexValue layerValue = field.getHexValueAtPos(position.getColumn(), position.getRow());
+          final HexFieldValue layerValue = field.getHexValueAtPos(position.getColumn(), position.getRow());
           if (layerValue != null) {
             if (buffer.length() > 0) {
               buffer.append("<br>");
@@ -867,7 +868,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void onAppBusEvent(final Object source, final AppBus bus, final AppBus.AppBusEvent event, final Object... objects) {
+  public void onAppBusEvent(final Object source, final InsideApplicationBus bus, final InsideApplicationBus.AppBusEvent event, final Object... objects) {
     switch (event) {
       case A_FRAME_CHANGED_ITS_STATUS: {
         if (objects[0] == this.frameLayers) {
@@ -890,7 +891,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       }
       break;
       case SELECTED_LAYER_CHANGED: {
-        this.selectedLayer = (LayerDataField) objects[0];
+        this.selectedLayer = (HexFieldLayer) objects[0];
         this.layers.resetaAllRedoUndo();
         updateRedoUndoForCurrentLayer();
       }
@@ -899,18 +900,18 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         final LayerRecordPanel panel = (LayerRecordPanel) objects[0];
         final EditLayerDialog dlg = new EditLayerDialog(this, this.layers, panel.getLayer(), this.hexMapPanel.getHexShape());
         dlg.setVisible(true);
-        final LayerDataField result = dlg.getResult();
+        final HexFieldLayer result = dlg.getResult();
         if (result != null) {
           result.updatePrerasterizedIcons(this.hexMapPanel.getHexShape());
           panel.updateLayer(result);
-          AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED, result);
+          InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, result);
           this.hexMapPanel.repaint();
         }
       }
       break;
       case REQUEST_EVENT: {
-        if (objects[0] == AppBus.AppBusEvent.HEX_SHAPE) {
-          AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.HEX_SHAPE, this.hexMapPanel.getHexShape());
+        if (objects[0] == InsideApplicationBus.AppBusEvent.HEX_SHAPE) {
+          InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.HEX_SHAPE, this.hexMapPanel.getHexShape());
         }
       }
       break;
@@ -923,7 +924,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   public void loadState(final FileContainer container) throws IOException {
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED, (Object) null);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, (Object) null);
 
     final FileContainerSection docsettings = container.findSectionForName("docsettings");
     final FileContainerSection layers = container.findSectionForName("layers");
@@ -950,8 +951,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     updateTheSourceFile(null);
     updateRedoUndoForCurrentLayer();
     this.hexMapPanel.setZoom(1.0f);
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.HEX_SHAPE, this.hexMapPanel.getHexShape());
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED, (Object) null);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.HEX_SHAPE, this.hexMapPanel.getHexShape());
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, (Object) null);
   }
 
   private void updateRedoUndoForCurrentLayer() {

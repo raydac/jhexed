@@ -3,7 +3,7 @@ package com.igormaznitsa.jhexed.swing.editor.model;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class AppBus {
+public class InsideApplicationBus {
 
   public enum AppBusEvent {
     SELECTED_TOOL_CHANGED,
@@ -16,16 +16,16 @@ public class AppBus {
   }
   
   public interface AppBusListener{
-    void onAppBusEvent(Object source,AppBus bus, AppBusEvent event, Object ... objects);
+    void onAppBusEvent(Object source,InsideApplicationBus bus, AppBusEvent event, Object ... objects);
   }
   
-  private static final AppBus instance = new AppBus();
+  private static final InsideApplicationBus instance = new InsideApplicationBus();
   
-  private AppBus(){
+  private InsideApplicationBus(){
     
   }
   
-  public static AppBus getInstance(){
+  public static InsideApplicationBus getInstance(){
     return instance;
   }
   

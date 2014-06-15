@@ -2,8 +2,8 @@ package com.igormaznitsa.jhexed.swing.editor.ui.dialogs.hexeditors;
 
 import com.igormaznitsa.jhexed.renders.svg.SVGImage;
 import com.igormaznitsa.jhexed.swing.editor.Log;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexSVGImageValue;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
+import com.igormaznitsa.jhexed.values.HexSVGImageValue;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import com.igormaznitsa.jhexed.swing.editor.ui.Utils;
 import java.awt.BorderLayout;
 import java.awt.image.BufferedImage;
@@ -280,12 +280,12 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
   // End of variables declaration//GEN-END:variables
 
   @Override
-  public HexValue getHexEditResult() {
+  public HexFieldValue getHexEditResult() {
     return this.result;
   }
 
   @Override
-  public HexValue showDialog() {
+  public HexFieldValue showDialog() {
     this.setVisible(true);
     return getHexEditResult();
   }

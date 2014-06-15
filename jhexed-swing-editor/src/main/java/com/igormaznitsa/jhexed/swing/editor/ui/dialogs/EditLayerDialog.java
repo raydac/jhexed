@@ -1,9 +1,12 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs;
 
+import com.igormaznitsa.jhexed.values.HexFieldValue;
+import com.igormaznitsa.jhexed.values.HexSVGImageValue;
+import com.igormaznitsa.jhexed.values.HexColorValue;
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.hexeditors.DialogEditSVGImageValue;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.hexeditors.DialogEditColorValue;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
-import com.igormaznitsa.jhexed.swing.editor.model.values.*;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.hexeditors.HexEditor;
 import java.awt.*;
 import java.awt.geom.Path2D;
@@ -19,14 +22,14 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
 
   private static final long serialVersionUID = 3760730921364742774L;
   private final List<TableModelListener> listeners = new ArrayList<TableModelListener>();
-  private final List<HexValue> values = new ArrayList<HexValue>();
-  private final LayerDataField value;
-  private LayerDataField result;
+  private final List<HexFieldValue> values = new ArrayList<HexFieldValue>();
+  private final HexFieldLayer value;
+  private HexFieldLayer result;
   private final Path2D iconShape;
   private final List<Integer> removedIndexes = new ArrayList<Integer>();
   private final List<Integer> insertedIndexes = new ArrayList<Integer>();
   
-  public EditLayerDialog(final Frame parent, final LayerListModel layerModel, final LayerDataField field, final Path2D hexShape) {
+  public EditLayerDialog(final Frame parent, final LayerListModel layerModel, final HexFieldLayer field, final Path2D hexShape) {
     super(parent, true);
     initComponents();
     this.iconShape = hexShape;
@@ -55,7 +58,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
     return this.insertedIndexes;
   }
   
-  public LayerDataField getResult() {
+  public HexFieldLayer getResult() {
     return this.result;
   }
 
@@ -314,7 +317,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
     }else if (evt.getClickCount()>1){
       final int selectedRow = this.tableValues.getSelectedRow();
       if (selectedRow>0){
-        final HexValue origValue = this.values.get(selectedRow);
+        final HexFieldValue origValue = this.values.get(selectedRow);
         final HexEditor dlg;
         if (origValue instanceof HexColorValue){
           dlg = new DialogEditColorValue(null, (HexColorValue)origValue);
@@ -324,7 +327,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
           JOptionPane.showMessageDialog(this, "unsupported Hex value","Error",JOptionPane.ERROR_MESSAGE);
           return;
         }
-        final HexValue editedValue = dlg.showDialog();
+        final HexFieldValue editedValue = dlg.showDialog();
         if (editedValue!=null){
           origValue.load(editedValue);
           for(final TableModelListener l : this.listeners){
@@ -335,7 +338,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
     }
   }//GEN-LAST:event_tableValuesMouseClicked
 
-  private void addNewHexValueToList(final int position, final HexValue v) {
+  private void addNewHexValueToList(final int position, final HexFieldValue v) {
     v.setIndex(position);
     if (position<this.values.size()){
       this.insertedIndexes.add(position);
@@ -410,7 +413,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
 
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
-    final HexValue value = this.values.get(rowIndex);
+    final HexFieldValue value = this.values.get(rowIndex);
     switch (columnIndex) {
       case 0:
         return rowIndex;
@@ -428,7 +431,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
 
   @Override
   public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
-    final HexValue value = this.values.get(rowIndex);
+    final HexFieldValue value = this.values.get(rowIndex);
     switch (columnIndex) {
       case 1:
         break;

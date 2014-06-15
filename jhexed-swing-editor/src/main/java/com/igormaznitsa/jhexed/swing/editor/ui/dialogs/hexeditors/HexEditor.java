@@ -1,8 +1,8 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs.hexeditors;
 
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 
 public interface HexEditor {
-  HexValue getHexEditResult();
-  HexValue showDialog();
+  HexFieldValue getHexEditResult();
+  HexFieldValue showDialog();
 }

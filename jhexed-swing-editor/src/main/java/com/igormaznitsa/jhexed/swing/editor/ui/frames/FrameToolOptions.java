@@ -4,7 +4,7 @@ import com.igormaznitsa.jhexed.swing.editor.model.*;
 import java.awt.*;
 import javax.swing.*;
 
-public class FrameToolOptions extends javax.swing.JInternalFrame implements AppBus.AppBusListener {
+public class FrameToolOptions extends javax.swing.JInternalFrame implements InsideApplicationBus.AppBusListener {
   private static final long serialVersionUID = -1997778093948284499L;
   private final JPanel NO_SELECTED_TOOL;
   
@@ -20,7 +20,7 @@ public class FrameToolOptions extends javax.swing.JInternalFrame implements AppB
     lbl.setEnabled(false);
     NO_SELECTED_TOOL.add(lbl,BorderLayout.CENTER);
 
-    AppBus.getInstance().addAppBusListener(this);
+    InsideApplicationBus.getInstance().addAppBusListener(this);
     this.setContentPane(NO_SELECTED_TOOL);
     
     pack();
@@ -63,11 +63,11 @@ public class FrameToolOptions extends javax.swing.JInternalFrame implements AppB
   }// </editor-fold>//GEN-END:initComponents
 
   private void formComponentHidden(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentHidden
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.TOOL_OPTIONS);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.TOOL_OPTIONS);
   }//GEN-LAST:event_formComponentHidden
 
   private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.TOOL_OPTIONS);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.TOOL_OPTIONS);
   }//GEN-LAST:event_formComponentShown
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -77,13 +77,13 @@ public class FrameToolOptions extends javax.swing.JInternalFrame implements AppB
   public void setVisible(final boolean flag) {
     super.setVisible(flag);
     if (flag) {
-      AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.REQUEST_EVENT, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED);
+      InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.REQUEST_EVENT, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED);
     }
   }
   
   @Override
-  public void onAppBusEvent(Object source, AppBus bus, AppBus.AppBusEvent event, Object... objects) {
-    if (event == AppBus.AppBusEvent.SELECTED_TOOL_CHANGED){
+  public void onAppBusEvent(Object source, InsideApplicationBus bus, InsideApplicationBus.AppBusEvent event, Object... objects) {
+    if (event == InsideApplicationBus.AppBusEvent.SELECTED_TOOL_CHANGED){
       final ToolType selectedTool = (ToolType)objects[0];
       if (selectedTool == null) {
         this.setContentPane(NO_SELECTED_TOOL);

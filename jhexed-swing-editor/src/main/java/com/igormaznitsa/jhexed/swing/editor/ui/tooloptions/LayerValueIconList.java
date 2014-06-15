@@ -1,7 +1,7 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.tooloptions;
 
-import com.igormaznitsa.jhexed.swing.editor.model.LayerDataField;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Path2D;
@@ -16,26 +16,26 @@ public class LayerValueIconList extends JScrollPane {
   private static final long serialVersionUID = 4067088203855017500L;
  
   private static final int ICON_SIZE = 48;
-  private LayerDataField currentLayerField;
+  private HexFieldLayer currentLayerField;
 
   private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(2, 2, 2, 2);
   private static final Border LINE_BORDER = BorderFactory.createLineBorder(Color.BLUE, 2);
   
   public interface LayerIconListListener {
-    void onLeftClick(final HexValue h, final ImageIcon icon);
-    void onRightClick(final HexValue h, final ImageIcon icon);
+    void onLeftClick(final HexFieldValue h, final ImageIcon icon);
+    void onRightClick(final HexFieldValue h, final ImageIcon icon);
   }
   
   public static class HexButton extends JLabel {
     private static final long serialVersionUID = -6733971540369351944L;
-    private final HexValue value;
+    private final HexFieldValue value;
     private final LayerValueIconList parent;
     
-    public HexValue getHexValue(){
+    public HexFieldValue getHexValue(){
       return this.value;
     }
     
-    public HexButton(final LayerValueIconList parent, final HexValue hex){
+    public HexButton(final LayerValueIconList parent, final HexFieldValue hex){
       super();
       this.setBorder(EMPTY_BORDER);
       
@@ -113,7 +113,7 @@ public class LayerValueIconList extends JScrollPane {
     }
   }
   
-  public void setSelectedHexValue(final HexValue value){
+  public void setSelectedHexValue(final HexFieldValue value){
     for(final Component c : this.content.getComponents()){
       final HexButton b = (HexButton)c;
       if (b.getHexValue() == value){
@@ -133,7 +133,7 @@ public class LayerValueIconList extends JScrollPane {
     this.listeners.remove(l);
   }
   
-  public void setLayerField(final LayerDataField layer){
+  public void setLayerField(final HexFieldLayer layer){
     this.currentLayerField = layer;  
     refill();
   }
@@ -148,7 +148,7 @@ public class LayerValueIconList extends JScrollPane {
 
     if (currentLayerField != null) {
       for (int i = 0; i < currentLayerField.getHexValuesNumber(); i++) {
-        final HexValue value = currentLayerField.getHexValueForIndex(i);
+        final HexFieldValue value = currentLayerField.getHexValueForIndex(i);
         this.content.add(new HexButton(this, value));
       }
     }

@@ -17,10 +17,9 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.exporters;
 
 import com.igormaznitsa.jhexed.engine.HexEngine;
-import com.igormaznitsa.jhexed.swing.editor.model.LayerDataField;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexColorValue;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexSVGImageValue;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
+import com.igormaznitsa.jhexed.values.HexColorValue;
+import com.igormaznitsa.jhexed.values.HexSVGImageValue;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import com.igormaznitsa.jhexed.swing.editor.ui.Utils;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.*;
 import java.awt.Color;
@@ -65,7 +64,7 @@ public class XmlExporter implements Exporter {
         buffer.append("\t\t<layer name=\"").append(StringEscapeUtils.escapeXml10(f.getLayer().getLayerName())).append("\" commentary=\"").append(StringEscapeUtils.escapeXml10(f.getLayer().getComments())).append("\">\n");
         buffer.append("\t\t\t<values>\n");
         for(int i=1; i<f.getLayer().getHexValuesNumber();i++){
-          final HexValue vl = f.getLayer().getHexValueForIndex(i);
+          final HexFieldValue vl = f.getLayer().getHexValueForIndex(i);
           buffer.append("\t\t\t\t<value index=\"").append(i).append("\" name=\"").append(StringEscapeUtils.escapeXml10(vl.getName())).append("\" commentary=\"").append(StringEscapeUtils.escapeXml10(vl.getComment())).append("\">\n");
           if (vl instanceof HexColorValue){
             final Color clr = ((HexColorValue)vl).getColor();

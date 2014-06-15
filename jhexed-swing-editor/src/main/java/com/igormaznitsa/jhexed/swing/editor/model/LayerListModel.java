@@ -2,13 +2,16 @@ package com.igormaznitsa.jhexed.swing.editor.model;
 
 import com.igormaznitsa.jhexed.engine.*;
 import com.igormaznitsa.jhexed.engine.misc.HexPosition;
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
+import com.igormaznitsa.jhexed.hexmap.LayerableHexValueSource;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.layers.LayerRecordPanel;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.io.*;
 import java.util.*;
 import javax.swing.ListModel;
 import javax.swing.event.*;
 
-public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineModel<LayerListModel> {
+public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineModel<LayerListModel>, LayerableHexValueSource {
   private final List<LayerRecordPanel> layers = new ArrayList<LayerRecordPanel>();
   private final List<ListDataListener> listeners = new ArrayList<ListDataListener>();
 
@@ -17,6 +20,7 @@ public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineMod
   
   private final int initCols;
   private final int initRows;
+  
   
   public LayerListModel(final int cols, final int rows) {
     this.initCols = cols;
@@ -34,17 +38,17 @@ public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineMod
     return this.layers.get(index);
   }
 
-  public LayerDataField makeNewLayerField(final String name, final String comments){
-    return new LayerDataField(name, comments, this.cols, this.rows);
+  public HexFieldLayer makeNewLayerField(final String name, final String comments){
+    return new HexFieldLayer(name, comments, this.cols, this.rows);
   }
   
-  public void addLayer(final LayerDataField f){
+  public void addLayer(final HexFieldLayer f){
     final LayerRecordPanel newPanel = new LayerRecordPanel(this,f);
     this.layers.add(0,newPanel);
     fireListenerEvent(ListDataEvent.INTERVAL_ADDED, this.layers.size()-1, this.layers.size() - 1);
   }
 
-  public void removeLayer(final LayerDataField f) {
+  public void removeLayer(final HexFieldLayer f) {
     int index = -1;
     for(int i=0;i<this.layers.size();i++){
       if (this.layers.get(i).getLayer() == f){
@@ -191,17 +195,17 @@ public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineMod
   
     final int numberOfLayers = din.readUnsignedShort();
     
-    final List<LayerDataField> newLayers = new ArrayList<LayerDataField>();
+    final List<HexFieldLayer> newLayers = new ArrayList<HexFieldLayer>();
     
     for(int i=0;i<numberOfLayers;i++){
-      newLayers.add(new LayerDataField(din));
+      newLayers.add(new HexFieldLayer(din));
     }
     
     final int num = this.layers.size();
     this.layers.clear();
     fireListenerEvent(ListDataEvent.INTERVAL_REMOVED, 0, num);
     
-    for(final LayerDataField f : newLayers){
+    for(final HexFieldLayer f : newLayers){
       this.layers.add(new LayerRecordPanel(this, f));
     }
     fireListenerEvent(ListDataEvent.INTERVAL_ADDED, 0, newLayers.size());
@@ -213,6 +217,11 @@ public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineMod
     final int max = this.layers.size();
     this.layers.clear();
     this.fireListenerEvent(ListDataEvent.INTERVAL_REMOVED, 0, max-1);
+  }
+
+  @Override
+  public Iterable<HexFieldValue> getHexStackAtPosition(final int col, final int row) {
+    return new HexIterator(this,col,row);
   }
 
 }

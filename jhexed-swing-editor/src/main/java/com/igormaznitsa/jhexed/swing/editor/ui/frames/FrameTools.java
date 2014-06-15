@@ -1,19 +1,20 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.frames;
 
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
 import java.awt.event.*;
 import java.util.Enumeration;
 import javax.swing.*;
 import org.jdesktop.swingx.WrapLayout;
 
-public class FrameTools extends javax.swing.JInternalFrame implements AppBus.AppBusListener, ActionListener {
+public class FrameTools extends javax.swing.JInternalFrame implements InsideApplicationBus.AppBusListener, ActionListener {
 
   private static final long serialVersionUID = -2106015366224156744L;
 
   public FrameTools() {
     initComponents();
 
-    AppBus.getInstance().addAppBusListener(this);
+    InsideApplicationBus.getInstance().addAppBusListener(this);
 
     final JPanel buttonPanel = new JPanel(new WrapLayout(WrapLayout.LEFT));
     
@@ -61,11 +62,11 @@ public class FrameTools extends javax.swing.JInternalFrame implements AppBus.App
   }// </editor-fold>//GEN-END:initComponents
 
   private void formComponentHidden(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentHidden
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.TOOLS);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.TOOLS);
   }//GEN-LAST:event_formComponentHidden
 
   private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.TOOLS);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.TOOLS);
   }//GEN-LAST:event_formComponentShown
 
 
@@ -77,7 +78,7 @@ public class FrameTools extends javax.swing.JInternalFrame implements AppBus.App
   public void setVisible(final boolean flag) {
     super.setVisible(flag);
     if (flag) {
-      AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.REQUEST_EVENT, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED);
+      InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.REQUEST_EVENT, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED);
     }
   }
 
@@ -85,8 +86,8 @@ public class FrameTools extends javax.swing.JInternalFrame implements AppBus.App
   public void actionPerformed(final ActionEvent e) {
     final ToolButton btn = (ToolButton) e.getSource();
     if (btn.isSelected()) {
-      AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_TOOL_CHANGED, btn.getType());
-      AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.REQUEST_EVENT, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED);
+      InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_TOOL_CHANGED, btn.getType());
+      InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.REQUEST_EVENT, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED);
     }
   }
 
@@ -101,13 +102,13 @@ public class FrameTools extends javax.swing.JInternalFrame implements AppBus.App
   }
 
   @Override
-  public void onAppBusEvent(final Object source, final AppBus bus, final AppBus.AppBusEvent event, final Object... objects) {
-    if (event == AppBus.AppBusEvent.SELECTED_LAYER_CHANGED) {
+  public void onAppBusEvent(final Object source, final InsideApplicationBus bus, final InsideApplicationBus.AppBusEvent event, final Object... objects) {
+    if (event == InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED) {
       this.toolsButtonGroup.clearSelection();
-      final LayerDataField layer = (LayerDataField) objects[0];
+      final HexFieldLayer layer = (HexFieldLayer) objects[0];
       if (layer == null) {
         changeButtonsState(false);
-        AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_TOOL_CHANGED, (Object) null);
+        InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_TOOL_CHANGED, (Object) null);
       }
       else {
         changeButtonsState(true);

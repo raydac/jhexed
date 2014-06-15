@@ -1,14 +1,15 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.frames.layers;
 
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.EditLayerDialog;
-import com.igormaznitsa.jhexed.swing.editor.components.HexMapPanel;
-import com.igormaznitsa.jhexed.swing.editor.components.HexMapPanelListener;
+import com.igormaznitsa.jhexed.hexmap.HexMapPanel;
+import com.igormaznitsa.jhexed.hexmap.HexMapPanelListener;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameType;
 import java.awt.geom.Path2D;
 import javax.swing.JOptionPane;
 
-public class FrameLayers extends javax.swing.JInternalFrame implements AppBus.AppBusListener, HexMapPanelListener {
+public class FrameLayers extends javax.swing.JInternalFrame implements InsideApplicationBus.AppBusListener, HexMapPanelListener {
   private static final long serialVersionUID = -3120809272379715966L;
   private final LayerListComponent layerList;
 
@@ -23,7 +24,7 @@ public class FrameLayers extends javax.swing.JInternalFrame implements AppBus.Ap
     this.layerList = new LayerListComponent(listModel);
     this.scrollLayerList.getViewport().add(this.layerList);
     
-    AppBus.getInstance().addAppBusListener(this);
+    InsideApplicationBus.getInstance().addAppBusListener(this);
   
     this.panel.addHexMapPanelListener(this);
   }
@@ -118,20 +119,20 @@ public class FrameLayers extends javax.swing.JInternalFrame implements AppBus.Ap
   }// </editor-fold>//GEN-END:initComponents
 
   private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.LAYERS);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.LAYERS);
   }//GEN-LAST:event_formComponentShown
 
   private void formComponentHidden(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentHidden
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.LAYERS);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.A_FRAME_CHANGED_ITS_STATUS, this, FrameType.LAYERS);
   }//GEN-LAST:event_formComponentHidden
 
   private void buttonAddLayerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddLayerActionPerformed
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.REQUEST_EVENT, AppBus.AppBusEvent.HEX_SHAPE);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.REQUEST_EVENT, InsideApplicationBus.AppBusEvent.HEX_SHAPE);
     
     final EditLayerDialog dlg = new EditLayerDialog(null, (LayerListModel) this.layerList.getModel(), null, this.hexShape);
     dlg.setVisible(true);
     
-    final LayerDataField newLayer = dlg.getResult();
+    final HexFieldLayer newLayer = dlg.getResult();
     if (newLayer!=null){
       this.layerList.clearSelection();
       ((LayerListModel) this.layerList.getModel()).addLayer(newLayer);
@@ -142,13 +143,13 @@ public class FrameLayers extends javax.swing.JInternalFrame implements AppBus.Ap
 
   private void buttonLayerUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLayerUpActionPerformed
     if (this.layerList.up()){
-      AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT);
+      InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT);
     }
   }//GEN-LAST:event_buttonLayerUpActionPerformed
 
   private void buttonLayerDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLayerDownActionPerformed
     if (this.layerList.down()){
-      AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT);
+      InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT);
     }
   }//GEN-LAST:event_buttonLayerDownActionPerformed
 
@@ -158,8 +159,8 @@ public class FrameLayers extends javax.swing.JInternalFrame implements AppBus.Ap
       if (JOptionPane.showConfirmDialog(null, "Do you really want to remove '"+panel.getLayer().getLayerName()+'\'',"Delete layer",JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
         this.layerList.delete(panel.getLayer());
         this.layerList.clearSelection();
-        AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED,(Object)null);
-        AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT);
+        InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED,(Object)null);
+        InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT);
       }
     }
   }//GEN-LAST:event_buttonDeleteLayerActionPerformed
@@ -177,12 +178,12 @@ public class FrameLayers extends javax.swing.JInternalFrame implements AppBus.Ap
 
 
   @Override
-  public void onAppBusEvent(final Object source, final AppBus bus, final AppBus.AppBusEvent event, final Object... objects) {
+  public void onAppBusEvent(final Object source, final InsideApplicationBus bus, final InsideApplicationBus.AppBusEvent event, final Object... objects) {
     switch(event){
       case REQUEST_EVENT: {
-        if (objects[0] == AppBus.AppBusEvent.SELECTED_LAYER_CHANGED){
+        if (objects[0] == InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED){
           final LayerRecordPanel selected = this.layerList.getSelectedValue();
-          AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED, selected == null ? null : selected.getLayer());
+          InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, selected == null ? null : selected.getLayer());
         }
       }break;
       case HEX_SHAPE : {

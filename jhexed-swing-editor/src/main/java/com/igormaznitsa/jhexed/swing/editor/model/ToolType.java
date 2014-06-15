@@ -1,9 +1,10 @@
 package com.igormaznitsa.jhexed.swing.editor.model;
 
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.engine.HexEngine;
 import com.igormaznitsa.jhexed.engine.misc.HexPosition;
 import com.igormaznitsa.jhexed.swing.editor.Log;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import com.igormaznitsa.jhexed.swing.editor.ui.Utils;
 import com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.*;
 import java.awt.image.BufferedImage;
@@ -49,7 +50,7 @@ public enum ToolType {
     return this.icon;
   }
 
-  private static void fill(final HexEngine<?> engine, final LayerDataField field, final int col, final int row, final int fillIndex, final int borderIndex) {
+  private static void fill(final HexEngine<?> engine, final HexFieldLayer field, final int col, final int row, final int fillIndex, final int borderIndex) {
     final List<Integer> stack = new ArrayList<Integer>(16384);
     
     stack.add(HexEngine.packColumnRow(col, row));
@@ -81,11 +82,11 @@ public enum ToolType {
     }
   }
 
-  public void processTool(final HexEngine<?> engine, final LayerDataField field, final HexPosition position) {
+  public void processTool(final HexEngine<?> engine, final HexFieldLayer field, final HexPosition position) {
     switch (this) {
       case ERASER: {
         final EraserOptions opt = (EraserOptions) this.getOptions();
-        final HexValue value = opt.getHexValue();
+        final HexFieldValue value = opt.getHexValue();
         if (value != null) {
           final int index = value.getIndex();
           final int width = opt.getPencilWidth();
@@ -113,8 +114,8 @@ public enum ToolType {
       break;
       case FILL: {
         final FillOptions opt = (FillOptions) this.getOptions();
-        final HexValue fillValue = opt.getFillValue();
-        final HexValue borderValue = opt.getBorderValue();
+        final HexFieldValue fillValue = opt.getFillValue();
+        final HexFieldValue borderValue = opt.getBorderValue();
 
         if (fillValue == null) {
           JOptionPane.showMessageDialog(null, "You have to select the fill value", "Fill value", JOptionPane.WARNING_MESSAGE);
@@ -131,7 +132,7 @@ public enum ToolType {
       break;
       case PENCIL: {
         final PencilOptions opt = (PencilOptions) this.getOptions();
-        final HexValue value = opt.getHexValue();
+        final HexFieldValue value = opt.getHexValue();
         if (value != null) {
           final int width = opt.getPencilWidth();
           field.setValueAt(position, (byte) value.getIndex());

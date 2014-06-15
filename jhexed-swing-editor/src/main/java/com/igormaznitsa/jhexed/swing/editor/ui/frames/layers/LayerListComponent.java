@@ -1,5 +1,6 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.frames.layers;
 
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -33,7 +34,7 @@ public class LayerListComponent extends JList<LayerRecordPanel> implements ListS
           }
           else {
             if (evt.getClickCount() > 1) {
-              AppBus.getInstance().fireEvent(theInstance, AppBus.AppBusEvent.LAYER_NEEDS_EDITION, focusedPanel);
+              InsideApplicationBus.getInstance().fireEvent(theInstance, InsideApplicationBus.AppBusEvent.LAYER_NEEDS_EDITION, focusedPanel);
             }
 //            final LayerRecordPanel panel = (LayerRecordPanel) componentAtPanel.getParent();
 //            final Point movedPoint = translatePointToListPanel(list, evt.getPoint(), panel);
@@ -160,12 +161,12 @@ public class LayerListComponent extends JList<LayerRecordPanel> implements ListS
   @Override
   public void valueChanged(final ListSelectionEvent e) {
     final int index = this.getSelectedIndex();
-    final LayerDataField layer = index < 0 ? null : (this.getModel().getElementAt(index)).getLayer();
+    final HexFieldLayer layer = index < 0 ? null : (this.getModel().getElementAt(index)).getLayer();
 
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.SELECTED_LAYER_CHANGED, layer);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, layer);
   }
 
-  public void delete(final LayerDataField field) {
+  public void delete(final HexFieldLayer field) {
     ((LayerListModel)this.getModel()).removeLayer(field);
   }
 

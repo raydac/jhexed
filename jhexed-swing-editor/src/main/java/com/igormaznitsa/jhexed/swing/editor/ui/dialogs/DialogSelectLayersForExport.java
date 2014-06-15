@@ -16,7 +16,7 @@
 
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs;
 
-import com.igormaznitsa.jhexed.swing.editor.model.LayerDataField;
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.event.TableModelListener;
@@ -48,16 +48,16 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
       return this.layers;
     }
     
-    public void addLayer(final boolean export, final LayerDataField layer){
+    public void addLayer(final boolean export, final HexFieldLayer layer){
       this.layers.add(new LayerExportRecord(export, layer));
     }
   }
   
   public static class LayerExportRecord{
     private boolean allowed;
-    private final LayerDataField layer;
+    private final HexFieldLayer layer;
     
-    public LayerExportRecord(final boolean allowed, final LayerDataField dataField){
+    public LayerExportRecord(final boolean allowed, final HexFieldLayer dataField){
       this.allowed = allowed;
       this.layer = dataField;
     }
@@ -70,7 +70,7 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
       this.allowed = flag;
     }
     
-    public LayerDataField getLayer(){
+    public HexFieldLayer getLayer(){
       return this.layer;
     }
   }

@@ -1,7 +1,7 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs.hexeditors;
 
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexColorValue;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
+import com.igormaznitsa.jhexed.values.HexColorValue;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -355,12 +355,12 @@ public class DialogEditColorValue extends javax.swing.JDialog implements HexEdit
   }//GEN-LAST:event_buttonCancelActionPerformed
 
   @Override
-  public HexValue getHexEditResult() {
+  public HexFieldValue getHexEditResult() {
     return this.result;
   }  
 
   @Override
-  public HexValue showDialog() {
+  public HexFieldValue showDialog() {
     setVisible(true);
     return getHexEditResult();
   }

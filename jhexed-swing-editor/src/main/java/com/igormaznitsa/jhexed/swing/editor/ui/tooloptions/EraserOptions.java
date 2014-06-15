@@ -1,24 +1,25 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.tooloptions;
 
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
-import com.igormaznitsa.jhexed.swing.editor.model.values.HexValue;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.awt.geom.Path2D;
 import javax.swing.ImageIcon;
 
-public class EraserOptions extends javax.swing.JPanel implements AppBus.AppBusListener, LayerValueIconList.LayerIconListListener {
+public class EraserOptions extends javax.swing.JPanel implements InsideApplicationBus.AppBusListener, LayerValueIconList.LayerIconListListener {
   private static final long serialVersionUID = 2906524676479899740L;
   
-  private HexValue selectedValue;
+  private HexFieldValue selectedValue;
   
   public EraserOptions() {
     initComponents();
-    AppBus.getInstance().addAppBusListener(this);
-    AppBus.getInstance().fireEvent(this, AppBus.AppBusEvent.REQUEST_EVENT, AppBus.AppBusEvent.HEX_SHAPE);
+    InsideApplicationBus.getInstance().addAppBusListener(this);
+    InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.REQUEST_EVENT, InsideApplicationBus.AppBusEvent.HEX_SHAPE);
   
     this.layerIconList.addLayerIconListListener(this);
   }
 
-  public HexValue getHexValue(){
+  public HexFieldValue getHexValue(){
     return this.selectedValue;
   }
   
@@ -98,10 +99,10 @@ public class EraserOptions extends javax.swing.JPanel implements AppBus.AppBusLi
 
 
   @Override
-  public void onAppBusEvent(final Object source, final AppBus bus, final AppBus.AppBusEvent event, final Object... objects) {
+  public void onAppBusEvent(final Object source, final InsideApplicationBus bus, final InsideApplicationBus.AppBusEvent event, final Object... objects) {
     switch(event){
       case SELECTED_LAYER_CHANGED:{
-        final LayerDataField layer = (LayerDataField) objects[0];
+        final HexFieldLayer layer = (HexFieldLayer) objects[0];
         layerIconList.setLayerField(layer);
         this.selectedValue = null;
         this.layerIconList.setSelectedHexValue(null);
@@ -113,13 +114,13 @@ public class EraserOptions extends javax.swing.JPanel implements AppBus.AppBusLi
   }
 
   @Override
-  public void onLeftClick(final HexValue value, final ImageIcon icon) {
+  public void onLeftClick(final HexFieldValue value, final ImageIcon icon) {
     this.selectedValue = value;
     this.layerIconList.setSelectedHexValue(value);
   }
 
   @Override
-  public void onRightClick(final HexValue value, final ImageIcon icon) {
+  public void onRightClick(final HexFieldValue value, final ImageIcon icon) {
     this.selectedValue = value;
     this.layerIconList.setSelectedHexValue(value);
   }
