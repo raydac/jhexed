@@ -62,6 +62,8 @@ public class HexColorValue extends HexFieldValue {
     final BufferedImage result = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
     final Graphics2D g = result.createGraphics();
     
+    g.setStroke(new BasicStroke(0.05f));
+    
     final Color c;
     if (allowAlpha){
       c = new Color(this.color.getRed(),this.color.getGreen(),this.color.getBlue(),this.color.getAlpha());
@@ -100,6 +102,7 @@ public class HexColorValue extends HexFieldValue {
     final Rectangle r = shape.getBounds();
     final BufferedImage prerasterized = new BufferedImage(r.width, r.height, BufferedImage.TYPE_INT_ARGB);
     final Graphics2D g = prerasterized.createGraphics();
+    g.setStroke(new BasicStroke(0.05f));
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
     g.setColor(this.color);
