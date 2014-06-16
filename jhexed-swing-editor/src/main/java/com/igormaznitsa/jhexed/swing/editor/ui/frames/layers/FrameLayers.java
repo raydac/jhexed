@@ -45,6 +45,7 @@ public class FrameLayers extends javax.swing.JInternalFrame implements InsideApp
     buttonLayerDown = new javax.swing.JButton();
     buttonAddLayer = new javax.swing.JButton();
     buttonDeleteLayer = new javax.swing.JButton();
+    buttonEditLayer = new javax.swing.JButton();
 
     setClosable(true);
     setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
@@ -113,6 +114,18 @@ public class FrameLayers extends javax.swing.JInternalFrame implements InsideApp
     });
     jToolBar1.add(buttonDeleteLayer);
 
+    buttonEditLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/edit-image.png"))); // NOI18N
+    buttonEditLayer.setToolTipText("Edit the selected layer");
+    buttonEditLayer.setFocusable(false);
+    buttonEditLayer.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    buttonEditLayer.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    buttonEditLayer.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        buttonEditLayerActionPerformed(evt);
+      }
+    });
+    jToolBar1.add(buttonEditLayer);
+
     getContentPane().add(jToolBar1, java.awt.BorderLayout.PAGE_START);
 
     pack();
@@ -165,10 +178,18 @@ public class FrameLayers extends javax.swing.JInternalFrame implements InsideApp
     }
   }//GEN-LAST:event_buttonDeleteLayerActionPerformed
 
+  private void buttonEditLayerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditLayerActionPerformed
+    final LayerRecordPanel panel = this.layerList.getSelectedValue();
+    if (panel!=null){
+      InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.LAYER_NEEDS_EDITION, panel);
+    }
+  }//GEN-LAST:event_buttonEditLayerActionPerformed
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton buttonAddLayer;
   private javax.swing.JButton buttonDeleteLayer;
+  private javax.swing.JButton buttonEditLayer;
   private javax.swing.JButton buttonLayerDown;
   private javax.swing.JButton buttonLayerUp;
   private javax.swing.JToolBar jToolBar1;
