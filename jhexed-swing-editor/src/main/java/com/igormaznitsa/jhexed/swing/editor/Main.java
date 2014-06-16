@@ -17,10 +17,12 @@ public class Main {
       java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
     }
 
+    final String file = args.length>0 ? args[0] : null;
+    
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        new MainForm().setVisible(true);
+        new MainForm(file).setVisible(true);
       }
     });
   }  

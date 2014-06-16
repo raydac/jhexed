@@ -56,7 +56,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private static final Preferences REGISTRY = Preferences.userRoot().node(MainForm.class.getName());
 
-  public MainForm() {
+  public MainForm(final String fileToOpen) {
     initComponents();
     hexMapPanelDesktop = new Desktop();
     layers = new LayerListModel(256, 128);
@@ -98,6 +98,13 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     resetState();
 
     Log.info("The MainForm created");
+
+    if (fileToOpen != null) {
+      Log.info("Started with parameter: " + fileToOpen);
+      final File file = new File(fileToOpen);
+      loadFromFile(file);
+    }
+
   }
 
   private Rectangle loadPosition(final String prefix, final Rectangle dflt) {
@@ -503,11 +510,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }//GEN-LAST:event_menuWindowOptionsActionPerformed
 
-  private void menuItemFileOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemFileOpenActionPerformed
-    final JFileChooser dlg = new JFileChooser(this.destinationFile);
-    dlg.setFileFilter(Utils.JHX_FILE_FILTER);
-    if (dlg.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-      final File file = dlg.getSelectedFile();
+  private void loadFromFile(final File file) {
+    if (file.isFile()) {
+
       try {
         final FileContainer container = new FileContainer(file);
         loadState(container);
@@ -517,6 +522,19 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         Log.error("Can't load map from file [" + file + ']', ex);
         JOptionPane.showMessageDialog(this, "Can't load file, may be wrong format", "Error", JOptionPane.ERROR_MESSAGE);
       }
+    }
+    else {
+      Log.warn("Can't find file " + file);
+      JOptionPane.showMessageDialog(this, "Can't find file " + file, "Can't find file", JOptionPane.WARNING_MESSAGE);
+    }
+  }
+
+  private void menuItemFileOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemFileOpenActionPerformed
+    final JFileChooser dlg = new JFileChooser(this.destinationFile);
+    dlg.setFileFilter(Utils.JHX_FILE_FILTER);
+    if (dlg.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+      final File file = dlg.getSelectedFile();
+      loadFromFile(file);
     }
   }//GEN-LAST:event_menuItemFileOpenActionPerformed
 
