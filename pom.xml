@@ -142,7 +142,7 @@
         <version>3.0</version>
         <configuration>
           <compilerArgument>-Xlint:all</compilerArgument>
-          <verbose>true</verbose>
+          <verbose>false</verbose>
           <source>1.5</source>
           <target>1.5</target>
           <showDeprecation>true</showDeprecation>
