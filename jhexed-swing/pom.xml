@@ -23,11 +23,6 @@
 
     <dependencies>
       <dependency>
-        <groupId>com.kitfox.svg</groupId>
-        <artifactId>svg-salamander</artifactId>
-        <version>1.0</version>
-      </dependency>
-      <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.4</version>
@@ -36,6 +31,11 @@
         <groupId>com.igormaznitsa</groupId>
         <artifactId>jhexed-engine</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.xmlgraphics</groupId>
+        <artifactId>batik-swing</artifactId>
+        <version>1.7</version>
       </dependency>
     </dependencies>
 </project>
