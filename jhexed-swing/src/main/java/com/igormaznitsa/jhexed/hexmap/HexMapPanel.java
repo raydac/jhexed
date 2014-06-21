@@ -71,7 +71,7 @@ public class HexMapPanel extends JPanel {
 
   public void setImage(final SVGImage image) {
     if (image != null) {
-      image.setAntialias(this.antialias);
+      image.setQuality(this.antialias);
     }
     this.mapImage.setSVGImage(image);
     updateHexLayoutForImage();
@@ -96,7 +96,7 @@ public class HexMapPanel extends JPanel {
   public void setAntialiasing(final boolean flag) {
     this.antialias = flag;
     if (this.mapImage.getSVGImage() != null) {
-      this.mapImage.getSVGImage().setAntialias(flag);
+      this.mapImage.getSVGImage().setQuality(flag);
     }
     this.hexField.setAntialiased(flag);
     revalidate();

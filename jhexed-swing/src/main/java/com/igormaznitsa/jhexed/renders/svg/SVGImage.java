@@ -30,7 +30,7 @@ import org.w3c.dom.svg.*;
 public class SVGImage {
 
   private final GraphicsNode svgGraphicsNode;
-  private boolean antialias = true;
+  private boolean quality = true;
   private final byte[] originalNonParsedImageData;
   private final Dimension2D documentSize = new Dimension();
 
@@ -51,14 +51,13 @@ public class SVGImage {
   }
 
   private static GraphicsNode loadDiagramFromStream(final InputStream in, final Dimension2D docSize) throws IOException {
-    String parser = XMLResourceDescriptor.getXMLParserClassName();
-    SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parser);
-    String uri = "http://www.igormaznitsa.com/jhexed/svg";
-    final SVGDocument doc = f.createSVGDocument(uri, in);
-    
-    String widthStr = doc.getRootElement().getAttribute("width");
-    String heightStr = doc.getRootElement().getAttribute("height");
-    
+    final String parser = XMLResourceDescriptor.getXMLParserClassName();
+    final SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
+    final SVGDocument doc = factory.createSVGDocument("http://www.igormaznitsa.com/jhexed/svg", in);
+
+    String strDocWidth = doc.getRootElement().getAttribute("width");
+    String strDocHeight = doc.getRootElement().getAttribute("height");
+
     final GVTBuilder bldr = new GVTBuilder();
 
     final UserAgent userAgent = new UserAgentAdapter();
@@ -66,12 +65,12 @@ public class SVGImage {
     final BridgeContext ctx = new BridgeContext(userAgent, loader);
 
     final GraphicsNode result = bldr.build(ctx, doc);
-    
-    widthStr = widthStr.isEmpty() ? Double.toString(result.getSensitiveBounds().getWidth()) : widthStr;
-    heightStr = heightStr.isEmpty() ? Double.toString(result.getSensitiveBounds().getHeight()) : heightStr;
-    
-    docSize.setSize(Double.parseDouble(widthStr.trim()), Double.parseDouble(heightStr.trim())); 
-    
+
+    strDocWidth = strDocWidth.isEmpty() ? Double.toString(result.getSensitiveBounds().getWidth()) : strDocWidth;
+    strDocHeight = strDocHeight.isEmpty() ? Double.toString(result.getSensitiveBounds().getHeight()) : strDocHeight;
+
+    docSize.setSize(Double.parseDouble(strDocWidth.trim()), Double.parseDouble(strDocHeight.trim()));
+
     return result;
   }
 
@@ -91,9 +90,9 @@ public class SVGImage {
     }
   }
 
-  public SVGImage(final InputStream in, final boolean zipped) throws IOException {
+  public SVGImage(final InputStream in, final boolean packed) throws IOException {
     final DataInputStream din = in instanceof DataInputStream ? (DataInputStream) in : new DataInputStream(in);
-    if (zipped) {
+    if (packed) {
       final byte[] packedImageData = new byte[din.readInt()];
       IOUtils.readFully(din, packedImageData);
       this.originalNonParsedImageData = Utils.unpackArray(packedImageData);
@@ -101,7 +100,7 @@ public class SVGImage {
     else {
       this.originalNonParsedImageData = readFullInputStream(din);
     }
-    this.antialias = din.readBoolean();
+    this.quality = din.readBoolean();
 
     this.svgGraphicsNode = loadDiagramFromStream(new ByteArrayInputStream(this.originalNonParsedImageData), this.documentSize);
   }
@@ -117,23 +116,23 @@ public class SVGImage {
     else {
       dout.write(this.originalNonParsedImageData);
     }
-    dout.writeBoolean(this.antialias);
+    dout.writeBoolean(this.quality);
   }
 
   public float getSVGWidth() {
-    return (float)this.documentSize.getWidth();
+    return (float) this.documentSize.getWidth();
   }
 
   public float getSVGHeight() {
-    return (float)this.documentSize.getHeight();
+    return (float) this.documentSize.getHeight();
   }
 
-  public void setAntialias(final boolean flag) {
-    this.antialias = flag;
+  public void setQuality(final boolean flag) {
+    this.quality = flag;
   }
 
-  public boolean isAntialias() {
-    return this.antialias;
+  public boolean isQuality() {
+    return this.quality;
   }
 
   public byte[] getImageData() {
@@ -141,8 +140,18 @@ public class SVGImage {
   }
 
   public void render(final Graphics2D g) throws IOException {
-    processAntialias(this.antialias, g);
-    this.svgGraphicsNode.primitivePaint(g);
+    final Object antialiasText = g.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING);
+    final Object antialiasDraw = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+    final Object antialiasAlpha = g.getRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION);
+    try {
+      processAntialias(this.quality, g);
+      this.svgGraphicsNode.primitivePaint(g);
+    }
+    finally {
+      g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, antialiasText == null ? RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT : antialiasText);
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, antialiasDraw == null ? RenderingHints.VALUE_ANTIALIAS_DEFAULT : antialiasDraw);
+      g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, antialiasAlpha == null ? RenderingHints.VALUE_ALPHA_INTERPOLATION_DEFAULT : antialiasAlpha);
+    }
   }
 
   public BufferedImage rasterize(final int imageType) throws IOException {
@@ -152,9 +161,9 @@ public class SVGImage {
     final BufferedImage result = new BufferedImage(svgWidth, svgHeight, imageType);
     final Graphics2D g = result.createGraphics();
 
-    processAntialias(this.antialias, g);
+    processAntialias(this.quality, g);
     this.svgGraphicsNode.primitivePaint(g);
-    
+
     g.dispose();
     return result;
   }
@@ -173,7 +182,7 @@ public class SVGImage {
 
     final Graphics2D g = result.createGraphics();
 
-    processAntialias(this.antialias, g);
+    processAntialias(this.quality, g);
     g.setTransform(AffineTransform.getScaleInstance(xfactor, yfactor));
     this.svgGraphicsNode.primitivePaint(g);
 

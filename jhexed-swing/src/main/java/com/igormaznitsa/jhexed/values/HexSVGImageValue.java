@@ -90,6 +90,7 @@ public class HexSVGImageValue extends HexFieldValue {
         final BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         final Graphics2D g = result.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
         g.setClip(makeTransformedPathForSize(width, height, shape));
         g.drawImage(img, 0,0, null);
         g.dispose();
