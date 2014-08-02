@@ -235,19 +235,20 @@ public final class HexRect2D {
     if (this.width <= 0) {
       out |= POS_LEFT | POS_RIGHT;
     }
-    else if (x < getLeft()) {
+    else if (x < this.left) {
       out |= POS_LEFT;
     }
-    else if (x > getRight()) {
+    else if (x > this.left+this.width) {
       out |= POS_RIGHT;
     }
+    
     if (this.height <= 0) {
       out |= POS_TOP | POS_BOTTOM;
     }
-    else if (y < getTop()) {
+    else if (y < this.top) {
       out |= POS_TOP;
     }
-    else if (y > getBottom()) {
+    else if (y > this.top+this.height) {
       out |= POS_BOTTOM;
     }
     return out;
