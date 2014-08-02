@@ -113,7 +113,7 @@ public final class HexRect2D {
    * @return the right X as float
    */
   public float getRight() {
-    return this.left + this.width - 0.5f;
+    return this.left + this.width;
   }
 
   /**
@@ -131,7 +131,7 @@ public final class HexRect2D {
    * @return the bottom Y as float
    */
   public float getBottom() {
-    return this.top + this.height - 0.5f;
+    return this.top + this.height;
   }
 
   /**
@@ -238,7 +238,7 @@ public final class HexRect2D {
     else if (x < this.left) {
       out |= POS_LEFT;
     }
-    else if (x > this.left+this.width) {
+    else if (x > getRight()) {
       out |= POS_RIGHT;
     }
     
@@ -248,7 +248,7 @@ public final class HexRect2D {
     else if (y < this.top) {
       out |= POS_TOP;
     }
-    else if (y > this.top+this.height) {
+    else if (y > getBottom()) {
       out |= POS_BOTTOM;
     }
     return out;
