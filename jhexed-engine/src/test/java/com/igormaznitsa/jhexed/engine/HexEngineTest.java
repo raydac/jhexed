@@ -47,6 +47,50 @@ public class HexEngineTest {
   }
 
   @Test
+  public void testPointToHex_Horizontal(){
+    final HexEngine<Object> eng = new HexEngine<Object>(32, 16, HexEngine.ORIENTATION_HORIZONTAL);
+    assertEquals(new HexPosition(-1, -1), eng.pointToHex(0, 0));
+    assertEquals(new HexPosition(0, 0), eng.pointToHex(16, 8));
+    assertEquals(new HexPosition(0, 0), eng.pointToHex(1, 8));
+    assertEquals(new HexPosition(0, 0), eng.pointToHex(31, 8));
+    assertEquals(new HexPosition(1, 0), eng.pointToHex(48, 16));
+    assertEquals(new HexPosition(0, 1), eng.pointToHex(16, 24));
+    assertEquals(new HexPosition(0, 2), eng.pointToHex(16, 40));
+    
+    for(int c = -128; c < 128; c++){
+      for(int r = -5; r < 128; r++){
+        final float hexx = eng.calculateX(c, r);
+        final float hexy = eng.calculateY(c, r);
+        assertEquals(new HexPosition(c<0 ? -1 : c, r<0? -1 : r),eng.pointToHex(hexx+16, hexy+8));
+      }
+    }
+    
+  }
+  
+  @Test
+  public void testPointToHex_Vertical(){
+    final HexEngine<Object> eng = new HexEngine<Object>(32, 16, HexEngine.ORIENTATION_VERTICAL);
+    assertEquals(new HexPosition(0, 0), eng.pointToHex(16, 8));
+    assertEquals(new HexPosition(0, 0), eng.pointToHex(1, 8));
+    assertEquals(new HexPosition(0, 0), eng.pointToHex(31, 8));
+    assertEquals(new HexPosition(0, 0), eng.pointToHex(16, 1));
+    assertEquals(new HexPosition(0, 0), eng.pointToHex(16, 15));
+    assertEquals(new HexPosition(1, 0), eng.pointToHex(48, 8));
+    assertEquals(new HexPosition(0, 1), eng.pointToHex(32, 16));
+    assertEquals(new HexPosition(0, 2), eng.pointToHex(16, 32));
+    assertEquals(new HexPosition(-1, 1), eng.pointToHex(1, 24));
+
+    for (int c = -128; c < 128; c++) {
+      for (int r = -5; r < 128; r++) {
+        final float hexx = eng.calculateX(c, r);
+        final float hexy = eng.calculateY(c, r);
+        assertEquals(new HexPosition(c < 0 ? -1 : c, r < 0 ? -1 : r), eng.pointToHex(hexx + 16, hexy + 8));
+      }
+    }
+
+  }
+  
+  @Test
   public void testGetClockwisePositionsAroundHex_Horizontal_0() {
     final HexEngine<Object> eng = new HexEngine<Object>(20, 20, HexEngine.ORIENTATION_HORIZONTAL);
     assertPositions(eng.getNeighbourPositions(4, 8, 0), 4, 8);
