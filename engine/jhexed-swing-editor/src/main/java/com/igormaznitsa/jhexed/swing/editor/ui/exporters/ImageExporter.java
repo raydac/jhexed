@@ -19,15 +19,19 @@ import com.igormaznitsa.jhexed.engine.*;
 import com.igormaznitsa.jhexed.engine.misc.*;
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.renders.swing.ColorHexRender;
+import com.igormaznitsa.jhexed.swing.editor.model.DocumentCellComments;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.*;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.awt.*;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import java.util.Map.Entry;
 import javax.imageio.ImageIO;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -37,10 +41,12 @@ public class ImageExporter implements Exporter {
 
   private final DocumentOptions docOptions;
   private final SelectLayersExportData exportData;
-
-  public ImageExporter(final DocumentOptions docOptions, final SelectLayersExportData exportData) {
+  private final DocumentCellComments cellComments;
+  
+  public ImageExporter(final DocumentOptions docOptions, final SelectLayersExportData exportData, final DocumentCellComments cellComments) {
     this.docOptions = docOptions;
     this.exportData = exportData;
+    this.cellComments = cellComments;
   }
 
   public BufferedImage generateImage() throws IOException {
@@ -187,6 +193,27 @@ public class ImageExporter implements Exporter {
 
     engine.draw(gfx);
 
+    if (this.exportData.isCellCommentariesExport()){
+      final Iterator<Entry<HexPosition,String>> iterator = this.cellComments.iterator();
+      gfx.setFont(new Font("Arial",Font.BOLD,12));
+      while(iterator.hasNext()){
+        final Entry<HexPosition,String> item = iterator.next();
+        final HexPosition pos = item.getKey();
+        final String text = item.getValue();
+        final float x = engine.calculateX(pos.getColumn(), pos.getRow());
+        final float y = engine.calculateY(pos.getColumn(), pos.getRow());
+      
+        final Rectangle2D textBounds = gfx.getFontMetrics().getStringBounds(text, gfx);
+        
+        final float dx = x-((float) textBounds.getWidth()-engine.getCellWidth())/2;
+        
+        gfx.setColor(Color.BLACK);
+        gfx.drawString(text, dx, y);
+        gfx.setColor(Color.WHITE);
+        gfx.drawString(text, dx-2, y-2);
+      }
+    }
+    
     gfx.dispose();
 
     return result;
@@ -195,6 +222,9 @@ public class ImageExporter implements Exporter {
   @Override
   public void export(final File file) throws IOException {
     final BufferedImage img = generateImage();
-    ImageIO.write(img, "png", file);
+    final ByteArrayOutputStream buffer = new ByteArrayOutputStream(1000000);
+    ImageIO.write(img, "png", buffer);
+    buffer.flush();
+    FileUtils.writeByteArrayToFile(file, buffer.toByteArray());
   }
 }

@@ -30,10 +30,8 @@ import com.igormaznitsa.jhexed.swing.editor.Log;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainer;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainerSection;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.*;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
-import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogSelectLayersForExport;
-import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DocumentOptions;
-import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.SelectLayersExportData;
 import com.igormaznitsa.jhexed.swing.editor.ui.exporters.ImageExporter;
 import com.igormaznitsa.jhexed.swing.editor.ui.exporters.XmlExporter;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameUtils;
@@ -58,6 +56,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private final FrameTools frameTools;
   private final FrameToolOptions frameToolOptions;
 
+  private final DocumentCellComments cellComments = new DocumentCellComments();
+  
   private final LayerListModel layers;
 
   private ToolType selectedToolType;
@@ -689,7 +689,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private void menuFileExportAsImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsImageActionPerformed
     SelectLayersExportData toExport = prepareExportData();
 
-    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, toExport);
+    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, true, toExport);
     dlg.setTitle("Select data for export as Image");
     dlg.setVisible(true);
     toExport = dlg.getResult();
@@ -699,7 +699,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
         this.lastExportedFile = fileChooser.getSelectedFile();
 
-        final ImageExporter exporter = new ImageExporter(getDocumentOptions(), toExport);
+        final ImageExporter exporter = new ImageExporter(getDocumentOptions(), toExport, this.cellComments);
         try {
           exporter.export(this.lastExportedFile);
         }
@@ -714,7 +714,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private void menuFileExportAsXMLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsXMLActionPerformed
     SelectLayersExportData toExport = prepareExportData();
 
-    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, toExport);
+    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, true, toExport);
     dlg.setTitle("Select data for XML export");
     dlg.setVisible(true);
     toExport = dlg.getResult();
@@ -724,7 +724,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
         this.lastExportedFile = fileChooser.getSelectedFile();
 
-        final XmlExporter exporter = new XmlExporter(getDocumentOptions(), toExport);
+        final XmlExporter exporter = new XmlExporter(getDocumentOptions(), toExport, this.cellComments);
         try {
           exporter.export(this.lastExportedFile);
         }
@@ -740,7 +740,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     final SelectLayersExportData result = new SelectLayersExportData();
 
     result.setBackgroundImageExport(this.menuViewBackImage.isSelected());
-
+    result.setCellCommentariesExport(true);
+    
     for (int i = 0; i < this.layers.getSize(); i++) {
       final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
       result.addLayer(field.isLayerVisible(), field);
@@ -787,9 +788,15 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   // End of variables declaration//GEN-END:variables
 
   private void updateActivehexCoord(final HexPosition position) {
-    this.labelCellUnderMouse.setText("Hex " + position.getColumn() + ',' + position.getRow());
+    final String comment = this.cellComments.getForHex(position);
+    this.labelCellUnderMouse.setText("Hex " + position.getColumn() + ',' + position.getRow()+' '+(comment == null? "" : comment));
     if (this.hexMapPanel.isValidPosition(position)) {
       final StringBuilder buffer = new StringBuilder();
+
+      if (comment !=null){
+        buffer.append("<h4>").append(StringEscapeUtils.escapeHtml4(comment)).append("</h4>");
+      }
+      
       for (int i = 0; i < this.layers.getSize(); i++) {
         final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
         if (field.isLayerVisible()) {
@@ -832,6 +839,20 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         useCurrentToolAtPosition(hexNumber);
       }
       break;
+      case MouseEvent.BUTTON3:{
+        if (e.getClickCount()>1){
+          final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
+          if (hexNumber!=null && this.hexMapPanel.isValidPosition(hexNumber)){
+            // open dialog for cell comment
+            final CellCommentDialog commentDialog = new CellCommentDialog(this, "Commentaries for "+hexNumber.getColumn()+","+hexNumber.getRow()+" cell", this.cellComments.getForHex(hexNumber));
+            commentDialog.setVisible(true);
+            final String result = commentDialog.getResult();
+            if (result!=null){
+              this.cellComments.setForHex(hexNumber, result);
+            }
+          }
+        }
+      }
     }
   }
 
@@ -955,6 +976,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   public void saveState(final FileContainer container) throws IOException {
     container.addSection(new FileContainerSection("docsettings", getDocumentOptions().toByteArray()));
     container.addSection(new FileContainerSection("layers", this.layers.toByteArray()));
+    container.addSection(new FileContainerSection("cellcomments", this.cellComments.toByteArray()));
   }
 
   public void loadState(final FileContainer container) throws IOException {
@@ -962,6 +984,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     final FileContainerSection docsettings = container.findSectionForName("docsettings");
     final FileContainerSection layers = container.findSectionForName("layers");
+    final FileContainerSection cellComments = container.findSectionForName("cellcomments");
 
     if (layers == null) {
       throw new IOException("Can't find 'layers' section");
@@ -970,6 +993,11 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       throw new IOException("Can't find 'docsettings' section");
     }
 
+    this.cellComments.clear();
+    if (cellComments!=null){
+      this.cellComments.fromByteArray(cellComments.getData());
+    }
+    
     DocumentOptions opts = new DocumentOptions(docsettings.getData());
     this.layers.fromByteArray(layers.getData());
     setDocumentOptions(opts);

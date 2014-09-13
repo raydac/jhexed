@@ -16,8 +16,7 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs;
 
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -25,11 +24,16 @@ import java.util.List;
  */
 public class SelectLayersExportData {
   private boolean exportBackgroundImage;
+  private boolean exportCellCommentaries;
   private final List<LayerExportRecord> layers = new ArrayList<LayerExportRecord>();
-
+  
   public SelectLayersExportData() {
   }
 
+  public boolean isCellCommentariesExport(){
+    return this.exportCellCommentaries;
+  }
+  
   public boolean isBackgroundImageExport() {
     return this.exportBackgroundImage;
   }
@@ -38,6 +42,10 @@ public class SelectLayersExportData {
     this.exportBackgroundImage = flag;
   }
 
+  public void setCellCommentariesExport(final boolean flag){
+    this.exportCellCommentaries = flag;
+  }
+  
   public List<LayerExportRecord> getLayers() {
     return this.layers;
   }

@@ -16,6 +16,8 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.exporters;
 
 import com.igormaznitsa.jhexed.engine.HexEngine;
+import com.igormaznitsa.jhexed.engine.misc.HexPosition;
+import com.igormaznitsa.jhexed.swing.editor.model.DocumentCellComments;
 import com.igormaznitsa.jhexed.values.HexColorValue;
 import com.igormaznitsa.jhexed.values.HexSVGImageValue;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
@@ -23,6 +25,8 @@ import com.igormaznitsa.jhexed.swing.editor.ui.Utils;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.*;
 import java.awt.Color;
 import java.io.*;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -31,45 +35,49 @@ import org.apache.commons.lang3.StringEscapeUtils;
  * @author Igor Maznitsa (http://www.igormaznitsa.com)
  */
 public class XmlExporter implements Exporter {
+
   private final DocumentOptions docOptions;
   private final SelectLayersExportData exportData;
-  
-  public XmlExporter(final DocumentOptions docOptions, final SelectLayersExportData exportData){
+  private final DocumentCellComments cellComments;
+
+  public XmlExporter(final DocumentOptions docOptions, final SelectLayersExportData exportData, final DocumentCellComments cellComments) {
     this.docOptions = docOptions;
     this.exportData = exportData;
+    this.cellComments = cellComments;
   }
-  
+
   @Override
   public void export(final File file) throws IOException {
     final StringBuilder buffer = new StringBuilder(256000);
-    
+
     buffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     buffer.append("<jhexed>\n");
-    
+
     buffer.append("\t<docOptions>\n");
     buffer.append("\t\t<columns>").append(this.docOptions.getColumns()).append("</columns>\n");
     buffer.append("\t\t<rows>").append(this.docOptions.getRows()).append("</rows>\n");
     buffer.append("\t\t<commentary>").append(StringEscapeUtils.escapeXml10(this.docOptions.getCommentary())).append("</commentary>\n");
     buffer.append("\t\t<hexBorderWidth>").append(this.docOptions.getLineWidth()).append("</hexBorderWidth>\n");
-    buffer.append("\t\t<hexBorderColor>").append(Utils.color2html(this.docOptions.getColor(),false)).append("</hexBorderColor>\n");
+    buffer.append("\t\t<hexBorderColor>").append(Utils.color2html(this.docOptions.getColor(), false)).append("</hexBorderColor>\n");
     buffer.append("\t\t<hexOrientation>").append(this.docOptions.getHexOrientation() == HexEngine.ORIENTATION_VERTICAL ? "vertical" : "horizontal").append("</hexOrientation>\n");
     buffer.append("\t</docOptions>\n");
-    if (exportData.isBackgroundImageExport() && this.docOptions.getImage() != null){
+    if (exportData.isBackgroundImageExport() && this.docOptions.getImage() != null) {
       buffer.append("\t<backImage>").append(Utils.byteArray2String(this.docOptions.getImage().getImageData(), true, true)).append("</backImage>\n");
     }
     buffer.append("\t<layers>\n");
-    for(final LayerExportRecord f : exportData.getLayers()){
-      if (f.isAllowed()){
+    for (final LayerExportRecord f : exportData.getLayers()) {
+      if (f.isAllowed()) {
         buffer.append("\t\t<layer name=\"").append(StringEscapeUtils.escapeXml10(f.getLayer().getLayerName())).append("\" commentary=\"").append(StringEscapeUtils.escapeXml10(f.getLayer().getComments())).append("\">\n");
         buffer.append("\t\t\t<values>\n");
-        for(int i=1; i<f.getLayer().getHexValuesNumber();i++){
+        for (int i = 1; i < f.getLayer().getHexValuesNumber(); i++) {
           final HexFieldValue vl = f.getLayer().getHexValueForIndex(i);
           buffer.append("\t\t\t\t<value index=\"").append(i).append("\" name=\"").append(StringEscapeUtils.escapeXml10(vl.getName())).append("\" commentary=\"").append(StringEscapeUtils.escapeXml10(vl.getComment())).append("\">\n");
-          if (vl instanceof HexColorValue){
-            final Color clr = ((HexColorValue)vl).getColor();
-            buffer.append("\t\t\t\t\t<color color=\"").append(Utils.color2html(clr,true)).append("\"/>\n");
-          }else if (vl instanceof HexSVGImageValue){
-            buffer.append("\t\t\t\t\t<svg>").append(Utils.byteArray2String(((HexSVGImageValue)vl).getImage().getImageData(), true, true)).append("</svg>\n");
+          if (vl instanceof HexColorValue) {
+            final Color clr = ((HexColorValue) vl).getColor();
+            buffer.append("\t\t\t\t\t<color color=\"").append(Utils.color2html(clr, true)).append("\"/>\n");
+          }
+          else if (vl instanceof HexSVGImageValue) {
+            buffer.append("\t\t\t\t\t<svg>").append(Utils.byteArray2String(((HexSVGImageValue) vl).getImage().getImageData(), true, true)).append("</svg>\n");
           }
           buffer.append("\t\t\t\t</value>\n");
         }
@@ -79,8 +87,19 @@ public class XmlExporter implements Exporter {
       }
     }
     buffer.append("\t</layers>\n");
+    if (this.exportData.isCellCommentariesExport()) {
+      buffer.append("\t<cellComments>\n");
+      final Iterator<Entry<HexPosition, String>> cellComment = this.cellComments.iterator();
+      while (cellComment.hasNext()) {
+        final Entry<HexPosition, String> entry = cellComment.next();
+        final HexPosition hexPos = entry.getKey();
+        final String escapedComment = StringEscapeUtils.escapeXml11(entry.getValue());
+        buffer.append("\t\t<cellComment col=\"").append(hexPos.getColumn()).append("\" row=\"").append(hexPos.getRow()).append("\" text=\"").append(escapedComment).append("\"/>\n");
+      }
+      buffer.append("\t</cellComments>\n");
+    }
     buffer.append("</jhexed>\n");
-    
+
     FileUtils.write(file, buffer.toString());
   }
 }
