@@ -310,6 +310,11 @@ public class HexFieldLayer implements HexEngineModel<Byte> {
     return this.values.size();
   }
 
+  public void addValue(final HexFieldValue value){
+    value.setIndex(this.getHexValuesNumber());
+    this.values.add(value);
+  }
+  
   public void replaceValues(final List<HexFieldValue> values) {
     this.values.clear();
     this.values.addAll(values);
