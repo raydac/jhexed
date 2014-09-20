@@ -226,6 +226,11 @@
             </MenuItem>
           </SubComponents>
         </Menu>
+        <Menu class="javax.swing.JMenu" name="menuPlugins">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Plugins"/>
+          </Properties>
+        </Menu>
         <Menu class="javax.swing.JMenu" name="menuWindow">
           <Properties>
             <Property name="text" type="java.lang.String" value="Window"/>

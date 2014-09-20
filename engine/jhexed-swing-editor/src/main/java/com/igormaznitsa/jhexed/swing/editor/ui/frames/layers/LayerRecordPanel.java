@@ -112,4 +112,9 @@ public class LayerRecordPanel extends javax.swing.JPanel {
   public LayerListModel getLayerListModel() {
     return this.parent;
   }
+  
+  @Override
+  public String toString(){
+    return this.layer.getLayerName();
+  }
 }

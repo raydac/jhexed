@@ -34,16 +34,23 @@ import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.*;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
 import com.igormaznitsa.jhexed.swing.editor.ui.exporters.ImageExporter;
 import com.igormaznitsa.jhexed.swing.editor.ui.exporters.XmlExporter;
+import com.igormaznitsa.jhexed.swing.editor.ui.extensions.GroovyPluginBase;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameUtils;
+import groovy.lang.*;
+import groovy.util.DelegatingScript;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.codehaus.groovy.control.CompilerConfiguration;
 
 public class MainForm extends javax.swing.JFrame implements MouseListener, MouseMotionListener, MouseWheelListener, HexMapPanelListener, InsideApplicationBus.AppBusListener {
 
@@ -57,7 +64,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private final FrameToolOptions frameToolOptions;
 
   private final DocumentCellComments cellComments = new DocumentCellComments();
-  
+
   private final LayerListModel layers;
 
   private ToolType selectedToolType;
@@ -66,6 +73,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private File destinationFile;
   private File lastExportedFile;
   private String documentComments = "";
+
+  private final GroovyPluginBase dsl;
+  private final GroovyShell groovyShell;
+  private final CompilerConfiguration compilerConfiguration;
 
   private boolean dragging = false;
 
@@ -106,6 +117,11 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     hexMapPanelDesktop.setContentPane(hexMapPanel);
 
+    this.dsl = new GroovyPluginBase(this, this.layers);
+    this.compilerConfiguration = new CompilerConfiguration();
+    this.compilerConfiguration.setScriptBaseClass(DelegatingScript.class.getName());
+    this.groovyShell = new GroovyShell(this.compilerConfiguration);
+
     InsideApplicationBus.getInstance().addAppBusListener(this);
 
     loadSettings();
@@ -114,14 +130,108 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     Log.info("The MainForm created");
 
+    registerInternalPlugins();
+    registerExternalPlugins(".");
+
     if (fileToOpen != null) {
       Log.info("Started with parameter: " + fileToOpen);
       final File file = new File(fileToOpen);
       loadFromFile(file);
     }
-
   }
 
+  private void registerInternalPlugins() {
+    final String [] plugins = new String[]{"ClearValueOnLayer"};
+      for (final String f : plugins) {
+        Reader reader = null;
+        try {
+          System.out.println("Loading internal plugin '" + f + "'");
+          final InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("com/igormaznitsa/jhexed/swing/editor/plugins/" + f + ".groovy");
+          if (inStream == null){
+            System.err.println("Can't find internal plugin "+f);
+            continue;
+          }
+          reader = new InputStreamReader(inStream,"UTF-8");
+          readAndParsePluginScript(reader);
+        }
+        catch (Exception ex) {
+          ex.printStackTrace();
+          continue;
+        }
+        finally {
+          IOUtils.closeQuietly(reader);
+        }
+
+      }
+  }
+
+  private void registerExternalPlugins(final String root) {
+    final File plugins = new File(root, "plugins");
+    if (plugins.isDirectory()) {
+      final Collection<File> files = FileUtils.listFiles(plugins, FileFilterUtils.asFileFilter(new FilenameFilter() {
+        @Override
+        public boolean accept(final File dir, final String name) {
+          return name.endsWith(".groovy");
+        }
+      }), null);
+      
+      boolean first = true;
+      
+      for (final File f : files) {
+        Reader reader = null;
+        try {
+          System.out.println("Loading external plugin '" + f.getName() + "'");
+          reader = new FileReader(f);
+
+          if (first){
+            this.menuPlugins.add(new JSeparator());
+            first = false;
+          }
+          
+          readAndParsePluginScript(reader);
+        }
+        catch (Exception ex) {
+          ex.printStackTrace();
+          continue;
+        }finally{
+          IOUtils.closeQuietly(reader);
+        }
+
+      }
+    }
+  }
+
+  private void readAndParsePluginScript(final Reader reader) throws IOException {
+    final DelegatingScript script = (DelegatingScript) this.groovyShell.parse(reader);
+    script.setDelegate(this.dsl);
+    final String name = (String) script.invokeMethod("getPluginName", new Object[]{});
+    final String description = (String) script.invokeMethod("getDescription", new Object[]{});
+    final JMenuItem menuItem = new JMenuItem(name);
+    menuItem.setToolTipText(description);
+    menuItem.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        try {
+          if (selectedLayer != null) {
+            selectedLayer.addUndo();
+          }
+          script.invokeMethod("doWork", new Object[]{selectedToolType, selectedLayer});
+        }
+        catch (Exception ex) {
+          ex.printStackTrace();
+          JOptionPane.showMessageDialog(rootPane, "Error during execution", "Script error", JOptionPane.ERROR_MESSAGE);
+        }
+        finally {
+          updateRedoUndoForCurrentLayer();
+        }
+        hexMapPanel.repaint();
+      }
+    });
+
+    menuPlugins.add(menuItem);
+  }
+  
   private Rectangle loadPosition(final String prefix, final Rectangle dflt) {
     final int x = REGISTRY.getInt(prefix + ".X", dflt.x);
     final int y = REGISTRY.getInt(prefix + ".Y", dflt.y);
@@ -211,6 +321,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     jSeparator2 = new javax.swing.JPopupMenu.Separator();
     menuViewBackImage = new javax.swing.JCheckBoxMenuItem();
     menuShowHexBorders = new javax.swing.JCheckBoxMenuItem();
+    menuPlugins = new javax.swing.JMenu();
     menuWindow = new javax.swing.JMenu();
     menuWindowLayers = new javax.swing.JCheckBoxMenuItem();
     menuWindowTools = new javax.swing.JCheckBoxMenuItem();
@@ -429,6 +540,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     jMenu1.add(menuShowHexBorders);
 
     jMenuBar1.add(jMenu1);
+
+    menuPlugins.setText("Plugins");
+    jMenuBar1.add(menuPlugins);
 
     menuWindow.setText("Window");
 
@@ -741,7 +855,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     result.setBackgroundImageExport(this.menuViewBackImage.isSelected());
     result.setCellCommentariesExport(true);
-    
+
     for (int i = 0; i < this.layers.getSize(); i++) {
       final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
       result.addLayer(field.isLayerVisible(), field);
@@ -775,6 +889,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private javax.swing.JMenu menuHelp;
   private javax.swing.JMenuItem menuHelpAbout;
   private javax.swing.JMenuItem menuItemFileOpen;
+  private javax.swing.JMenu menuPlugins;
   private javax.swing.JCheckBoxMenuItem menuShowHexBorders;
   private javax.swing.JCheckBoxMenuItem menuViewBackImage;
   private javax.swing.JMenuItem menuViewZoomIn;
@@ -789,14 +904,14 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private void updateActivehexCoord(final HexPosition position) {
     final String comment = this.cellComments.getForHex(position);
-    this.labelCellUnderMouse.setText("Hex " + position.getColumn() + ',' + position.getRow()+' '+(comment == null? "" : comment));
+    this.labelCellUnderMouse.setText("Hex " + position.getColumn() + ',' + position.getRow() + ' ' + (comment == null ? "" : comment));
     if (this.hexMapPanel.isValidPosition(position)) {
       final StringBuilder buffer = new StringBuilder();
 
-      if (comment !=null){
+      if (comment != null) {
         buffer.append("<h4>").append(StringEscapeUtils.escapeHtml4(comment)).append("</h4>");
       }
-      
+
       for (int i = 0; i < this.layers.getSize(); i++) {
         final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
         if (field.isLayerVisible()) {
@@ -839,15 +954,15 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         useCurrentToolAtPosition(hexNumber);
       }
       break;
-      case MouseEvent.BUTTON3:{
-        if (e.getClickCount()>1){
+      case MouseEvent.BUTTON3: {
+        if (e.getClickCount() > 1) {
           final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
-          if (hexNumber!=null && this.hexMapPanel.isValidPosition(hexNumber)){
+          if (hexNumber != null && this.hexMapPanel.isValidPosition(hexNumber)) {
             // open dialog for cell comment
-            final CellCommentDialog commentDialog = new CellCommentDialog(this, "Commentaries for "+hexNumber.getColumn()+","+hexNumber.getRow()+" cell", this.cellComments.getForHex(hexNumber));
+            final CellCommentDialog commentDialog = new CellCommentDialog(this, "Commentaries for " + hexNumber.getColumn() + "," + hexNumber.getRow() + " cell", this.cellComments.getForHex(hexNumber));
             commentDialog.setVisible(true);
             final String result = commentDialog.getResult();
-            if (result!=null){
+            if (result != null) {
               this.cellComments.setForHex(hexNumber, result);
             }
           }
@@ -994,10 +1109,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
 
     this.cellComments.clear();
-    if (cellComments!=null){
+    if (cellComments != null) {
       this.cellComments.fromByteArray(cellComments.getData());
     }
-    
+
     DocumentOptions opts = new DocumentOptions(docsettings.getData());
     this.layers.fromByteArray(layers.getData());
     setDocumentOptions(opts);
