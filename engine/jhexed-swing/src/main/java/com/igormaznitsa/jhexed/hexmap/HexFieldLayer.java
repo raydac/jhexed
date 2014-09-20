@@ -190,7 +190,7 @@ public class HexFieldLayer implements HexEngineModel<Byte> {
   @Override
   public Byte getValueAt(final int col, final int row) {
     if (this.isPositionValid(col, row)) {
-      return Byte.valueOf(array[row * this.columns]);
+      return array[col + row * this.columns];
     }
     else {
       return defaultValue;
