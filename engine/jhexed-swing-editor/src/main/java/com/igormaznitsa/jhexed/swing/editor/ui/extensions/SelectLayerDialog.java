@@ -22,6 +22,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+@SuppressWarnings("rawtypes")
 public class SelectLayerDialog extends javax.swing.JDialog {
   private static final long serialVersionUID = 6969556541848786336L;
 
@@ -31,6 +32,7 @@ public class SelectLayerDialog extends javax.swing.JDialog {
     return this.result;
   }
   
+  @SuppressWarnings("unchecked")
   public SelectLayerDialog(final java.awt.Frame parent, final String title, final LayerListModel layers, final int layersNumberToSelect) {
     super(parent, true);
     initComponents();
