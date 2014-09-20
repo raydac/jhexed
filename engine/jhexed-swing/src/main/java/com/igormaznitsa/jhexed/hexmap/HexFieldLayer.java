@@ -26,6 +26,8 @@ import org.apache.commons.io.IOUtils;
 
 public class HexFieldLayer implements HexEngineModel<Byte> {
 
+  public static final int MAX_UNDO_DEPTH = 10;
+  
   private int columns;
   private int rows;
 
@@ -327,12 +329,19 @@ public class HexFieldLayer implements HexEngineModel<Byte> {
     return !this.listRedo.isEmpty();
   }
   
-  public void addUndo(){
+  /**
+   * Add undo copy into inside list.
+   * @return true if the inside list too big and the first item has been removed, false otherwise
+   */
+  public boolean addUndo(){
     this.listRedo.clear();
     this.listUndo.add(new CopyOfLayerState(this));
-    if (this.listUndo.size()>10){
+    boolean result = false;
+    while(this.listUndo.size()>MAX_UNDO_DEPTH){
       this.listUndo.remove(0);
+      result = true;
     }
+    return result;
   }
   
   public void resetRedoUndo(){
