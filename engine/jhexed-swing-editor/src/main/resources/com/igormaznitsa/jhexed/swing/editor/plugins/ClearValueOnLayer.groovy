@@ -7,14 +7,15 @@ def getDescription(){
 }
 
 def doWork(tool, layer){
-  selectedlayer = selectLayer("Select layer");
-  if (selectedlayer){
-    value = (byte)selectValue("Select value to clear",selectedlayer);
+  selected_layer = selectLayer("Select layer");
+  if (selected_layer){
+    value = (byte)selectValue("Select value to clear",selected_layer);
     if (value>0){
-      printf("Remove value %d from %s",value,selectedlayer.getLayerName())
-      for(int x=0;x<selectedlayer.getColumnNumber();x++){
-        for(int y=0;y<selectedlayer.getRowNumber();y++){
-          if (selectedlayer.getValueAt(x,y)==value) selectedlayer.setValueAt(x,y,(byte)0);
+      printf("Remove value %d from %s",value,selected_layer.getLayerName())
+      addUndo(selected_layer);
+      for(int x=0;x<selected_layer.getColumnNumber();x++){
+        for(int y=0;y<selected_layer.getRowNumber();y++){
+          if (selected_layer.getValueAt(x,y)==value) selected_layer.setValueAt(x,y,(byte)0);
         }
       }
     }

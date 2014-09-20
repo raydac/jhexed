@@ -2,15 +2,15 @@ package com.igormaznitsa.jhexed.swing.editor.ui.extensions;
 
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.model.LayerListModel;
-import javax.swing.JFrame;
+import com.igormaznitsa.jhexed.swing.editor.ui.MainForm;
 import javax.swing.JOptionPane;
 
 public class GroovyPluginBase {
 
   private final LayerListModel layerListModel;
-  private final JFrame frame;
+  private final MainForm frame;
   
-  public GroovyPluginBase(final JFrame frame, final LayerListModel listModel){
+  public GroovyPluginBase(final MainForm frame, final LayerListModel listModel){
     this.frame = frame;
     this.layerListModel = listModel;
   }
@@ -19,6 +19,18 @@ public class GroovyPluginBase {
     final SelectValueDialog dialog = new SelectValueDialog(this.frame, text, layer);
     dialog.setVisible(true);
     return dialog.getSelectedIndex();
+  }
+
+  public void addUndo(final HexFieldLayer layer){
+    if (layer!=null){
+      this.frame.addedUndoStep(new HexFieldLayer[]{layer});
+    }
+  }
+  
+  public void addUndo(final HexFieldLayer [] layers){
+    if (layers!=null){
+      this.frame.addedUndoStep(layers);
+    }
   }
   
   public HexFieldLayer selectLayer(final String title){

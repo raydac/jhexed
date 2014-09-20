@@ -23,6 +23,7 @@ import java.awt.geom.Path2D;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.jdesktop.swingx.WrapLayout;
@@ -33,8 +34,8 @@ public class LayerValueIconList extends JScrollPane {
   private static final int ICON_SIZE = 48;
   private HexFieldLayer currentLayerField;
 
-  private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(2, 2, 2, 2);
-  private static final Border LINE_BORDER = BorderFactory.createLineBorder(Color.BLUE, 2);
+  private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(3, 3, 3, 3);
+  private static final Border LINE_BORDER = BorderFactory.createDashedBorder(Color.ORANGE.darker().darker(),  3.0f, 2.0f, 1.0f, true);
   
   public interface LayerIconListListener {
     void onLeftClick(final HexFieldValue h, final ImageIcon icon);

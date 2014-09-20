@@ -41,8 +41,7 @@ import groovy.util.DelegatingScript;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.util.Collection;
-import java.util.Locale;
+import java.util.*;
 import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -80,6 +79,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private boolean dragging = false;
 
+  private final java.util.List<HexFieldLayer[]> undoLayers = new ArrayList<HexFieldLayer[]>();
+  private final java.util.List<HexFieldLayer[]> redoLayers = new ArrayList<HexFieldLayer[]>();
+  
   private static final Preferences REGISTRY = Preferences.userRoot().node(MainForm.class.getName());
 
   public MainForm(final String fileToOpen) {
@@ -201,6 +203,20 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
+  public void addedUndoStep(final HexFieldLayer [] layers){
+    boolean tooMany = false;
+    for(final HexFieldLayer l : layers){
+      tooMany |= l.addUndo();
+    }
+    this.undoLayers.add(layers);
+    if (tooMany){
+      this.undoLayers.remove(0);
+    }
+    
+    this.redoLayers.clear();
+    updateRedoUndoForCurrentLayer();
+  }
+  
   private void readAndParsePluginScript(final Reader reader) throws IOException {
     final DelegatingScript script = (DelegatingScript) this.groovyShell.parse(reader);
     script.setDelegate(this.dsl);
@@ -214,7 +230,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       public void actionPerformed(ActionEvent e) {
         try {
           if (selectedLayer != null) {
-            selectedLayer.addUndo();
+            addedUndoStep(new HexFieldLayer[]{selectedLayer});
           }
           script.invokeMethod("doWork", new Object[]{selectedToolType, selectedLayer});
         }
@@ -743,18 +759,30 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }//GEN-LAST:event_menuViewBackImageStateChanged
 
   private void menuEditUndoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEditUndoActionPerformed
-    if (this.selectedLayer.undo()) {
-      this.selectedLayer.updatePrerasterizedIcons(this.hexMapPanel.getHexShape());
+    if (!this.undoLayers.isEmpty()){
+      final HexFieldLayer [] layers = this.undoLayers.remove(this.undoLayers.size()-1);
+      this.redoLayers.add(layers);
+      for(final HexFieldLayer l : layers){
+        l.undo();
+        l.updatePrerasterizedIcons(this.hexMapPanel.getHexShape());
+      }
       this.hexMapPanel.repaint();
     }
+    
     updateRedoUndoForCurrentLayer();
   }//GEN-LAST:event_menuEditUndoActionPerformed
 
   private void menuEditRedoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEditRedoActionPerformed
-    if (this.selectedLayer.redo()) {
-      this.selectedLayer.updatePrerasterizedIcons(this.hexMapPanel.getHexShape());
+    if (!this.redoLayers.isEmpty()) {
+      final HexFieldLayer [] layers = this.redoLayers.remove(this.redoLayers.size() - 1);
+      this.undoLayers.add(layers);
+      for(final HexFieldLayer l : layers){
+        l.redo();
+        l.updatePrerasterizedIcons(this.hexMapPanel.getHexShape());
+      }
       this.hexMapPanel.repaint();
     }
+
     updateRedoUndoForCurrentLayer();
   }//GEN-LAST:event_menuEditRedoActionPerformed
 
@@ -976,8 +1004,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     switch (e.getButton()) {
       case MouseEvent.BUTTON1: {
         if (selectedToolType != null && this.selectedLayer != null) {
-          this.selectedLayer.addUndo();
-          updateRedoUndoForCurrentLayer();
+          addedUndoStep(new HexFieldLayer[]{this.selectedLayer});
           final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
           useCurrentToolAtPosition(hexNumber);
         }
@@ -1062,7 +1089,6 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       break;
       case SELECTED_LAYER_CHANGED: {
         this.selectedLayer = (HexFieldLayer) objects[0];
-        this.layers.resetaAllRedoUndo();
         updateRedoUndoForCurrentLayer();
       }
       break;
@@ -1133,14 +1159,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   private void updateRedoUndoForCurrentLayer() {
-    if (this.selectedLayer == null) {
-      this.menuEditRedo.setEnabled(false);
-      this.menuEditUndo.setEnabled(false);
-    }
-    else {
-      this.menuEditRedo.setEnabled(this.selectedLayer.hasRedo());
-      this.menuEditUndo.setEnabled(this.selectedLayer.hasUndo());
-    }
+    this.menuEditUndo.setEnabled(!this.undoLayers.isEmpty());
+    this.menuEditRedo.setEnabled(!this.redoLayers.isEmpty());
   }
 
   @Override

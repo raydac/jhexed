@@ -168,12 +168,6 @@ public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineMod
   public void detachedFromEngine(final HexEngine<?> engine) {
   }
   
-  public void resetaAllRedoUndo(){
-    for(final LayerRecordPanel p : this.layers){
-      p.getLayer().resetRedoUndo();
-    }
-  }
-
   public boolean resize(final int cols, final int rows) {
     if (this.cols!=cols || this.rows!=rows){
       this.cols = cols;
