@@ -40,6 +40,7 @@ import groovy.lang.*;
 import groovy.util.DelegatingScript;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Path2D;
 import java.io.*;
 import java.util.*;
 import java.util.prefs.Preferences;
@@ -786,6 +787,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     updateRedoUndoForCurrentLayer();
   }//GEN-LAST:event_menuEditRedoActionPerformed
 
+  public Path2D getHexShape(){
+    return this.hexMapPanel.getHexShape();
+  }
+  
   private DocumentOptions getDocumentOptions() {
     return new DocumentOptions(
             this.hexMapPanel.getImage(),
