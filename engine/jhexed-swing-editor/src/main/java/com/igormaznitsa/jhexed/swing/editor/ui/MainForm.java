@@ -206,7 +206,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   public void addedUndoStep(final HexFieldLayer [] layers){
     boolean tooMany = false;
     for(final HexFieldLayer l : layers){
-      tooMany |= l.addUndo();
+      tooMany = tooMany || l.addUndo();
     }
     this.undoLayers.add(layers);
     if (tooMany){
