@@ -56,6 +56,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private static final long serialVersionUID = 3235266727080222251L;
 
+  private static final String[] INTERNAL_PLUGINS = new String[]{"ClearValueOnLayer","CalcNumber","CalcNumberOverBase"};
+
+  
   private final Desktop hexMapPanelDesktop;
   private final HexMapPanel hexMapPanel;
 
@@ -144,8 +147,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   private void registerInternalPlugins() {
-    final String [] plugins = new String[]{"ClearValueOnLayer"};
-      for (final String f : plugins) {
+      for (final String f : INTERNAL_PLUGINS) {
         Reader reader = null;
         try {
           System.out.println("Loading internal plugin '" + f + "'");

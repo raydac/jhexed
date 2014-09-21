@@ -5,6 +5,7 @@ import com.igormaznitsa.jhexed.swing.editor.model.LayerListModel;
 import com.igormaznitsa.jhexed.swing.editor.ui.MainForm;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.layers.LayerRecordPanel;
 import com.igormaznitsa.jhexed.values.HexColorValue;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.awt.Color;
 import javax.swing.JOptionPane;
 
@@ -36,6 +37,17 @@ public class GroovyPluginBase {
     }
   }
 
+  public HexFieldValue hexValue(final HexFieldLayer layer, final int index){
+    return layer.getHexValueForIndex(index);
+  }
+  
+  public HexFieldValue hexValue(final HexFieldLayer layer, final String name){
+    for(int i = 0;i<layer.getHexValuesNumber();i++){
+      if (name.equalsIgnoreCase(layer.getHexValueForIndex(i).getName())) return layer.getHexValueForIndex(i);
+    }
+    return null;
+  }
+  
   public HexColorValue addColorValue(final HexFieldLayer layer, final String name, final String comment, final Color color){
     if (color==null) throw new NullPointerException("Color is null");
     final HexColorValue value = new HexColorValue(name == null ? "" : name, comment == null ? "" : comment, color, -1);
@@ -44,7 +56,7 @@ public class GroovyPluginBase {
     return value;
   }
   
-  public int getLayersNumber(){
+  public int layerNumber(){
     return this.layerListModel.getSize();
   }
   
@@ -58,11 +70,11 @@ public class GroovyPluginBase {
     return result;
   }
   
-  public HexFieldLayer layerForIndex(final int index){
+  public HexFieldLayer layer(final int index){
     return this.layerListModel.getElementAt(index).getLayer();
   }
   
-  public HexFieldLayer layerForName(final String layerName) {
+  public HexFieldLayer layer(final String layerName) {
     for (int i = 0; i < this.layerListModel.getSize(); i++) {
       final LayerRecordPanel panel = this.layerListModel.getElementAt(i);
       if (layerName.equalsIgnoreCase(panel.getLayer().getLayerName())) {
