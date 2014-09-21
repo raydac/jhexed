@@ -48,7 +48,7 @@ public final class Utils {
 
     @Override
     public String getDescription() {
-      return "SVG Image files (*.jhx)";
+      return "SVG Image files (*.svg)";
     }
   };
 
