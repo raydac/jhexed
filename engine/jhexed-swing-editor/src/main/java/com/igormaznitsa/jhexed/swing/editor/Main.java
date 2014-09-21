@@ -22,14 +22,14 @@ public class Main {
   public static void main(final String... args) {
     try {
       for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-        if ("Nimbus".equals(info.getName())) {
+        System.out.println("Found UI: "+info.getName());
+        if ("Windows".equals(info.getName())) {
           javax.swing.UIManager.setLookAndFeel(info.getClassName());
           break;
         }
       }
     }
     catch (Exception ex) {
-      java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
     }
 
     final String file = args.length>0 ? args[0] : null;

@@ -120,7 +120,7 @@ public class EraserOptions extends javax.swing.JPanel implements InsideApplicati
         final HexFieldLayer layer = (HexFieldLayer) objects[0];
         layerIconList.setLayerField(layer);
         this.selectedValue = null;
-        this.layerIconList.setSelectedHexValue(null);
+        this.layerIconList.clearSelection();
       }break;
       case HEX_SHAPE:{
         this.layerIconList.setIconShape((Path2D)objects[0]);
@@ -131,13 +131,11 @@ public class EraserOptions extends javax.swing.JPanel implements InsideApplicati
   @Override
   public void onLeftClick(final HexFieldValue value, final ImageIcon icon) {
     this.selectedValue = value;
-    this.layerIconList.setSelectedHexValue(value);
   }
 
   @Override
   public void onRightClick(final HexFieldValue value, final ImageIcon icon) {
     this.selectedValue = value;
-    this.layerIconList.setSelectedHexValue(value);
   }
 
   

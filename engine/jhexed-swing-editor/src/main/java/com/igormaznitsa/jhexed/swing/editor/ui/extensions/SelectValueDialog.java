@@ -18,24 +18,30 @@ package com.igormaznitsa.jhexed.swing.editor.ui.extensions;
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerValueIconList;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.ImageIcon;
 
 public class SelectValueDialog extends javax.swing.JDialog implements LayerValueIconList.LayerIconListListener{
   private static final long serialVersionUID = 883383692539345227L;
 
-  private int selected = -1;
+  private HexFieldValue [] selected = null;
   
-  public SelectValueDialog(final java.awt.Frame parent, final String title, final HexFieldLayer layer) {
+  public SelectValueDialog(final java.awt.Frame parent, final String title, final HexFieldLayer layer, final boolean multiple) {
     super(parent, true);
     initComponents();
     this.setTitle(title);
     this.layerIconList.setLayerField(layer);
     this.layerIconList.addLayerIconListListener(this);
+    if (multiple) {
+      final DefaultListSelectionModel model = new DefaultListSelectionModel();
+      model.setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+      this.layerIconList.setSelectionModel(model);
+    }
     this.setLocationRelativeTo(parent);
   }
   
-  public int getSelectedIndex(){
-    return this.selected;
+  public HexFieldValue [] getSelected(){
+    return selected;
   }
 
   /**
@@ -104,11 +110,12 @@ public class SelectValueDialog extends javax.swing.JDialog implements LayerValue
   }// </editor-fold>//GEN-END:initComponents
 
   private void buttonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOkActionPerformed
+    this.selected = this.layerIconList.getSelected();
     dispose();
   }//GEN-LAST:event_buttonOkActionPerformed
 
   private void buttonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelActionPerformed
-    this.selected = -1;
+    this.selected = null;
     dispose();
   }//GEN-LAST:event_buttonCancelActionPerformed
 
@@ -121,9 +128,7 @@ public class SelectValueDialog extends javax.swing.JDialog implements LayerValue
 
   @Override
   public void onLeftClick(final HexFieldValue h, final ImageIcon icon) {
-    this.selected = h.getIndex();
     this.buttonOk.setEnabled(true);
-    this.layerIconList.setSelectedHexValue(h);
   }
 
   @Override

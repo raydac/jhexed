@@ -3,18 +3,18 @@ def getPluginName(){
 }
 
 def getDescription(){
-  return 'The Plugin allows to clear a selected value on a layer'
+  return 'The Plugin allows to clear a selected values on a layer'
 }
 
 def doWork(activeTool, activeLayer){
   selected_layer = selectLayerDialog("Select layer");
   if (selected_layer){
-    value = selectValueDialog("Select value to clear",selected_layer);
-    if (value>0){
+    values = selectValuesDialog("Select values to clear",selected_layer);
+    if (values){
       addUndo(selected_layer);
       for(x in 0..selected_layer.getColumnNumber()){
         for(y in 0..selected_layer.getRowNumber()){
-          if (getHex(selected_layer,x,y)==value) setHex(selected_layer,x,y,0);
+          if (getHex(selected_layer,x,y) in values) resetHex(selected_layer,x,y);
         }
       }
     }

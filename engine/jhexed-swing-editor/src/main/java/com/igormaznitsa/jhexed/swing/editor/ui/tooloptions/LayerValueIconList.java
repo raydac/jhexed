@@ -23,12 +23,13 @@ import java.awt.geom.Path2D;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.jdesktop.swingx.WrapLayout;
 
-public class LayerValueIconList extends JScrollPane {
+public class LayerValueIconList extends JScrollPane implements ListSelectionListener {
   private static final long serialVersionUID = 4067088203855017500L;
  
   private static final int ICON_SIZE = 48;
@@ -36,7 +37,9 @@ public class LayerValueIconList extends JScrollPane {
 
   private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(3, 3, 3, 3);
   private static final Border LINE_BORDER = BorderFactory.createDashedBorder(Color.ORANGE.darker().darker(),  3.0f, 2.0f, 1.0f, true);
-  
+
+  private ListSelectionModel selectionModel;
+
   public interface LayerIconListListener {
     void onLeftClick(final HexFieldValue h, final ImageIcon icon);
     void onRightClick(final HexFieldValue h, final ImageIcon icon);
@@ -105,16 +108,68 @@ public class LayerValueIconList extends JScrollPane {
   
   public LayerValueIconList(){
     super();
-    
+
     this.content = new JPanel(new WrapLayout(WrapLayout.LEFT));
     this.getViewport().setBackground(Color.white);
     this.content.setBackground(Color.white);
   
     this.getViewport().add(this.content);
-    
+
+    this.selectionModel = new DefaultListSelectionModel();
+    this.selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    this.selectionModel.addListSelectionListener(this);
   }
 
+  public HexFieldValue [] getSelected(){
+    final List<HexFieldValue> selected = new ArrayList<HexFieldValue>();
+    for(final Component compo : this.content.getComponents()){
+      final HexButton b = (HexButton)compo;
+      if (this.selectionModel.isSelectedIndex(b.value.getIndex())){
+        selected.add(b.value);
+      }
+    }
+    return selected.toArray(new HexFieldValue[selected.size()]);
+  }
+  
+  public ListSelectionModel getSelectionModel(){
+    return this.selectionModel;
+  }
+  
+  public void setSelectionModel(final ListSelectionModel selectionModel){
+    this.selectionModel.removeListSelectionListener(this);
+    this.selectionModel = selectionModel;
+    this.selectionModel.addListSelectionListener(this);
+    valueChanged(null);
+  }
+
+  @Override
+  public void valueChanged(final ListSelectionEvent e) {
+    for(final Component compo : this.content.getComponents()){
+      final HexButton b = (HexButton) compo;
+      if (this.selectionModel.isSelectedIndex(b.value.getIndex())){
+        b.setBorder(LINE_BORDER);
+      }else{
+        b.setBorder(EMPTY_BORDER);
+      }
+    }
+    this.content.revalidate();
+    this.content.repaint();
+  }
+  
   protected void processMouseClick(final HexButton source, final MouseEvent evt){
+    if ((evt.getModifiersEx() & (MouseEvent.CTRL_DOWN_MASK| MouseEvent.SHIFT_DOWN_MASK)) != 0){
+      if ((evt.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK)!=0){
+        this.selectionModel.addSelectionInterval(source.value.getIndex(), source.value.getIndex());
+      }else {
+        final int selIndex = source.value.getIndex();
+        final int minindex = Math.min(selIndex, this.selectionModel.getMinSelectionIndex());
+        final int maxindex = Math.max(selIndex, this.selectionModel.getMaxSelectionIndex());
+        this.selectionModel.setSelectionInterval(Math.max(0, minindex), Math.max(0, maxindex));
+      }
+    }else{
+      this.selectionModel.setSelectionInterval(source.value.getIndex(), source.value.getIndex());
+    }
+    
     switch(evt.getButton()){
       case MouseEvent.BUTTON1:{
         for (final LayerIconListListener l : this.listeners) {
@@ -128,17 +183,9 @@ public class LayerValueIconList extends JScrollPane {
       }break;
     }
   }
-  
-  public void setSelectedHexValue(final HexFieldValue value){
-    for(final Component c : this.content.getComponents()){
-      final HexButton b = (HexButton)c;
-      if (b.getHexValue() == value){
-        b.setBorder(LINE_BORDER);
-      }else{
-        b.setBorder(EMPTY_BORDER);
-      }
-    }
-    this.content.repaint();
+
+  public void clearSelection(){
+    this.selectionModel.clearSelection();
   }
   
   public void addLayerIconListListener(final LayerIconListListener l){
@@ -170,6 +217,7 @@ public class LayerValueIconList extends JScrollPane {
     }
 
     this.content.revalidate();
+    valueChanged(null);
     repaint();
   }
   

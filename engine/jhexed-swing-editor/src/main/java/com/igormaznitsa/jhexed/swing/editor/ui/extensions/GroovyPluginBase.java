@@ -19,10 +19,16 @@ public class GroovyPluginBase {
     this.layerListModel = listModel;
   }
 
-  public int selectValueDialog(final String text, final HexFieldLayer layer) {
-    final SelectValueDialog dialog = new SelectValueDialog(this.frame, text, layer);
+  public HexFieldValue [] selectValuesDialog(final String text, final HexFieldLayer layer){
+    final SelectValueDialog dialog = new SelectValueDialog(this.frame, text, layer, true);
     dialog.setVisible(true);
-    return dialog.getSelectedIndex();
+    return dialog.getSelected() == null ? null : dialog.getSelected();
+  }
+  
+  public HexFieldValue selectValueDialog(final String text, final HexFieldLayer layer) {
+    final SelectValueDialog dialog = new SelectValueDialog(this.frame, text, layer, false);
+    dialog.setVisible(true);
+    return dialog.getSelected() == null ? null : dialog.getSelected()[0];
   }
 
   public void addUndo(final HexFieldLayer layer) {
@@ -84,21 +90,23 @@ public class GroovyPluginBase {
     return null;
   }
 
-  public void setHex(final HexFieldLayer layer, final int x, final int y, final int value) {
-    if (value < 0) {
-      return;
-    }
-    if (value < layer.getHexValuesNumber()) {
-      layer.setValueAt(x, y, (byte) value);
+  public void resetHex(final HexFieldLayer layer, final int x, final int y){
+    layer.setValueAt(x, y, (byte)0);
+  }
+  
+  public void setHex(final HexFieldLayer layer, final int x, final int y, final HexFieldValue value) {
+    final int index = value.getIndex();
+    if (index < layer.getHexValuesNumber()) {
+      layer.setValueAt(x, y, (byte) index);
     }
     else {
-      error("Attempt to set value " + value + " but max value is " + (layer.getHexValuesNumber() - 1));
+      error("Attempt to set value " + index + " but max value is " + (layer.getHexValuesNumber() - 1));
     }
   }
 
-  public int getHex(final HexFieldLayer layer, final int x, final int y) {
-    final int value = layer.getValueAt(x, y);
-    return value < 0 ? -1 : value & 0xFF;
+  public HexFieldValue getHex(final HexFieldLayer layer, final int x, final int y) {
+    final int index = layer.getValueAt(x, y);
+    return index < 0 ? null : layer.getHexValueForIndex(index & 0xFF);
   }
 
   public HexFieldLayer selectLayerDialog(final String title) {
