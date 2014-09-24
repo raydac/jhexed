@@ -31,9 +31,8 @@ import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainer;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainerSection;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.*;
+import com.igormaznitsa.jhexed.swing.editor.ui.exporters.*;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
-import com.igormaznitsa.jhexed.swing.editor.ui.exporters.ImageExporter;
-import com.igormaznitsa.jhexed.swing.editor.ui.exporters.XmlExporter;
 import com.igormaznitsa.jhexed.swing.editor.ui.extensions.GroovyPluginBase;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameUtils;
 import groovy.lang.*;
@@ -325,6 +324,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     jSeparator1 = new javax.swing.JPopupMenu.Separator();
     menuFileExportAs = new javax.swing.JMenu();
     menuFileExportAsImage = new javax.swing.JMenuItem();
+    menuFileExportAsSVG = new javax.swing.JMenuItem();
     menuFileExportAsXML = new javax.swing.JMenuItem();
     jSeparator3 = new javax.swing.JPopupMenu.Separator();
     menuFileDocumentOptions = new javax.swing.JMenuItem();
@@ -447,6 +447,14 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       }
     });
     menuFileExportAs.add(menuFileExportAsImage);
+
+    menuFileExportAsSVG.setText("SVG Image");
+    menuFileExportAsSVG.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        menuFileExportAsSVGActionPerformed(evt);
+      }
+    });
+    menuFileExportAs.add(menuFileExportAsSVG);
 
     menuFileExportAsXML.setText("Xml file");
     menuFileExportAsXML.addActionListener(new java.awt.event.ActionListener() {
@@ -838,8 +846,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private void menuFileExportAsImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsImageActionPerformed
     SelectLayersExportData toExport = prepareExportData();
 
-    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, true, toExport);
-    dlg.setTitle("Select data for export as Image");
+    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, true, true, toExport);
+    dlg.setTitle("Select data for export as PNG Image");
     dlg.setVisible(true);
     toExport = dlg.getResult();
     if (toExport != null) {
@@ -848,13 +856,14 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
         this.lastExportedFile = fileChooser.getSelectedFile();
 
-        final ImageExporter exporter = new ImageExporter(getDocumentOptions(), toExport, this.cellComments);
+        final PNGImageExporter exporter = new PNGImageExporter(getDocumentOptions(), toExport, this.cellComments);
         try {
           exporter.export(this.lastExportedFile);
+          JOptionPane.showMessageDialog(this, "Export in PNG has been successfuly completed","Export",JOptionPane.INFORMATION_MESSAGE);
         }
-        catch (IOException ex) {
+        catch (Exception ex) {
           Log.error("Can't export Image", ex);
-          JOptionPane.showMessageDialog(null, "Can't export as Image for error", "Error", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(this, "Can't export as Image for error", "Error", JOptionPane.ERROR_MESSAGE);
         }
       }
     }
@@ -863,7 +872,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private void menuFileExportAsXMLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsXMLActionPerformed
     SelectLayersExportData toExport = prepareExportData();
 
-    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, true, toExport);
+    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, true, false, toExport);
     dlg.setTitle("Select data for XML export");
     dlg.setVisible(true);
     toExport = dlg.getResult();
@@ -876,20 +885,48 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         final XmlExporter exporter = new XmlExporter(getDocumentOptions(), toExport, this.cellComments);
         try {
           exporter.export(this.lastExportedFile);
+          JOptionPane.showMessageDialog(this, "Export in XML has been successfuly completed", "Export", JOptionPane.INFORMATION_MESSAGE);
         }
-        catch (IOException ex) {
+        catch (Exception ex) {
           Log.error("Can't export XML", ex);
-          JOptionPane.showMessageDialog(null, "Can't export as XML for error", "Error", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(this, "Can't export as XML for error", "Error", JOptionPane.ERROR_MESSAGE);
         }
       }
     }
   }//GEN-LAST:event_menuFileExportAsXMLActionPerformed
+
+  private void menuFileExportAsSVGActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsSVGActionPerformed
+    SelectLayersExportData toExport = prepareExportData();
+
+    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, true, true, true, toExport);
+    dlg.setTitle("Select data for export as SVG Image");
+    dlg.setVisible(true);
+    toExport = dlg.getResult();
+    if (toExport != null) {
+      final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
+      fileChooser.setFileFilter(Utils.SVG_FILE_FILTER);
+      if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+        this.lastExportedFile = fileChooser.getSelectedFile();
+
+        final SVGImageExporter exporter = new SVGImageExporter(getDocumentOptions(), toExport, this.cellComments);
+        try {
+          exporter.export(this.lastExportedFile);
+          JOptionPane.showMessageDialog(this, "Export in SVG has been successfuly completed", "Export", JOptionPane.INFORMATION_MESSAGE);
+        }
+        catch (Exception ex) {
+          Log.error("Can't export SVG Image", ex);
+          JOptionPane.showMessageDialog(this, "Can't export as SVG Image for error", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+  }//GEN-LAST:event_menuFileExportAsSVGActionPerformed
 
   private SelectLayersExportData prepareExportData() {
     final SelectLayersExportData result = new SelectLayersExportData();
 
     result.setBackgroundImageExport(this.menuViewBackImage.isSelected());
     result.setCellCommentariesExport(true);
+    result.setExportHexBorders(true);
 
     for (int i = 0; i < this.layers.getSize(); i++) {
       final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
@@ -917,6 +954,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private javax.swing.JMenuItem menuFileExit;
   private javax.swing.JMenu menuFileExportAs;
   private javax.swing.JMenuItem menuFileExportAsImage;
+  private javax.swing.JMenuItem menuFileExportAsSVG;
   private javax.swing.JMenuItem menuFileExportAsXML;
   private javax.swing.JMenuItem menuFileNew;
   private javax.swing.JMenuItem menuFileSave;

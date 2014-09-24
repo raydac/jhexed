@@ -28,7 +28,7 @@ def doWork(activeTool, activeLayer){
           if (getHex(selected_layer,x,y) in values) number++;
         }
       }
-      info('Found '+number+' cell(s) of value(s) '+tostr(values)+' on \''+selected_layer.getLayerName()+'\'\n')
+      info('Statistics','Found '+number+' cell(s) of value(s) '+tostr(values)+' on \''+selected_layer.getLayerName()+'\'\n')
     }
   }else{
     warn('To use the plugin, you must select a layer');

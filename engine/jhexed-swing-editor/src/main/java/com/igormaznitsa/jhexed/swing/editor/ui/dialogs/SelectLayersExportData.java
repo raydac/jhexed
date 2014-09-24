@@ -25,6 +25,7 @@ import java.util.*;
 public class SelectLayersExportData {
   private boolean exportBackgroundImage;
   private boolean exportCellCommentaries;
+  private boolean exportHexBorders;
   private final List<LayerExportRecord> layers = new ArrayList<LayerExportRecord>();
   
   public SelectLayersExportData() {
@@ -42,6 +43,14 @@ public class SelectLayersExportData {
     this.exportBackgroundImage = flag;
   }
 
+  public void setExportHexBorders(final boolean flag){
+    this.exportHexBorders = flag;
+  }
+  
+  public boolean isExportHexBorders(){
+    return this.exportHexBorders;
+  }
+  
   public void setCellCommentariesExport(final boolean flag){
     this.exportCellCommentaries = flag;
   }

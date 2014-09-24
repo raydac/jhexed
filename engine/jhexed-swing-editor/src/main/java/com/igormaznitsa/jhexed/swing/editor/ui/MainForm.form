@@ -81,6 +81,14 @@
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuFileExportAsImageActionPerformed"/>
                   </Events>
                 </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="menuFileExportAsSVG">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="SVG Image"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuFileExportAsSVGActionPerformed"/>
+                  </Events>
+                </MenuItem>
                 <MenuItem class="javax.swing.JMenuItem" name="menuFileExportAsXML">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Xml file"/>

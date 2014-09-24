@@ -45,5 +45,5 @@ def doWork(activeTool, activeLayer){
       if (getHex(selected_base_layer,x,y) in selected_base_values && getHex(selected_check_layer,x,y) in selected_check_values) number++;
     }
   }
-  info('Found '+number+' cell(s) of value(s) '+tovrt(selected_check_values)+' on \''+selected_check_layer.getLayerName()+'\'\n'+tolist(selected_base_layer,selected_base_values))
+  info('Statistics','Found '+number+' cell(s) of value(s) '+tovrt(selected_check_values)+' on \''+selected_check_layer.getLayerName()+'\'\n'+tolist(selected_base_layer,selected_base_values))
 }

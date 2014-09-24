@@ -105,7 +105,7 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
   private final SelectLayersExportData data;
   private SelectLayersExportData result;
   
-  public DialogSelectLayersForExport(final java.awt.Frame parent, final boolean allowsBackgroundImageExport, final boolean allowExportCellCommentaries, final SelectLayersExportData data) {
+  public DialogSelectLayersForExport(final java.awt.Frame parent, final boolean allowsBackgroundImageExport, final boolean allowExportCellCommentaries, final boolean allowsExportHexBorders, final SelectLayersExportData data) {
     super(parent, true);
     initComponents();
     
@@ -113,6 +113,8 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
     this.checkBoxExportBackgroundImage.setSelected(data.isBackgroundImageExport());
     this.checkBoxExportCellCommentaries.setEnabled(allowExportCellCommentaries);
     this.checkBoxExportCellCommentaries.setSelected(data.isCellCommentariesExport());
+    this.checkBoxExportHexBorders.setEnabled(allowsExportHexBorders);
+    this.checkBoxExportHexBorders.setSelected(data.isExportHexBorders());
     
     this.data = data;
     this.tableListOfLayers.setModel(new LayersModel(data));
@@ -137,6 +139,7 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
     buttonCancel = new javax.swing.JButton();
     buttonOk = new javax.swing.JButton();
     checkBoxExportCellCommentaries = new javax.swing.JCheckBox();
+    checkBoxExportHexBorders = new javax.swing.JCheckBox();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     setLocationByPlatform(true);
@@ -173,6 +176,13 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
     });
 
     checkBoxExportCellCommentaries.setText("Export cell commentaries");
+    checkBoxExportCellCommentaries.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        checkBoxExportCellCommentariesActionPerformed(evt);
+      }
+    });
+
+    checkBoxExportHexBorders.setText("Export hex borders");
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
     getContentPane().setLayout(layout);
@@ -187,6 +197,7 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(checkBoxExportHexBorders)
           .addComponent(checkBoxExportCellCommentaries)
           .addComponent(checkBoxExportBackgroundImage)
           .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -203,7 +214,9 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(checkBoxExportCellCommentaries)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE)
+        .addComponent(checkBoxExportHexBorders)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(buttonCancel)
@@ -217,6 +230,7 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
   private void buttonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOkActionPerformed
     this.data.setBackgroundImageExport(this.checkBoxExportBackgroundImage.isSelected());
     this.data.setCellCommentariesExport(this.checkBoxExportCellCommentaries.isSelected());
+    this.data.setExportHexBorders(this.checkBoxExportHexBorders.isSelected());
     this.result = this.data;
     dispose();
   }//GEN-LAST:event_buttonOkActionPerformed
@@ -225,6 +239,10 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
     this.result = null;
     dispose();
   }//GEN-LAST:event_buttonCancelActionPerformed
+
+  private void checkBoxExportCellCommentariesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkBoxExportCellCommentariesActionPerformed
+    // TODO add your handling code here:
+  }//GEN-LAST:event_checkBoxExportCellCommentariesActionPerformed
   
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -232,6 +250,7 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
   private javax.swing.JButton buttonOk;
   private javax.swing.JCheckBox checkBoxExportBackgroundImage;
   private javax.swing.JCheckBox checkBoxExportCellCommentaries;
+  private javax.swing.JCheckBox checkBoxExportHexBorders;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JTable tableListOfLayers;
   // End of variables declaration//GEN-END:variables

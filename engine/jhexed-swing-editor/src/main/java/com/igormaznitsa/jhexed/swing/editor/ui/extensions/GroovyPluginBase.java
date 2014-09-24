@@ -135,4 +135,7 @@ public class GroovyPluginBase {
     JOptionPane.showMessageDialog(this.frame, text, "Error", JOptionPane.ERROR_MESSAGE);
   }
 
+  public void info(final String title, final String text){
+    new LongInfoDialog(this.frame, title, text).setVisible(true);
+  }
 }

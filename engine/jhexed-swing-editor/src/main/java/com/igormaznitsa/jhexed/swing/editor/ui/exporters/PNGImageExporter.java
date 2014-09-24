@@ -37,13 +37,13 @@ import org.apache.commons.io.FileUtils;
  *
  * @author Igor Maznitsa (http://www.igormaznitsa.com)
  */
-public class ImageExporter implements Exporter {
+public class PNGImageExporter implements Exporter {
 
   private final DocumentOptions docOptions;
   private final SelectLayersExportData exportData;
   private final DocumentCellComments cellComments;
   
-  public ImageExporter(final DocumentOptions docOptions, final SelectLayersExportData exportData, final DocumentCellComments cellComments) {
+  public PNGImageExporter(final DocumentOptions docOptions, final SelectLayersExportData exportData, final DocumentCellComments cellComments) {
     this.docOptions = docOptions;
     this.exportData = exportData;
     this.cellComments = cellComments;
@@ -157,7 +157,7 @@ public class ImageExporter implements Exporter {
 
       @Override
       public Color getBorderColor(HexEngineModel<?> model, int col, int row) {
-        return docOptions.getColor();
+        return exportData.isExportHexBorders() ? docOptions.getColor() : null;
       }
 
       @Override

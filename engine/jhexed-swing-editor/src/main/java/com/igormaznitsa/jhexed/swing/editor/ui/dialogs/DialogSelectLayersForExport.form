@@ -34,6 +34,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="checkBoxExportHexBorders" min="-2" max="-2" attributes="0"/>
                   <Component id="checkBoxExportCellCommentaries" min="-2" max="-2" attributes="0"/>
                   <Component id="checkBoxExportBackgroundImage" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="jScrollPane1" alignment="0" min="-2" pref="307" max="-2" attributes="0"/>
@@ -50,7 +51,9 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="checkBoxExportCellCommentaries" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="342" max="32767" attributes="0"/>
+              <Component id="checkBoxExportHexBorders" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jScrollPane1" pref="319" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="buttonCancel" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -113,6 +116,14 @@
     <Component class="javax.swing.JCheckBox" name="checkBoxExportCellCommentaries">
       <Properties>
         <Property name="text" type="java.lang.String" value="Export cell commentaries"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="checkBoxExportCellCommentariesActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="checkBoxExportHexBorders">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Export hex borders"/>
       </Properties>
     </Component>
   </SubComponents>
