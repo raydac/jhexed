@@ -18,6 +18,7 @@ package com.igormaznitsa.jhexed.renders.swing;
 import com.igormaznitsa.jhexed.engine.*;
 import com.igormaznitsa.jhexed.engine.misc.HexPoint2D;
 import com.igormaznitsa.jhexed.engine.renders.HexEngineRender;
+import com.igormaznitsa.jhexed.renders.Utils;
 import java.awt.*;
 import java.awt.geom.Path2D;
 
@@ -141,18 +142,7 @@ public class ColorHexRender implements HexEngineRender<Graphics2D>, HexEngineLis
   }
 
   public void onEngineReconfigured(final HexEngine<?> engine) {
-    final HexPoint2D[] points = engine.getHexPoints();
-
-    final Path2D path = new Path2D.Float();
-    path.moveTo(points[0].getX() * engine.getScaleX(), points[0].getY() * engine.getScaleY());
-    path.lineTo(points[1].getX() * engine.getScaleX(), points[1].getY() * engine.getScaleY());
-    path.lineTo(points[2].getX() * engine.getScaleX(), points[2].getY() * engine.getScaleY());
-    path.lineTo(points[3].getX() * engine.getScaleX(), points[3].getY() * engine.getScaleY());
-    path.lineTo(points[4].getX() * engine.getScaleX(), points[4].getY() * engine.getScaleY());
-    path.lineTo(points[5].getX() * engine.getScaleX(), points[5].getY() * engine.getScaleY());
-    path.closePath();
-
-    this.hexPath = path;
+    this.hexPath = Utils.getHexShapeAsPath(engine, true);
   }
 
   public void onScaleFactorChanged(final HexEngine<?> engine, final float scaleX, final float scaleY) {

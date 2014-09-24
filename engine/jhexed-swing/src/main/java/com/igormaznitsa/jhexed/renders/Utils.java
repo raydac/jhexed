@@ -15,6 +15,9 @@
  */
 package com.igormaznitsa.jhexed.renders;
 
+import com.igormaznitsa.jhexed.engine.HexEngine;
+import com.igormaznitsa.jhexed.engine.misc.HexPoint2D;
+import java.awt.geom.Path2D;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -59,5 +62,31 @@ public final class Utils {
     }
     
     return result;
+  }
+
+  public static Path2D getHexShapeAsPath(final HexEngine<?> engine, final boolean allowScaling){
+    final HexPoint2D[] points = engine.getHexPoints();
+
+    final Path2D path = new Path2D.Float();
+    if (allowScaling){
+      path.moveTo(points[0].getX() * engine.getScaleX(), points[0].getY() * engine.getScaleY());
+      path.lineTo(points[1].getX() * engine.getScaleX(), points[1].getY() * engine.getScaleY());
+      path.lineTo(points[2].getX() * engine.getScaleX(), points[2].getY() * engine.getScaleY());
+      path.lineTo(points[3].getX() * engine.getScaleX(), points[3].getY() * engine.getScaleY());
+      path.lineTo(points[4].getX() * engine.getScaleX(), points[4].getY() * engine.getScaleY());
+      path.lineTo(points[5].getX() * engine.getScaleX(), points[5].getY() * engine.getScaleY());
+    }else{
+      path.moveTo(points[0].getX(), points[0].getY());
+      path.lineTo(points[1].getX(), points[1].getY());
+      path.lineTo(points[2].getX(), points[2].getY());
+      path.lineTo(points[3].getX(), points[3].getY());
+      path.lineTo(points[4].getX(), points[4].getY());
+      path.lineTo(points[5].getX(), points[5].getY());
+    }   
+      
+   path.closePath();
+      
+
+    return path;
   }
 }

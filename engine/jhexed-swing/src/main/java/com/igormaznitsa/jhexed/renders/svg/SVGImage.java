@@ -202,4 +202,8 @@ public class SVGImage {
       g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
     }
   }
+  
+  public GraphicsNode getSVGGraphicsNode(){
+    return this.svgGraphicsNode;
+  }
 }
