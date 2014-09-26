@@ -28,11 +28,12 @@ public class Main {
         final String name = info.getName().trim().toLowerCase(Locale.ENGLISH);
         if (name.startsWith("windows")) {
           landf = info;
-        } else if (landf==null && name.equals("nimbus")){
+        } else if (landf==null && name.contains("gtk")){
           landf = info;
         }
       }
       if (landf!=null){
+        System.out.println("Selected L&F: "+landf.getClassName());
         javax.swing.UIManager.setLookAndFeel(landf.getClassName());
       }
     }

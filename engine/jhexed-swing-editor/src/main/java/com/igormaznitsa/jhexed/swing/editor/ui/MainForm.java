@@ -194,7 +194,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
           readAndParsePluginScript(reader);
         }
         catch (Exception ex) {
-          Log.error("Can't load external plugin: "+f , ex);
+          Log.error("Can't load external plugin: " + f, ex);
           continue;
         }
         finally {
@@ -870,6 +870,12 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }//GEN-LAST:event_menuFileExportAsImageActionPerformed
 
   private static void processExporterAsLongTask(final JFrame frame, final String taskDescription, final Exporter exporter, final File theFile) {
+    if (theFile.exists()) {
+      if (JOptionPane.showConfirmDialog(frame, "File '" + theFile.getName() + "' exists! To rewrite it?", "File exists", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
+        return;
+      }
+    }
+
     new LongTaskDialog(frame, taskDescription, new Runnable() {
 
       @Override
