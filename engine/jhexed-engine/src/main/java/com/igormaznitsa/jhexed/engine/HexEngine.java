@@ -261,6 +261,7 @@ public final class HexEngine<G> {
 
   /**
    * Get cell width
+   *
    * @return the cell width
    */
   public float getCellWidth() {
@@ -277,7 +278,7 @@ public final class HexEngine<G> {
 
   /**
    * Register a hex engine listener.
-   * @param listener 
+   * @param listener
    */
   public void addHexLayerListener(final HexEngineListener listener) {
     if (listener == null) {
@@ -288,7 +289,7 @@ public final class HexEngine<G> {
 
   /**
    * Unregister a hex engine listener.
-   * @param listener 
+   * @param listener
    */
   public void removeHexLayerListener(final HexEngineListener listener) {
     if (listener == null) {
@@ -473,10 +474,10 @@ public final class HexEngine<G> {
    * @param pointY the point y
    * @return the hex coordinate
    */
-  public HexPosition pointToHex(final float pointX, final float pointY){
+  public HexPosition pointToHex(final float pointX, final float pointY) {
     return new HexPosition(calculateColumn(pointX, pointY), calculateRow(pointX, pointY));
   }
-  
+
   /**
    * Calculate hexagon column for X,Y coordinates. It takes in count the scale
    * factor.
@@ -829,6 +830,26 @@ public final class HexEngine<G> {
   }
 
   /**
+   * Draw whole layer with check of the current thread interruption. If the current thread is interrupted then the method will cancel its work
+   *
+   * @param gfx a graphic object to be used for draw.
+   */
+  public void drawWithThreadInterruptionCheck(final G gfx) {
+    synchronized (this.rendererLock) {
+      synchronized (this.modelLock) {
+        for (int r = 0; r < this.model.getRowNumber(); r++) {
+          for (int c = 0; c < this.model.getColumnNumber(); c++) {
+            if (Thread.currentThread().isInterrupted()) {
+              return;
+            }
+            _drawHex(gfx, c, r);
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Get the layer hexagon orientation.
    *
    * @return
@@ -951,8 +972,8 @@ public final class HexEngine<G> {
    *
    * @param pos the hexagon position.
    * @param distance the distance of neghbors.
-   * @return array of neighbor positions for the distance, the length
-   * calculated as distance*6
+   * @return array of neighbor positions for the distance, the length calculated
+   * as distance*6
    */
   public HexPosition[] getNeighbourPositions(final HexPosition pos, final int distance) {
     return this.getNeighbourPositions(null, pos.getColumn(), pos.getRow(), distance);
@@ -974,6 +995,7 @@ public final class HexEngine<G> {
 
   /**
    * Get all neighbor positions for a hexagon positions.
+   *
    * @param col the column of a hex
    * @param row the row of a hex
    * @param distance the distance of neighbors
@@ -986,9 +1008,11 @@ public final class HexEngine<G> {
 
   /**
    * Calculate number of columns and rows for a rectangular area.
+   *
    * @param areaWidth the width of a rectangular area
    * @param areaHeight the height of a rectangular area
-   * @return a width-height object contains number of columns and rows for a model which can fill the rectangular area
+   * @return a width-height object contains number of columns and rows for a
+   * model which can fill the rectangular area
    */
   public WidthHeightPair calculateHexesForRectangle(final float areaWidth, final float areaHeight) {
     final WidthHeightPair result;
@@ -1026,6 +1050,7 @@ public final class HexEngine<G> {
 
   /**
    * Get size of the full hexagonal area for the current zoom.
+   *
    * @return the rectangle to show whole hexagonal area for the current zoom
    */
   public HexRect2D getVisibleSize() {
@@ -1056,6 +1081,7 @@ public final class HexEngine<G> {
 
   /**
    * Auxiliary method to pack column-row into an integer value
+   *
    * @param col the column (0...0xFFFF)
    * @param row the row (0...0xFFFF)
    * @return the packed value as integer
@@ -1068,6 +1094,7 @@ public final class HexEngine<G> {
 
   /**
    * Auxiliary method to extract the column value from a packed column-row pair.
+   *
    * @param packedValue a packed column-row pair
    * @return the column value extracted from the pair
    */
@@ -1089,11 +1116,14 @@ public final class HexEngine<G> {
 
   /**
    * Get neighbor positions as packed column-row pairs for a distance.
-   * @param array the array will be used for result but it can be null or it can be smaller than needed one and in the case a new array will be generated
+   *
+   * @param array the array will be used for result but it can be null or it can
+   * be smaller than needed one and in the case a new array will be generated
    * @param col the column of a hex to get its neighbors
    * @param row the row of a hex to get its neighbors
    * @param distance a distance
-   * @return array with first distance*6 elements contains packed column-row values
+   * @return array with first distance*6 elements contains packed column-row
+   * values
    */
   public int[] getPackedNeighbourPositions(final int[] array, final int col, final int row, final int distance) {
     if (distance <= 0) {
