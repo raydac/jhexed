@@ -20,6 +20,7 @@ import com.igormaznitsa.jhexed.engine.misc.*;
 import com.igormaznitsa.jhexed.engine.renders.HexEngineRender;
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.renders.Utils;
+import com.igormaznitsa.jhexed.swing.editor.Log;
 import com.igormaznitsa.jhexed.swing.editor.model.DocumentCellComments;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.*;
 import com.igormaznitsa.jhexed.values.*;
@@ -157,32 +158,38 @@ public class SVGImageExporter implements Exporter {
       }
 
       private void drawValue(final SVGGraphics2D gfx, float x, float y, final HexFieldValue val) {
-        if (val instanceof HexColorValue) {
-          final HexColorValue v = (HexColorValue) val;
-          gfx.setPaint(v.getColor());
-          hexShape.transform(AffineTransform.getTranslateInstance(x, y));
-          gfx.fill(hexShape);
-          hexShape.transform(AffineTransform.getTranslateInstance(-x, -y));
-        }
-        else if (val instanceof HexSVGImageValue) {
-          final HexSVGImageValue v = (HexSVGImageValue) val;
+        hexShape.transform(AffineTransform.getTranslateInstance(x, y));
+        try {
+          if (val instanceof HexColorValue) {
+            final HexColorValue v = (HexColorValue) val;
+            gfx.setPaint(v.getColor());
+            gfx.fill(hexShape);
+          }
+          else if (val instanceof HexSVGImageValue) {
+            gfx.setClip(hexShape);
+            final HexSVGImageValue v = (HexSVGImageValue) val;
 
-          final GraphicsNode obj = v.getImage().getSVGGraphicsNode();
-          final AffineTransform t = obj.getTransform();
-          try {
-            final AffineTransform tr = AffineTransform.getTranslateInstance(x, y);
-            tr.scale(cellWidth / v.getImage().getSVGWidth(), cellHeight / v.getImage().getSVGHeight());
-            obj.setTransform(tr);
-            obj.paint(gfx);
-          }
-          finally {
-            if (t == null) {
-              obj.setTransform(new AffineTransform());
+            final GraphicsNode obj = v.getImage().getSVGGraphicsNode();
+            final AffineTransform t = obj.getTransform();
+            try {
+              final AffineTransform tr = AffineTransform.getTranslateInstance(x, y);
+              tr.scale(cellWidth / v.getImage().getSVGWidth(), cellHeight / v.getImage().getSVGHeight());
+              obj.setTransform(tr);
+              gfx.setClip(hexShape);
+              obj.paint(gfx);
             }
-            else {
-              obj.setTransform(t);
+            finally {
+              if (t == null) {
+                obj.setTransform(new AffineTransform());
+              }
+              else {
+                obj.setTransform(t);
+              }
             }
           }
+        }
+        finally {
+          hexShape.transform(AffineTransform.getTranslateInstance(-x, -y));
         }
       }
 
@@ -196,7 +203,7 @@ public class SVGImageExporter implements Exporter {
 
     });
 
-    for (int layerIndex = 0; layerIndex < reversedNormalizedStack.size(); layerIndex++) {
+    for (int layerIndex = 0; layerIndex < reversedNormalizedStack.size() && !Thread.currentThread().isInterrupted(); layerIndex++) {
       final HexFieldLayer theLayer = reversedNormalizedStack.get(layerIndex);
       final HexFieldValue[] cacheLineForLayer = new HexFieldValue[theLayer.getHexValuesNumber()];
       for (int valueIndex = 1; valueIndex < theLayer.getHexValuesNumber(); valueIndex++) {
@@ -205,12 +212,14 @@ public class SVGImageExporter implements Exporter {
       cachedIcons[layerIndex] = cacheLineForLayer;
     }
 
-    engine.draw(g2d);
+    engine.drawWithThreadInterruptionCheck(g2d);
 
+    if (Thread.currentThread().isInterrupted()) return null;
+    
     if (this.exportData.isExportHexBorders()) {
       g2d.setStroke(new BasicStroke(docOptions.getLineWidth()));
       g2d.setColor(docOptions.getColor());
-      for (int x = 0; x < engine.getModel().getColumnNumber(); x++) {
+      for (int x = 0; x < engine.getModel().getColumnNumber() && !Thread.currentThread().isInterrupted(); x++) {
         for (int y = 0; y < engine.getModel().getRowNumber(); y++) {
           final float cx = engine.calculateX(x, y);
           final float cy = engine.calculateY(x, y);
@@ -224,7 +233,7 @@ public class SVGImageExporter implements Exporter {
     if (this.exportData.isCellCommentariesExport()) {
       final Iterator<Entry<HexPosition, String>> iterator = this.cellComments.iterator();
       g2d.setFont(new Font("Arial", Font.BOLD, 12));
-      while (iterator.hasNext()) {
+      while (!Thread.currentThread().isInterrupted() && iterator.hasNext()) {
         final Entry<HexPosition, String> item = iterator.next();
         final HexPosition pos = item.getKey();
         final String text = item.getValue();
@@ -242,6 +251,8 @@ public class SVGImageExporter implements Exporter {
       }
     }
 
+    if (Thread.currentThread().isInterrupted()) return null;
+    
     final ByteArrayOutputStream result = new ByteArrayOutputStream(256000);
     final Writer writer = new OutputStreamWriter(result, "UTF-8");
     g2d.stream(writer, true);
@@ -253,6 +264,11 @@ public class SVGImageExporter implements Exporter {
 
   @Override
   public void export(final File file) throws IOException {
-    FileUtils.writeByteArrayToFile(file, generateImage());
+    final byte[] img = generateImage();
+    if (img!=null && !Thread.currentThread().isInterrupted()) {
+      FileUtils.writeByteArrayToFile(file, img);
+    }else{
+      Log.warn("SVG export thread has been interrupted");
+    }
   }
 }

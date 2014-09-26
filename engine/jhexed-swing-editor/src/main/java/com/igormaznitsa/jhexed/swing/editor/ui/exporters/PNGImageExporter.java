@@ -79,6 +79,8 @@ public class PNGImageExporter implements Exporter {
       }
     }
 
+    if (Thread.currentThread().isInterrupted()) return null;
+    
     final HexFieldValue[] stackOfValues = new HexFieldValue[reversedNormalizedStack.size()];
 
     engine.setModel(new HexEngineModel<HexFieldValue[]>() {
@@ -182,7 +184,7 @@ public class PNGImageExporter implements Exporter {
     final int cellWidth = hexShape.getBounds().width;
     final int cellHeight = hexShape.getBounds().height;
 
-    for (int layerIndex = 0; layerIndex < reversedNormalizedStack.size(); layerIndex++) {
+    for (int layerIndex = 0; layerIndex < reversedNormalizedStack.size() && !Thread.currentThread().isInterrupted(); layerIndex++) {
       final HexFieldLayer theLayer = reversedNormalizedStack.get(layerIndex);
       final Image[] cacheLineForLayer = new Image[theLayer.getHexValuesNumber()];
       for (int valueIndex = 1; valueIndex < theLayer.getHexValuesNumber(); valueIndex++) {
@@ -191,12 +193,13 @@ public class PNGImageExporter implements Exporter {
       cachedIcons[layerIndex] = cacheLineForLayer;
     }
 
-    engine.draw(gfx);
+    engine.drawWithThreadInterruptionCheck(gfx);
+    if (Thread.currentThread().isInterrupted()) return null;
 
     if (this.exportData.isCellCommentariesExport()){
       final Iterator<Entry<HexPosition,String>> iterator = this.cellComments.iterator();
       gfx.setFont(new Font("Arial",Font.BOLD,12));
-      while(iterator.hasNext()){
+      while(iterator.hasNext() && !Thread.currentThread().isInterrupted()){
         final Entry<HexPosition,String> item = iterator.next();
         final HexPosition pos = item.getKey();
         final String text = item.getValue();
@@ -222,9 +225,13 @@ public class PNGImageExporter implements Exporter {
   @Override
   public void export(final File file) throws IOException {
     final BufferedImage img = generateImage();
+    if (img == null) return;
     final ByteArrayOutputStream buffer = new ByteArrayOutputStream(1000000);
     ImageIO.write(img, "png", buffer);
     buffer.flush();
+    
+    if (Thread.currentThread().isInterrupted()) return;
+    
     FileUtils.writeByteArrayToFile(file, buffer.toByteArray());
   }
 }

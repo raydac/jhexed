@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2014 Igor Maznitsa (http://www.igormaznitsa.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,6 +66,9 @@ public class XmlExporter implements Exporter {
     }
     buffer.append("\t<layers>\n");
     for (final LayerExportRecord f : exportData.getLayers()) {
+      if (Thread.currentThread().isInterrupted()) {
+        return;
+      }
       if (f.isAllowed()) {
         buffer.append("\t\t<layer name=\"").append(StringEscapeUtils.escapeXml10(f.getLayer().getLayerName())).append("\" commentary=\"").append(StringEscapeUtils.escapeXml10(f.getLayer().getComments())).append("\">\n");
         buffer.append("\t\t\t<values>\n");
@@ -91,6 +94,9 @@ public class XmlExporter implements Exporter {
       buffer.append("\t<cellComments>\n");
       final Iterator<Entry<HexPosition, String>> cellComment = this.cellComments.iterator();
       while (cellComment.hasNext()) {
+        if (Thread.currentThread().isInterrupted()) {
+          return;
+        }
         final Entry<HexPosition, String> entry = cellComment.next();
         final HexPosition hexPos = entry.getKey();
         final String escapedComment = StringEscapeUtils.escapeXml11(entry.getValue());
@@ -99,7 +105,8 @@ public class XmlExporter implements Exporter {
       buffer.append("\t</cellComments>\n");
     }
     buffer.append("</jhexed>\n");
-
-    FileUtils.write(file, buffer.toString());
+    if (!Thread.currentThread().isInterrupted()) {
+      FileUtils.write(file, buffer.toString());
+    }
   }
 }

@@ -16,20 +16,28 @@
 package com.igormaznitsa.jhexed.swing.editor;
 
 import com.igormaznitsa.jhexed.swing.editor.ui.MainForm;
+import java.util.Locale;
 import javax.swing.SwingUtilities;
 
 public class Main {
   public static void main(final String... args) {
     try {
+      javax.swing.UIManager.LookAndFeelInfo landf = null;
+      
       for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-        System.out.println("Found UI: "+info.getName());
-        if ("Windows".equals(info.getName())) {
-          javax.swing.UIManager.setLookAndFeel(info.getClassName());
-          break;
+        final String name = info.getName().trim().toLowerCase(Locale.ENGLISH);
+        if (name.startsWith("windows")) {
+          landf = info;
+        } else if (landf==null && name.equals("nimbus")){
+          landf = info;
         }
+      }
+      if (landf!=null){
+        javax.swing.UIManager.setLookAndFeel(landf.getClassName());
       }
     }
     catch (Exception ex) {
+      ex.printStackTrace();
     }
 
     final String file = args.length>0 ? args[0] : null;

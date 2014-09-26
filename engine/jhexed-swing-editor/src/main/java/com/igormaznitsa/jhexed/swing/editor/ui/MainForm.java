@@ -55,9 +55,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private static final long serialVersionUID = 3235266727080222251L;
 
-  private static final String[] INTERNAL_PLUGINS = new String[]{"ClearValueOnLayer","CalcNumber","CalcNumberOverBase"};
+  private static final String[] INTERNAL_PLUGINS = new String[]{"ClearValueOnLayer", "CalcNumber", "CalcNumberOverBase"};
 
-  
   private final Desktop hexMapPanelDesktop;
   private final HexMapPanel hexMapPanel;
 
@@ -84,7 +83,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private final java.util.List<HexFieldLayer[]> undoLayers = new ArrayList<HexFieldLayer[]>();
   private final java.util.List<HexFieldLayer[]> redoLayers = new ArrayList<HexFieldLayer[]>();
-  
+
   private static final Preferences REGISTRY = Preferences.userRoot().node(MainForm.class.getName());
 
   public MainForm(final String fileToOpen) {
@@ -146,27 +145,27 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   private void registerInternalPlugins() {
-      for (final String f : INTERNAL_PLUGINS) {
-        Reader reader = null;
-        try {
-          System.out.println("Loading internal plugin '" + f + "'");
-          final InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("com/igormaznitsa/jhexed/swing/editor/plugins/" + f + ".groovy");
-          if (inStream == null){
-            System.err.println("Can't find internal plugin "+f);
-            continue;
-          }
-          reader = new InputStreamReader(inStream,"UTF-8");
-          readAndParsePluginScript(reader);
-        }
-        catch (Exception ex) {
-          ex.printStackTrace();
+    for (final String f : INTERNAL_PLUGINS) {
+      Reader reader = null;
+      try {
+        Log.info("Loading internal plugin '" + f + "'");
+        final InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("com/igormaznitsa/jhexed/swing/editor/plugins/" + f + ".groovy");
+        if (inStream == null) {
+          Log.warn("Can't find internal plugin " + f);
           continue;
         }
-        finally {
-          IOUtils.closeQuietly(reader);
-        }
-
+        reader = new InputStreamReader(inStream, "UTF-8");
+        readAndParsePluginScript(reader);
       }
+      catch (Exception ex) {
+        ex.printStackTrace();
+        continue;
+      }
+      finally {
+        IOUtils.closeQuietly(reader);
+      }
+
+    }
   }
 
   private void registerExternalPlugins(final String root) {
@@ -178,26 +177,27 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
           return name.endsWith(".groovy");
         }
       }), null);
-      
+
       boolean first = true;
-      
+
       for (final File f : files) {
         Reader reader = null;
         try {
-          System.out.println("Loading external plugin '" + f.getName() + "'");
+          Log.info("Loading external plugin '" + f.getName() + "'");
           reader = new FileReader(f);
 
-          if (first){
+          if (first) {
             this.menuPlugins.add(new JSeparator());
             first = false;
           }
-          
+
           readAndParsePluginScript(reader);
         }
         catch (Exception ex) {
-          ex.printStackTrace();
+          Log.error("Can't load external plugin: "+f , ex);
           continue;
-        }finally{
+        }
+        finally {
           IOUtils.closeQuietly(reader);
         }
 
@@ -205,20 +205,20 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
-  public void addedUndoStep(final HexFieldLayer [] layers){
+  public void addedUndoStep(final HexFieldLayer[] layers) {
     boolean tooMany = false;
-    for(final HexFieldLayer l : layers){
+    for (final HexFieldLayer l : layers) {
       tooMany = tooMany || l.addUndo();
     }
     this.undoLayers.add(layers);
-    if (tooMany){
+    if (tooMany) {
       this.undoLayers.remove(0);
     }
-    
+
     this.redoLayers.clear();
     updateRedoUndoForCurrentLayer();
   }
-  
+
   private void readAndParsePluginScript(final Reader reader) throws IOException {
     final DelegatingScript script = (DelegatingScript) this.groovyShell.parse(reader);
     script.setDelegate(this.dsl);
@@ -249,7 +249,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     menuPlugins.add(menuItem);
   }
-  
+
   private Rectangle loadPosition(final String prefix, final Rectangle dflt) {
     final int x = REGISTRY.getInt(prefix + ".X", dflt.x);
     final int y = REGISTRY.getInt(prefix + ".Y", dflt.y);
@@ -353,6 +353,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     setLocationByPlatform(true);
     setMinimumSize(new java.awt.Dimension(300, 300));
     addWindowListener(new java.awt.event.WindowAdapter() {
+      public void windowClosed(java.awt.event.WindowEvent evt) {
+        formWindowClosed(evt);
+      }
       public void windowClosing(java.awt.event.WindowEvent evt) {
         formWindowClosing(evt);
       }
@@ -642,7 +645,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }//GEN-LAST:event_menuViewZoomOutActionPerformed
 
   private void menuFileExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExitActionPerformed
-    dispose();
+    formWindowClosing(null);
   }//GEN-LAST:event_menuFileExitActionPerformed
 
   private void menuWindowLayersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuWindowLayersActionPerformed
@@ -695,14 +698,20 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }//GEN-LAST:event_menuItemFileOpenActionPerformed
 
   private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-    saveSettings();
+    if (JOptionPane.showConfirmDialog(this, "Do you really want to close the aplication?", "Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 
-    this.frameLayers.dispose();
-    this.frameToolOptions.dispose();
-    this.frameTools.dispose();
-    dispose();
+      saveSettings();
 
-    Log.info("The MainForm disposed");
+      this.frameLayers.dispose();
+      this.frameToolOptions.dispose();
+      this.frameTools.dispose();
+      dispose();
+
+      Log.info("The MainForm disposed");
+    }
+    else {
+      Log.info("Closing rejected by user");
+    }
   }//GEN-LAST:event_formWindowClosing
 
   private void menuFileSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileSaveActionPerformed
@@ -770,24 +779,24 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }//GEN-LAST:event_menuViewBackImageStateChanged
 
   private void menuEditUndoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEditUndoActionPerformed
-    if (!this.undoLayers.isEmpty()){
-      final HexFieldLayer [] layers = this.undoLayers.remove(this.undoLayers.size()-1);
+    if (!this.undoLayers.isEmpty()) {
+      final HexFieldLayer[] layers = this.undoLayers.remove(this.undoLayers.size() - 1);
       this.redoLayers.add(layers);
-      for(final HexFieldLayer l : layers){
+      for (final HexFieldLayer l : layers) {
         l.undo();
         l.updatePrerasterizedIcons(this.hexMapPanel.getHexShape());
       }
       this.hexMapPanel.repaint();
     }
-    
+
     updateRedoUndoForCurrentLayer();
   }//GEN-LAST:event_menuEditUndoActionPerformed
 
   private void menuEditRedoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEditRedoActionPerformed
     if (!this.redoLayers.isEmpty()) {
-      final HexFieldLayer [] layers = this.redoLayers.remove(this.redoLayers.size() - 1);
+      final HexFieldLayer[] layers = this.redoLayers.remove(this.redoLayers.size() - 1);
       this.undoLayers.add(layers);
-      for(final HexFieldLayer l : layers){
+      for (final HexFieldLayer l : layers) {
         l.redo();
         l.updatePrerasterizedIcons(this.hexMapPanel.getHexShape());
       }
@@ -797,10 +806,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     updateRedoUndoForCurrentLayer();
   }//GEN-LAST:event_menuEditRedoActionPerformed
 
-  public Path2D getHexShape(){
+  public Path2D getHexShape() {
     return this.hexMapPanel.getHexShape();
   }
-  
+
   private DocumentOptions getDocumentOptions() {
     return new DocumentOptions(
             this.hexMapPanel.getImage(),
@@ -855,19 +864,28 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       fileChooser.setFileFilter(Utils.PNG_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
         this.lastExportedFile = fileChooser.getSelectedFile();
-
-        final PNGImageExporter exporter = new PNGImageExporter(getDocumentOptions(), toExport, this.cellComments);
-        try {
-          exporter.export(this.lastExportedFile);
-          JOptionPane.showMessageDialog(this, "Export in PNG has been successfuly completed","Export",JOptionPane.INFORMATION_MESSAGE);
-        }
-        catch (Exception ex) {
-          Log.error("Can't export Image", ex);
-          JOptionPane.showMessageDialog(this, "Can't export as Image for error", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        processExporterAsLongTask(this, "Export to PNG image", new PNGImageExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
   }//GEN-LAST:event_menuFileExportAsImageActionPerformed
+
+  private static void processExporterAsLongTask(final JFrame frame, final String taskDescription, final Exporter exporter, final File theFile) {
+    new LongTaskDialog(frame, taskDescription, new Runnable() {
+
+      @Override
+      public void run() {
+        Log.info("Started export: " + taskDescription);
+        try {
+          exporter.export(theFile);
+          Log.info("Export has been completed: " + taskDescription);
+        }
+        catch (Exception ex) {
+          Log.error("Can't make export for error", ex);
+          JOptionPane.showMessageDialog(frame, "Can't  make export for error, see the log", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }).startTask();
+  }
 
   private void menuFileExportAsXMLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsXMLActionPerformed
     SelectLayersExportData toExport = prepareExportData();
@@ -881,16 +899,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       fileChooser.setFileFilter(Utils.XML_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
         this.lastExportedFile = fileChooser.getSelectedFile();
-
-        final XmlExporter exporter = new XmlExporter(getDocumentOptions(), toExport, this.cellComments);
-        try {
-          exporter.export(this.lastExportedFile);
-          JOptionPane.showMessageDialog(this, "Export in XML has been successfuly completed", "Export", JOptionPane.INFORMATION_MESSAGE);
-        }
-        catch (Exception ex) {
-          Log.error("Can't export XML", ex);
-          JOptionPane.showMessageDialog(this, "Can't export as XML for error", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        processExporterAsLongTask(this, "Export to XML file", new XmlExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
   }//GEN-LAST:event_menuFileExportAsXMLActionPerformed
@@ -907,19 +916,15 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       fileChooser.setFileFilter(Utils.SVG_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
         this.lastExportedFile = fileChooser.getSelectedFile();
-
-        final SVGImageExporter exporter = new SVGImageExporter(getDocumentOptions(), toExport, this.cellComments);
-        try {
-          exporter.export(this.lastExportedFile);
-          JOptionPane.showMessageDialog(this, "Export in SVG has been successfuly completed", "Export", JOptionPane.INFORMATION_MESSAGE);
-        }
-        catch (Exception ex) {
-          Log.error("Can't export SVG Image", ex);
-          JOptionPane.showMessageDialog(this, "Can't export as SVG Image for error", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        processExporterAsLongTask(this, "Export to SVG image", new SVGImageExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
   }//GEN-LAST:event_menuFileExportAsSVGActionPerformed
+
+  private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+    Log.info("Canceling active long term tasks");
+    LongTaskDialog.cancel();
+  }//GEN-LAST:event_formWindowClosed
 
   private SelectLayersExportData prepareExportData() {
     final SelectLayersExportData result = new SelectLayersExportData();
