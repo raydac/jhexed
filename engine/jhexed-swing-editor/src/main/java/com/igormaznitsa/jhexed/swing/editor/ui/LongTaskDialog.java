@@ -32,7 +32,7 @@ public class LongTaskDialog extends javax.swing.JDialog {
     }
   });
   
-  private volatile Future theThread;
+  private volatile Future<?> theThread;
   private final Runnable task;
 
   public static void cancel(){

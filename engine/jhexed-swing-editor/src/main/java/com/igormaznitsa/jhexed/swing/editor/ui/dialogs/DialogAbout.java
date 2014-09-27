@@ -15,12 +15,34 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs;
 
+import java.awt.Cursor;
+import java.awt.Desktop;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+
 public class DialogAbout extends javax.swing.JDialog {
   private static final long serialVersionUID = -8850290336144697768L;
 
   public DialogAbout(java.awt.Frame parent) {
     super(parent, true);
     initComponents();
+    this.editorText.addHyperlinkListener(new HyperlinkListener() {
+      @Override
+      public void hyperlinkUpdate(HyperlinkEvent e) {
+        if (e.getEventType()==HyperlinkEvent.EventType.ENTERED){
+          editorText.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        } else if (e.getEventType() == HyperlinkEvent.EventType.EXITED){
+          editorText.setCursor(Cursor.getDefaultCursor());
+        } else {
+          try {
+            Desktop.getDesktop().browse(e.getURL().toURI());
+          }
+          catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        }
+      }
+    });
     pack();
   }
 
@@ -34,8 +56,9 @@ public class DialogAbout extends javax.swing.JDialog {
   private void initComponents() {
 
     buttonClose = new javax.swing.JButton();
-    jLabel1 = new javax.swing.JLabel();
-    jXLabel1 = new org.jdesktop.swingx.JXLabel();
+    labelImage = new javax.swing.JLabel();
+    jScrollPane1 = new javax.swing.JScrollPane();
+    editorText = new javax.swing.JEditorPane();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     setTitle("About");
@@ -49,12 +72,12 @@ public class DialogAbout extends javax.swing.JDialog {
       }
     });
 
-    jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/logo.png"))); // NOI18N
+    labelImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/logo.png"))); // NOI18N
 
-    jXLabel1.setText("<html><body>\n<h2>JHexed Map Editor</h2> \n<p>Author: igor Maznitsa (<a href=\"http://www.igormaznitsa.com\">http://www.igormaznitsa.com</b>)</p>\n<hr>\n <p>The Utility allows to edit multilevel hexagonal maps with SVG icons and background.</p>   \n<hr>\n<h3>Licenses</h3>\n<ul>\n<li>JHexed framework: Apache License 2.0 (<a href=\"https://code.google.com/p/jhexed/\">https://code.google.com/p/jhexed/</a>) </li>\n<li>Apache™ Batik SVG Toolkit: Apache License 2.0 (<a href=\"http://xmlgraphics.apache.org/batik/\">http://xmlgraphics.apache.org/batik/</a>)</li>\n<li>SwingX framework: LGPL (<a href=\"https://swingx.java.net//\">https://swingx.java.net/</a>)</li>\n<li>Fugue Icons: CCA 3.0 License (<a href=\"http://p.yusukekamiyamane.com/\">http://p.yusukekamiyamane.com/</a>)</li>\n<li>Free Vintage Design Icons: CCA 3.0 License (<a href=\"http://www.designcontest.com/free-icons/\">http://www.designcontest.com/free-icons/</a>)</li>\n</ul>\n</body></html>");
-    jXLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-    jXLabel1.setLineWrap(true);
-    jXLabel1.setPreferredSize(new java.awt.Dimension(450, 12));
+    editorText.setEditable(false);
+    editorText.setContentType("text/html"); // NOI18N
+    editorText.setText("<html><body> <h2>JHexed Map Editor</h2>  <p>Author: igor Maznitsa (<a href=\"http://www.igormaznitsa.com\">http://www.igormaznitsa.com</b>)</p> <hr>  <p>The Utility allows to edit multilevel hexagonal maps with SVG icons and background.</p>    <hr> <h3>Licenses</h3> <ul> <li>JHexed framework: Apache License 2.0 (<a href=\"https://code.google.com/p/jhexed/\">https://code.google.com/p/jhexed/</a>) </li> <li>Apache™ Batik SVG Toolkit: Apache License 2.0 (<a href=\"http://xmlgraphics.apache.org/batik/\">http://xmlgraphics.apache.org/batik/</a>)</li> <li>SwingX framework: LGPL (<a href=\"https://swingx.java.net//\">https://swingx.java.net/</a>)</li> <li>Fugue Icons: CCA 3.0 License (<a href=\"http://p.yusukekamiyamane.com/\">http://p.yusukekamiyamane.com/</a>)</li> <li>Free Vintage Design Icons: CCA 3.0 License (<a href=\"http://www.designcontest.com/free-icons/\">http://www.designcontest.com/free-icons/</a>)</li> </ul> </body></html>");
+    jScrollPane1.setViewportView(editorText);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
     getContentPane().setLayout(layout);
@@ -65,9 +88,9 @@ public class DialogAbout extends javax.swing.JDialog {
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
           .addComponent(buttonClose, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
           .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-            .addComponent(jLabel1)
+            .addComponent(labelImage)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(jXLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 403, Short.MAX_VALUE)))
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 397, Short.MAX_VALUE)))
         .addContainerGap())
     );
     layout.setVerticalGroup(
@@ -75,9 +98,11 @@ public class DialogAbout extends javax.swing.JDialog {
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jXLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 340, Short.MAX_VALUE)
-          .addComponent(jLabel1))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+          .addGroup(layout.createSequentialGroup()
+            .addComponent(labelImage)
+            .addGap(0, 90, Short.MAX_VALUE))
+          .addComponent(jScrollPane1))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(buttonClose)
         .addContainerGap())
     );
@@ -91,7 +116,8 @@ public class DialogAbout extends javax.swing.JDialog {
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton buttonClose;
-  private javax.swing.JLabel jLabel1;
-  private org.jdesktop.swingx.JXLabel jXLabel1;
+  private javax.swing.JEditorPane editorText;
+  private javax.swing.JScrollPane jScrollPane1;
+  private javax.swing.JLabel labelImage;
   // End of variables declaration//GEN-END:variables
 }
