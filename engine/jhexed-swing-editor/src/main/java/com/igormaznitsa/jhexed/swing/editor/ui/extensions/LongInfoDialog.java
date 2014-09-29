@@ -51,6 +51,7 @@ public class LongInfoDialog extends javax.swing.JDialog {
 
     textArea.setEditable(false);
     textArea.setColumns(20);
+    textArea.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
     textArea.setLineWrap(true);
     textArea.setRows(5);
     textArea.setWrapStyleWord(true);

@@ -23,14 +23,12 @@ def doWork(activeTool, activeLayer){
     values = selectValuesDialog('Select values to calculate',selected_layer);
     if (values){
       number = 0;
-      for(x in 0..selected_layer.getColumnNumber()){
-        for(y in 0..selected_layer.getRowNumber()){
+      for(x=0;x<selected_layer.getColumnNumber();x++){
+        for(y=0;y<selected_layer.getRowNumber();y++){
           if (getHex(selected_layer,x,y) in values) number++;
         }
       }
       info('Statistics','Found '+number+' cell(s) of value(s) '+tostr(values)+' on \''+selected_layer.getLayerName()+'\'\n')
     }
-  }else{
-    warn('To use the plugin, you must select a layer');
   }
 }

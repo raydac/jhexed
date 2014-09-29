@@ -40,8 +40,8 @@ def doWork(activeTool, activeLayer){
   if (!selected_check_values) return;
 
   number=0;
-  for(x in 0..selected_base_layer.getColumnNumber()){
-    for(y in 0..selected_base_layer.getRowNumber()){
+  for(x=0;x<selected_base_layer.getColumnNumber();x++){
+    for(y=0;y<selected_base_layer.getRowNumber();y++){
       if (getHex(selected_base_layer,x,y) in selected_base_values && getHex(selected_check_layer,x,y) in selected_check_values) number++;
     }
   }

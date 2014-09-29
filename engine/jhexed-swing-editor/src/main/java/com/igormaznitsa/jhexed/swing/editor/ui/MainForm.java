@@ -55,7 +55,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private static final long serialVersionUID = 3235266727080222251L;
 
-  private static final String[] INTERNAL_PLUGINS = new String[]{"ClearValueOnLayer", "CalcNumber", "CalcNumberOverBase"};
+  private static final String[] INTERNAL_PLUGINS = new String[]{"ClearValueOnLayer", "CalcNumber", "CalcNumberOverBase", "RandomSpread"};
 
   private final Desktop hexMapPanelDesktop;
   private final HexMapPanel hexMapPanel;
@@ -84,10 +84,30 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private final java.util.List<HexFieldLayer[]> undoLayers = new ArrayList<HexFieldLayer[]>();
   private final java.util.List<HexFieldLayer[]> redoLayers = new ArrayList<HexFieldLayer[]>();
 
-  private static final Preferences REGISTRY = Preferences.userRoot().node(MainForm.class.getName());
+  public static final Preferences REGISTRY = Preferences.userRoot().node(MainForm.class.getName());
 
   public MainForm(final String fileToOpen) {
     initComponents();
+    
+    final JFrame theFrame = this;
+    
+    for (final javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+      final JMenuItem landfItem = new JMenuItem(info.getName());
+      landfItem.addActionListener(new ActionListener() {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          try {
+            javax.swing.UIManager.setLookAndFeel(info.getClassName());
+          }
+          catch (Exception ex) {
+            Log.error("Can't change L&F", ex);
+          }
+          SwingUtilities.updateComponentTreeUI(theFrame);        }
+      });
+      menuLANDF.add(landfItem);
+    }
+    
     hexMapPanelDesktop = new Desktop();
     layers = new LayerListModel(256, 128);
 
@@ -292,6 +312,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     REGISTRY.putBoolean("showBackImage", this.menuViewBackImage.isSelected());
     REGISTRY.putBoolean("showHexBorders", this.menuShowHexBorders.isSelected());
+    
+    REGISTRY.put("lookandfeel", javax.swing.UIManager.getLookAndFeel().getClass().getName());
   }
 
   protected JInternalFrame createFrame() {
@@ -315,7 +337,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     jPanel1 = new javax.swing.JPanel();
     labelCellUnderMouse = new javax.swing.JLabel();
     labelZoomStatus = new javax.swing.JLabel();
-    jMenuBar1 = new javax.swing.JMenuBar();
+    menuMain = new javax.swing.JMenuBar();
     menuFile = new javax.swing.JMenu();
     menuFileNew = new javax.swing.JMenuItem();
     menuItemFileOpen = new javax.swing.JMenuItem();
@@ -330,10 +352,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     menuFileDocumentOptions = new javax.swing.JMenuItem();
     jSeparator4 = new javax.swing.JPopupMenu.Separator();
     menuFileExit = new javax.swing.JMenuItem();
-    jMenu2 = new javax.swing.JMenu();
+    menuEdit = new javax.swing.JMenu();
     menuEditUndo = new javax.swing.JMenuItem();
     menuEditRedo = new javax.swing.JMenuItem();
-    jMenu1 = new javax.swing.JMenu();
+    menuView = new javax.swing.JMenu();
     menuViewZoomIn = new javax.swing.JMenuItem();
     menuViewZoomOut = new javax.swing.JMenuItem();
     menuViewZoomReset = new javax.swing.JMenuItem();
@@ -345,6 +367,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     menuWindowLayers = new javax.swing.JCheckBoxMenuItem();
     menuWindowTools = new javax.swing.JCheckBoxMenuItem();
     menuWindowOptions = new javax.swing.JCheckBoxMenuItem();
+    menuLANDF = new javax.swing.JMenu();
     menuHelp = new javax.swing.JMenu();
     menuHelpAbout = new javax.swing.JMenuItem();
 
@@ -489,9 +512,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     });
     menuFile.add(menuFileExit);
 
-    jMenuBar1.add(menuFile);
+    menuMain.add(menuFile);
 
-    jMenu2.setText("Edit");
+    menuEdit.setText("Edit");
 
     menuEditUndo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
     menuEditUndo.setText("Undo");
@@ -501,7 +524,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         menuEditUndoActionPerformed(evt);
       }
     });
-    jMenu2.add(menuEditUndo);
+    menuEdit.add(menuEditUndo);
 
     menuEditRedo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_X, java.awt.event.InputEvent.CTRL_MASK));
     menuEditRedo.setText("Redo");
@@ -511,11 +534,11 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         menuEditRedoActionPerformed(evt);
       }
     });
-    jMenu2.add(menuEditRedo);
+    menuEdit.add(menuEditRedo);
 
-    jMenuBar1.add(jMenu2);
+    menuMain.add(menuEdit);
 
-    jMenu1.setText("View");
+    menuView.setText("View");
 
     menuViewZoomIn.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_MASK));
     menuViewZoomIn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/magnifier-zoom-in.png"))); // NOI18N
@@ -525,7 +548,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         menuViewZoomInActionPerformed(evt);
       }
     });
-    jMenu1.add(menuViewZoomIn);
+    menuView.add(menuViewZoomIn);
 
     menuViewZoomOut.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
     menuViewZoomOut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/magnifier-zoom-out.png"))); // NOI18N
@@ -535,7 +558,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         menuViewZoomOutActionPerformed(evt);
       }
     });
-    jMenu1.add(menuViewZoomOut);
+    menuView.add(menuViewZoomOut);
 
     menuViewZoomReset.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_MASK));
     menuViewZoomReset.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/magnifier-zoom-actual.png"))); // NOI18N
@@ -545,8 +568,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         menuViewZoomResetActionPerformed(evt);
       }
     });
-    jMenu1.add(menuViewZoomReset);
-    jMenu1.add(jSeparator2);
+    menuView.add(menuViewZoomReset);
+    menuView.add(jSeparator2);
 
     menuViewBackImage.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_MASK));
     menuViewBackImage.setSelected(true);
@@ -557,7 +580,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         menuViewBackImageStateChanged(evt);
       }
     });
-    jMenu1.add(menuViewBackImage);
+    menuView.add(menuViewBackImage);
 
     menuShowHexBorders.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_MASK));
     menuShowHexBorders.setSelected(true);
@@ -567,12 +590,12 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         menuShowHexBordersStateChanged(evt);
       }
     });
-    jMenu1.add(menuShowHexBorders);
+    menuView.add(menuShowHexBorders);
 
-    jMenuBar1.add(jMenu1);
+    menuMain.add(menuView);
 
     menuPlugins.setText("Plugins");
-    jMenuBar1.add(menuPlugins);
+    menuMain.add(menuPlugins);
 
     menuWindow.setText("Window");
 
@@ -603,7 +626,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     });
     menuWindow.add(menuWindowOptions);
 
-    jMenuBar1.add(menuWindow);
+    menuMain.add(menuWindow);
+
+    menuLANDF.setText("Look&Feel");
+    menuMain.add(menuLANDF);
 
     menuHelp.setText("Help");
 
@@ -615,9 +641,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     });
     menuHelp.add(menuHelpAbout);
 
-    jMenuBar1.add(menuHelp);
+    menuMain.add(menuHelp);
 
-    setJMenuBar(jMenuBar1);
+    setJMenuBar(menuMain);
 
     pack();
   }// </editor-fold>//GEN-END:initComponents
@@ -948,9 +974,6 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JMenu jMenu1;
-  private javax.swing.JMenu jMenu2;
-  private javax.swing.JMenuBar jMenuBar1;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPopupMenu.Separator jSeparator1;
   private javax.swing.JPopupMenu.Separator jSeparator2;
@@ -958,6 +981,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private javax.swing.JPopupMenu.Separator jSeparator4;
   private javax.swing.JLabel labelCellUnderMouse;
   private javax.swing.JLabel labelZoomStatus;
+  private javax.swing.JMenu menuEdit;
   private javax.swing.JMenuItem menuEditRedo;
   private javax.swing.JMenuItem menuEditUndo;
   private javax.swing.JMenu menuFile;
@@ -973,8 +997,11 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private javax.swing.JMenu menuHelp;
   private javax.swing.JMenuItem menuHelpAbout;
   private javax.swing.JMenuItem menuItemFileOpen;
+  private javax.swing.JMenu menuLANDF;
+  private javax.swing.JMenuBar menuMain;
   private javax.swing.JMenu menuPlugins;
   private javax.swing.JCheckBoxMenuItem menuShowHexBorders;
+  private javax.swing.JMenu menuView;
   private javax.swing.JCheckBoxMenuItem menuViewBackImage;
   private javax.swing.JMenuItem menuViewZoomIn;
   private javax.swing.JMenuItem menuViewZoomOut;

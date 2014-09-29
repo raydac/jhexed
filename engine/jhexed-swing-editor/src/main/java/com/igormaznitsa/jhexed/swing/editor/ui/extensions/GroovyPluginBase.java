@@ -7,7 +7,7 @@ import com.igormaznitsa.jhexed.swing.editor.ui.frames.layers.LayerRecordPanel;
 import com.igormaznitsa.jhexed.values.HexColorValue;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.awt.Color;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 public class GroovyPluginBase {
 
@@ -123,6 +123,13 @@ public class GroovyPluginBase {
     return result;
   }
 
+  public Integer selectInt(final String title, final String text, final int value, final int min, final int max){
+    final SpinnerModel model = new SpinnerNumberModel(value, min, max, 1);
+    final EnterIntNumberDialog dialog = new EnterIntNumberDialog(this.frame, title, text, model);
+    dialog.setVisible(true);
+    return dialog.isOk() ? ((Number)model.getValue()).intValue() : null;
+  }
+  
   public void warn(final String text) {
     JOptionPane.showMessageDialog(this.frame, text, "Warning", JOptionPane.WARNING_MESSAGE);
   }
@@ -131,11 +138,19 @@ public class GroovyPluginBase {
     JOptionPane.showMessageDialog(this.frame, text, "info", JOptionPane.INFORMATION_MESSAGE);
   }
 
+  public void debug(final String str){
+    System.out.println("PLUGIN:" + str);
+  }
+  
   public void error(final String text) {
     JOptionPane.showMessageDialog(this.frame, text, "Error", JOptionPane.ERROR_MESSAGE);
   }
 
   public void info(final String title, final String text){
     new LongInfoDialog(this.frame, title, text).setVisible(true);
+  }
+  
+  public boolean confirm(final String title, final String question){
+    return JOptionPane.showConfirmDialog(this.frame, question, title, JOptionPane.YES_NO_OPTION)== JOptionPane.YES_OPTION;
   }
 }

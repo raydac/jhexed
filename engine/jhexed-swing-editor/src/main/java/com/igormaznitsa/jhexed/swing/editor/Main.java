@@ -20,34 +20,49 @@ import java.util.Locale;
 import javax.swing.SwingUtilities;
 
 public class Main {
+
   public static void main(final String... args) {
     try {
+      final String lookandfeel = MainForm.REGISTRY.get("lookandfeel", null);
+
       javax.swing.UIManager.LookAndFeelInfo landf = null;
-      
-      for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-        final String name = info.getName().trim().toLowerCase(Locale.ENGLISH);
-        if (name.startsWith("windows")) {
-          landf = info;
-        } else if (landf==null && name.contains("gtk")){
-          landf = info;
+      if (lookandfeel == null) {
+        for (final javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+          final String name = info.getName().trim().toLowerCase(Locale.ENGLISH);
+          if (name.startsWith("windows")) {
+            landf = info;
+          }
+          else if (landf == null && name.contains("gtk")) {
+            landf = info;
+          }
         }
       }
-      if (landf!=null){
-        System.out.println("Selected L&F: "+landf.getClassName());
+      else {
+        for (final javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+          if (info.getClassName().equals(lookandfeel)){
+            landf = info;
+            break;
+          }
+        }
+      }
+      if (landf != null) {
+        System.out.println("Selected L&F: " + landf.getClassName());
         javax.swing.UIManager.setLookAndFeel(landf.getClassName());
+      }else{
+        System.out.println("Can't find needed L&F");
       }
     }
     catch (Exception ex) {
       ex.printStackTrace();
     }
 
-    final String file = args.length>0 ? args[0] : null;
-    
+    final String file = args.length > 0 ? args[0] : null;
+
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         new MainForm(file).setVisible(true);
       }
     });
-  }  
+  }
 }

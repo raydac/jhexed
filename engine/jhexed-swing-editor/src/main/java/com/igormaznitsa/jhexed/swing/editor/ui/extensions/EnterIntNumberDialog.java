@@ -15,35 +15,24 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.extensions;
 
-import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
-import com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerValueIconList;
-import com.igormaznitsa.jhexed.values.HexFieldValue;
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.ImageIcon;
+import javax.swing.SpinnerModel;
 
-public class SelectValueDialog extends javax.swing.JDialog implements LayerValueIconList.LayerIconListListener{
-  private static final long serialVersionUID = 883383692539345227L;
+public class EnterIntNumberDialog extends javax.swing.JDialog {
+  private static final long serialVersionUID = 941086763102265587L;
 
-  private HexFieldValue [] selected = null;
+  boolean ok;
   
-  public SelectValueDialog(final java.awt.Frame frame, final String title, final HexFieldLayer layer, final boolean multiple) {
+  public EnterIntNumberDialog(final java.awt.Frame frame, final String title, final String text, final SpinnerModel model) {
     super(frame, true);
     initComponents();
     this.setTitle(title);
-    this.layerIconList.setLayerField(layer);
-    this.layerIconList.addLayerIconListListener(this);
-    if (multiple) {
-      final DefaultListSelectionModel model = new DefaultListSelectionModel();
-      model.setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-      this.layerIconList.setSelectionModel(model);
-    }
+    labelText.setText(text);
+    spinnerValue.setModel(model);
     this.setLocationRelativeTo(frame);
   }
-  
-  public HexFieldValue [] getSelected(){
-    return selected;
-  }
 
+  
+  
   /**
    * This method is called from within the constructor to initialize the form.
    * WARNING: Do NOT modify this code. The content of this method is always
@@ -53,9 +42,10 @@ public class SelectValueDialog extends javax.swing.JDialog implements LayerValue
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    layerIconList = new com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerValueIconList();
+    spinnerValue = new javax.swing.JSpinner();
     buttonCancel = new javax.swing.JButton();
     buttonOk = new javax.swing.JButton();
+    labelText = new javax.swing.JLabel();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -68,13 +58,14 @@ public class SelectValueDialog extends javax.swing.JDialog implements LayerValue
     });
 
     buttonOk.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/tick.png"))); // NOI18N
-    buttonOk.setText("OK");
-    buttonOk.setEnabled(false);
+    buttonOk.setText("Ok");
     buttonOk.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         buttonOkActionPerformed(evt);
       }
     });
+
+    labelText.setText("Some title of operation");
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
     getContentPane().setLayout(layout);
@@ -83,12 +74,15 @@ public class SelectValueDialog extends javax.swing.JDialog implements LayerValue
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(layerIconList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(spinnerValue)
           .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-            .addGap(0, 194, Short.MAX_VALUE)
+            .addGap(0, 59, Short.MAX_VALUE)
             .addComponent(buttonOk)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(buttonCancel)))
+            .addComponent(buttonCancel))
+          .addGroup(layout.createSequentialGroup()
+            .addComponent(labelText)
+            .addGap(0, 0, Short.MAX_VALUE)))
         .addContainerGap())
     );
 
@@ -98,41 +92,37 @@ public class SelectValueDialog extends javax.swing.JDialog implements LayerValue
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(layerIconList, javax.swing.GroupLayout.DEFAULT_SIZE, 318, Short.MAX_VALUE)
+        .addComponent(labelText)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(spinnerValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(buttonCancel)
           .addComponent(buttonOk))
-        .addContainerGap())
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
 
     pack();
   }// </editor-fold>//GEN-END:initComponents
 
   private void buttonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOkActionPerformed
-    this.selected = this.layerIconList.getSelected();
+    this.ok = true;
     dispose();
   }//GEN-LAST:event_buttonOkActionPerformed
 
   private void buttonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelActionPerformed
-    this.selected = null;
+    this.ok = false;
     dispose();
   }//GEN-LAST:event_buttonCancelActionPerformed
 
-
+  public boolean isOk(){
+    return this.ok;
+  }
+  
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton buttonCancel;
   private javax.swing.JButton buttonOk;
-  private com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerValueIconList layerIconList;
+  private javax.swing.JLabel labelText;
+  private javax.swing.JSpinner spinnerValue;
   // End of variables declaration//GEN-END:variables
-
-  @Override
-  public void onLeftClick(final HexFieldValue h, final ImageIcon icon) {
-    this.buttonOk.setEnabled(true);
-  }
-
-  @Override
-  public void onRightClick(final HexFieldValue h, final ImageIcon icon) {
-    onLeftClick(h, icon);
-  }
 }
