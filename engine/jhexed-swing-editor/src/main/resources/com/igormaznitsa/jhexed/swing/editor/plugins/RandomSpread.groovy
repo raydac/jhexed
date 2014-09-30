@@ -16,7 +16,7 @@ def doWork(activeTool, activeLayer){
     if (value){
       base_layer = null;
       base_layer_values = null;
-      if (confirm("Use base layer","Do you want to use a base layer values?")){
+      if (!confirm("Use base layer","Use whole map for spreading?")){
         base_layer = selectLayerDialog("Select base layer");
         if (!base_layer) return;
 
@@ -46,7 +46,7 @@ def doWork(activeTool, activeLayer){
       }
       
       if (positions.size()<number){
-        warn("Detected only "+positions.size()+" cell(s) for spread, can't continue the operation");
+        warn("Detected only "+positions.size()+" free cell(s), can't continue the operation");
       }else{
         addUndo(selected_layer);
 

@@ -1,6 +1,7 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.extensions;
 
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
+import com.igormaznitsa.jhexed.swing.editor.Log;
 import com.igormaznitsa.jhexed.swing.editor.model.LayerListModel;
 import com.igormaznitsa.jhexed.swing.editor.ui.MainForm;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.layers.LayerRecordPanel;
@@ -13,8 +14,8 @@ public class GroovyPluginBase {
 
   private final LayerListModel layerListModel;
   private final MainForm frame;
-
-  public GroovyPluginBase(final MainForm frame, final LayerListModel listModel) {
+  
+  public GroovyPluginBase(final MainForm frame,final LayerListModel listModel) {
     this.frame = frame;
     this.layerListModel = listModel;
   }
@@ -139,7 +140,7 @@ public class GroovyPluginBase {
   }
 
   public void debug(final String str){
-    System.out.println("PLUGIN:" + str);
+    Log.info("PLUGIN:" + str);
   }
   
   public void error(final String text) {
@@ -153,4 +154,13 @@ public class GroovyPluginBase {
   public boolean confirm(final String title, final String question){
     return JOptionPane.showConfirmDialog(this.frame, question, title, JOptionPane.YES_NO_OPTION)== JOptionPane.YES_OPTION;
   }
+
+  public void log(final String text){
+    Log.info(text);
+  }
+  
+  public void log(final String text, final Throwable thr){
+    Log.error(text, thr);
+  }
+  
 }

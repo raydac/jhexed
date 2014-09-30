@@ -55,7 +55,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private static final long serialVersionUID = 3235266727080222251L;
 
-  private static final String[] INTERNAL_PLUGINS = new String[]{"ClearValueOnLayer", "CalcNumber", "CalcNumberOverBase", "RandomSpread"};
+  private static final String[] INTERNAL_PLUGINS = new String[]{"ClearValueOnLayer", "CalcNumberOverBase", "RandomSpread"};
 
   private final Desktop hexMapPanelDesktop;
   private final HexMapPanel hexMapPanel;

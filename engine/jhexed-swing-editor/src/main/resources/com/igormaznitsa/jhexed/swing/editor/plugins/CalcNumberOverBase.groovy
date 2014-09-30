@@ -1,9 +1,9 @@
 def getPluginName(){
-  return 'Number of a value over base'
+  return 'Calculate number of values'
 }
 
 def getDescription(){
-  return 'Calculate the number of a value on a layer over a value of another layer'
+  return 'Calculate the number of a value on a layer'
 }
 
 def tostr(hex_val){
@@ -12,7 +12,7 @@ def tostr(hex_val){
 }
 
 def tolist(layer, hex_vals){
-  result = 'Over cells in \''+layer.getLayerName()+'\':\n';
+  result = 'Layer is \''+layer.getLayerName()+'\' cells are :\n';
   for(v in hex_vals){
     result += tostr(v)+'\n'
   }
@@ -29,21 +29,35 @@ def tovrt(hex_vals){
 }
 
 def doWork(activeTool, activeLayer){
-  selected_base_layer = selectLayerDialog('Select base layer');
-  if (!selected_base_layer) return;
-  selected_base_values = selectValuesDialog('Select base values',selected_base_layer);
-  if (!selected_base_values) return;
-
-  selected_check_layer = selectLayerDialog('Select layer to check');
-  if (!selected_check_layer) return;
-  selected_check_values = selectValuesDialog('Select values to calculate',selected_check_layer);
-  if (!selected_check_values) return;
-
-  number=0;
-  for(x=0;x<selected_base_layer.getColumnNumber();x++){
-    for(y=0;y<selected_base_layer.getRowNumber();y++){
-      if (getHex(selected_base_layer,x,y) in selected_base_values && getHex(selected_check_layer,x,y) in selected_check_values) number++;
+  layer=selectLayerDialog('Select layer');
+  String text = null;
+  if (layer){
+    values = selectValuesDialog('Select values to calculate',layer);
+    if (values){
+      if (confirm('Whole map or special places?','Calculate for whole map?')){
+        number = 0;
+        for(x=0;x<layer.getColumnNumber();x++){
+          for(y=0;y<layer.getRowNumber();y++){
+            if (getHex(layer,x,y) in values) number++;
+          }
+        }
+        info('Calculation', 'Found '+number+' cell(s) of '+tovrt(values)+' on the whole map');
+      }else{
+        spec_layer = selectLayerDialog('Select special layer');
+        if (spec_layer){
+          spec_values = selectValuesDialog('Select base values',spec_layer);
+          if (spec_values){
+            number = 0;
+            for(x=0;x<layer.getColumnNumber();x++){
+              for(y=0;y<layer.getRowNumber();y++){
+                if (getHex(layer,x,y) in values && getHex(spec_layer,x,y) in spec_values) number++;
+              }
+            }
+            info('Calculation', 'Found '+number+' cell(s) of '+tovrt(values)+' placed over :\n'+tolist(spec_layer,spec_values));
+          }
+        }
+      }
     }
   }
-  info('Statistics','Found '+number+' cell(s) of value(s) '+tovrt(selected_check_values)+' on \''+selected_check_layer.getLayerName()+'\'\n'+tolist(selected_base_layer,selected_base_values))
 }
+
