@@ -88,9 +88,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   public MainForm(final String fileToOpen) {
     initComponents();
-    
+
     final JFrame theFrame = this;
-    
+
     for (final javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
       final JMenuItem landfItem = new JMenuItem(info.getName());
       landfItem.addActionListener(new ActionListener() {
@@ -103,11 +103,12 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
           catch (Exception ex) {
             Log.error("Can't change L&F", ex);
           }
-          SwingUtilities.updateComponentTreeUI(theFrame);        }
+          SwingUtilities.updateComponentTreeUI(theFrame);
+        }
       });
       menuLANDF.add(landfItem);
     }
-    
+
     hexMapPanelDesktop = new Desktop();
     layers = new LayerListModel(256, 128);
 
@@ -312,7 +313,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
     REGISTRY.putBoolean("showBackImage", this.menuViewBackImage.isSelected());
     REGISTRY.putBoolean("showHexBorders", this.menuShowHexBorders.isSelected());
-    
+
     REGISTRY.put("lookandfeel", javax.swing.UIManager.getLookAndFeel().getClass().getName());
   }
 
@@ -1247,15 +1248,34 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void mouseWheelMoved(MouseWheelEvent e) {
+  public void mouseWheelMoved(final MouseWheelEvent e) {
     if ((e.getModifiers() & MouseEvent.CTRL_MASK) != 0) {
       final int rotation = e.getWheelRotation();
+
+      final Point point = e.getPoint();
+      final Rectangle rect = this.hexMapPanel.getVisibleRect();
+
+      final HexPosition focusedNumber = this.hexMapPanel.getHexPosition(e.getPoint());
+
       if (rotation < 0) {
         menuViewZoomInActionPerformed(null);
       }
       else {
         menuViewZoomOutActionPerformed(null);
       }
+
+      final float cellx = this.hexMapPanel.getHexEngine().calculateX(focusedNumber.getColumn(), focusedNumber.getRow());
+      final float celly = this.hexMapPanel.getHexEngine().calculateY(focusedNumber.getColumn(), focusedNumber.getRow());
+
+      final float cellw = this.hexMapPanel.getHexEngine().getCellWidth() * this.hexMapPanel.getHexEngine().getScaleX();
+      final float cellh = this.hexMapPanel.getHexEngine().getCellHeight() * this.hexMapPanel.getHexEngine().getScaleY();
+
+      final float dx = cellx + cellw / 2 - point.x;
+      final float dy = celly + cellh / 2 - point.y;
+
+      rect.setLocation(Math.round(rect.x + dx), Math.round(rect.y + dy));
+
+      this.hexMapPanel.scrollRectToVisible(rect);
     }
   }
 }
