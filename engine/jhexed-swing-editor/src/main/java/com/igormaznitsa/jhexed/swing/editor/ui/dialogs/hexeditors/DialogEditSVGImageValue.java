@@ -46,12 +46,18 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
     if (value == null){
       setTitle("New SVG value");
       this.value = new HexSVGImageValue("", "", null, -1);    
-      this.buttonSave.setEnabled(false);
+      this.buttonOk.setEnabled(false);
     }else{
       setTitle("Edit SVG value '"+value.getName()+'\'');
       this.value = (HexSVGImageValue) value.cloneValue();
     }
     load();
+    
+    if (value.getImage() == null){
+      buttonOk.setEnabled(false);
+      buttonSaveAs.setEnabled(false);
+    }
+    
     this.setLocationRelativeTo(parent);
   }
 
@@ -95,7 +101,7 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
     jScrollPane1 = new javax.swing.JScrollPane();
     textComments = new javax.swing.JTextArea();
     buttonCancel = new javax.swing.JButton();
-    buttonSave = new javax.swing.JButton();
+    buttonOk = new javax.swing.JButton();
     panelPreview = new javax.swing.JPanel();
     buttonLoad = new javax.swing.JButton();
     buttonSaveAs = new javax.swing.JButton();
@@ -120,12 +126,12 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
       }
     });
 
-    buttonSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/tick.png"))); // NOI18N
-    buttonSave.setText("Ok");
-    buttonSave.setToolTipText("Save the changes");
-    buttonSave.addActionListener(new java.awt.event.ActionListener() {
+    buttonOk.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/tick.png"))); // NOI18N
+    buttonOk.setText("Ok");
+    buttonOk.setToolTipText("Save the changes");
+    buttonOk.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        buttonSaveActionPerformed(evt);
+        buttonOkActionPerformed(evt);
       }
     });
 
@@ -170,7 +176,7 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
             .addComponent(textName))
           .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
             .addGap(0, 0, Short.MAX_VALUE)
-            .addComponent(buttonSave)
+            .addComponent(buttonOk)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addComponent(buttonCancel))
           .addGroup(layout.createSequentialGroup()
@@ -181,7 +187,7 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
         .addContainerGap())
     );
 
-    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {buttonCancel, buttonSave});
+    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {buttonCancel, buttonOk});
 
     layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {buttonLoad, buttonSaveAs});
 
@@ -203,7 +209,7 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(buttonCancel)
-          .addComponent(buttonSave))
+          .addComponent(buttonOk))
         .addContainerGap())
     );
 
@@ -228,7 +234,7 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
         this.panelPreview.revalidate();
         this.panelPreview.repaint();
         
-        this.buttonSave.setEnabled(true);
+        this.buttonOk.setEnabled(true);
         this.buttonSaveAs.setEnabled(true);
       }
       catch (IOException ex) {
@@ -238,11 +244,11 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
     }
   }//GEN-LAST:event_buttonLoadActionPerformed
 
-  private void buttonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveActionPerformed
+  private void buttonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOkActionPerformed
     save();
     this.result = this.value;
     dispose();
-  }//GEN-LAST:event_buttonSaveActionPerformed
+  }//GEN-LAST:event_buttonOkActionPerformed
 
   private void buttonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelActionPerformed
     dispose();
@@ -285,7 +291,7 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton buttonCancel;
   private javax.swing.JButton buttonLoad;
-  private javax.swing.JButton buttonSave;
+  private javax.swing.JButton buttonOk;
   private javax.swing.JButton buttonSaveAs;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JScrollPane jScrollPane1;

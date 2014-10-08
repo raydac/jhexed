@@ -73,6 +73,8 @@
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="buttonRemoveSelected" min="-2" pref="23" max="-2" attributes="0"/>
                           <Component id="buttonAddPopup" pref="0" max="32767" attributes="0"/>
+                          <Component id="buttonEditSelected" alignment="0" min="-2" pref="23" max="-2" attributes="0"/>
+                          <Component id="buttonChangeValueType" alignment="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="tableValuesScroll" pref="0" max="32767" attributes="0"/>
@@ -97,8 +99,13 @@
                   <Component id="tableValuesScroll" pref="191" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="buttonAddPopup" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="buttonRemoveSelected" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="buttonEditSelected" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="buttonChangeValueType" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -199,6 +206,7 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/com/igormaznitsa/jhexed/swing/editor/icons/minus-button.png"/>
         </Property>
+        <Property name="toolTipText" type="java.lang.String" value="Remove selected value from the list"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
@@ -228,9 +236,34 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/com/igormaznitsa/jhexed/swing/editor/icons/plus-button.png"/>
         </Property>
+        <Property name="toolTipText" type="java.lang.String" value="Add or insert a new value in the list"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonAddPopupActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="buttonEditSelected">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/com/igormaznitsa/jhexed/swing/editor/icons/edit-image.png"/>
+        </Property>
+        <Property name="toolTipText" type="java.lang.String" value="Edit selected value"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonEditSelectedActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JToggleButton" name="buttonChangeValueType">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/com/igormaznitsa/jhexed/swing/editor/icons/new.png"/>
+        </Property>
+        <Property name="toolTipText" type="java.lang.String" value="Change type of the selected value"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonChangeValueTypeActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

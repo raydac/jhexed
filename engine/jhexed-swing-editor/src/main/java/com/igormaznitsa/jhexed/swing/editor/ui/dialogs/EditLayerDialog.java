@@ -43,9 +43,13 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
   private final Path2D iconShape;
   private final List<Integer> removedIndexes = new ArrayList<Integer>();
   private final List<Integer> insertedIndexes = new ArrayList<Integer>();
+  private final Frame parent;
+
+  private JComponent currentPopupParent;
   
   public EditLayerDialog(final Frame parent, final LayerListModel layerModel, final HexFieldLayer field, final Path2D hexShape) {
     super(parent, true);
+    this.parent = parent;
     initComponents();
     this.iconShape = hexShape;
     this.tableValues.setRowHeight(ICON_SIZE);
@@ -55,7 +59,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
       this.value = layerModel.makeNewLayerField("", "");
     }
     else {
-      this.setTitle("Edit layer \'"+field.getLayerName()+'\'');
+      this.setTitle("Edit layer \'" + field.getLayerName() + '\'');
       this.value = field.cloneLayer();
     }
 
@@ -65,14 +69,14 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
     this.setLocationRelativeTo(parent);
   }
 
-  public List<Integer> getRemovedIndexes(){
+  public List<Integer> getRemovedIndexes() {
     return this.removedIndexes;
   }
-  
-  public List<Integer> getInsertedIndexes(){
+
+  public List<Integer> getInsertedIndexes() {
     return this.insertedIndexes;
   }
-  
+
   public HexFieldLayer getResult() {
     return this.result;
   }
@@ -82,7 +86,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
     this.value.setComments(this.textComments.getText());
 
     this.value.updateIndexes(this.removedIndexes, this.insertedIndexes, this.values.size());
-    
+
     this.value.replaceValues(this.values);
   }
 
@@ -119,6 +123,8 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
     jScrollPane2 = new javax.swing.JScrollPane();
     textComments = new javax.swing.JTextPane();
     buttonAddPopup = new javax.swing.JToggleButton();
+    buttonEditSelected = new javax.swing.JButton();
+    buttonChangeValueType = new javax.swing.JToggleButton();
 
     popupSelectType.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
       public void popupMenuCanceled(javax.swing.event.PopupMenuEvent evt) {
@@ -190,6 +196,7 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
     tableValuesScroll.setViewportView(tableValues);
 
     buttonRemoveSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/minus-button.png"))); // NOI18N
+    buttonRemoveSelected.setToolTipText("Remove selected value from the list");
     buttonRemoveSelected.setEnabled(false);
     buttonRemoveSelected.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -201,9 +208,28 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
     jScrollPane2.setViewportView(textComments);
 
     buttonAddPopup.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/plus-button.png"))); // NOI18N
+    buttonAddPopup.setToolTipText("Add or insert a new value in the list");
     buttonAddPopup.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         buttonAddPopupActionPerformed(evt);
+      }
+    });
+
+    buttonEditSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/edit-image.png"))); // NOI18N
+    buttonEditSelected.setToolTipText("Edit selected value");
+    buttonEditSelected.setEnabled(false);
+    buttonEditSelected.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        buttonEditSelectedActionPerformed(evt);
+      }
+    });
+
+    buttonChangeValueType.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/igormaznitsa/jhexed/swing/editor/icons/new.png"))); // NOI18N
+    buttonChangeValueType.setToolTipText("Change type of the selected value");
+    buttonChangeValueType.setEnabled(false);
+    buttonChangeValueType.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        buttonChangeValueTypeActionPerformed(evt);
       }
     });
 
@@ -227,7 +253,9 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
           .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
               .addComponent(buttonRemoveSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-              .addComponent(buttonAddPopup, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+              .addComponent(buttonAddPopup, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+              .addComponent(buttonEditSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+              .addComponent(buttonChangeValueType, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addComponent(tableValuesScroll, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
         .addContainerGap())
@@ -249,8 +277,13 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
           .addComponent(tableValuesScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
           .addGroup(layout.createSequentialGroup()
             .addComponent(buttonAddPopup)
-            .addGap(7, 7, 7)
-            .addComponent(buttonRemoveSelected)))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(buttonRemoveSelected)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(buttonEditSelected)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(buttonChangeValueType)
+            .addGap(0, 0, Short.MAX_VALUE)))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(buttonCancel)
@@ -263,11 +296,11 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
 
   private void buttonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveActionPerformed
     saveFields();
-    
-    for(int i=0;i<this.values.size();i++){
+
+    for (int i = 0; i < this.values.size(); i++) {
       this.values.get(i).setIndex(i);
     }
-    
+
     this.result = this.value;
     dispose();
   }//GEN-LAST:event_buttonSaveActionPerformed
@@ -278,38 +311,47 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
 
   private void buttonAddPopupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddPopupActionPerformed
     if (buttonAddPopup.isSelected()) {
+      currentPopupParent = this.buttonAddPopup;
+      menuItemHexTypeColor.setEnabled(true);
+      menuItemHexTypeSVG.setEnabled(true);
       popupSelectType.show((Component) evt.getSource(), 0, ((Component) evt.getSource()).getHeight());
     }
   }//GEN-LAST:event_buttonAddPopupActionPerformed
 
   private void popupSelectTypePopupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent evt) {//GEN-FIRST:event_popupSelectTypePopupMenuWillBecomeInvisible
     buttonAddPopup.setSelected(false);
+    buttonChangeValueType.setSelected(false);
   }//GEN-LAST:event_popupSelectTypePopupMenuWillBecomeInvisible
 
   private void menuItemHexTypeColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemHexTypeColorActionPerformed
-    final DialogEditColorValue dlg = new DialogEditColorValue(null, null);
-    
-    final int position = getNewPosition();
-    
-    final HexColorValue r = (HexColorValue)dlg.showDialog();
-    if (r != null) {
-      addNewHexValueToList(position, r);
+    if (this.currentPopupParent == this.buttonChangeValueType) {
+      changeValueTypeTo(this.tableValues.getSelectedRow(), HexColorValue.class);
+    }
+    else {
+      final DialogEditColorValue dlg = new DialogEditColorValue(null, null);
+
+      final int position = getNewPosition();
+
+      final HexColorValue r = (HexColorValue) dlg.showDialog();
+      if (r != null) {
+        addNewHexValueToList(position, r);
+      }
     }
   }//GEN-LAST:event_menuItemHexTypeColorActionPerformed
 
   private void buttonRemoveSelectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonRemoveSelectedActionPerformed
     final int selectedRowIndex = this.tableValues.getSelectedRow();
     if (selectedRowIndex > 0) {
-      if (JOptionPane.showConfirmDialog(null, "Do you want to remove the index from layer field?","Confitrmation",JOptionPane.OK_CANCEL_OPTION)==JOptionPane.OK_OPTION){
+      if (JOptionPane.showConfirmDialog(null, "Do you want to remove the index from layer field?", "Confitrmation", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
         this.removedIndexes.add(Integer.valueOf(selectedRowIndex));
       }
 
       this.values.remove(selectedRowIndex);
-      
-      for(int i=0;i<this.values.size();i++){
+
+      for (int i = 0; i < this.values.size(); i++) {
         this.values.get(i).setIndex(i);
       }
-      
+
       for (final TableModelListener l : this.listeners) {
         l.tableChanged(new TableModelEvent(this));
       }
@@ -317,48 +359,72 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
   }//GEN-LAST:event_buttonRemoveSelectedActionPerformed
 
   private void menuItemHexTypeSVGActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemHexTypeSVGActionPerformed
-    final int position = getNewPosition();
-    
-    final DialogEditSVGImageValue dlg = new DialogEditSVGImageValue(null, null);
-    final HexSVGImageValue val = (HexSVGImageValue)dlg.showDialog();
-    if (val != null) {
-      addNewHexValueToList(position, val);
+    if (this.currentPopupParent == this.buttonChangeValueType) {
+      changeValueTypeTo(this.tableValues.getSelectedRow(), HexSVGImageValue.class);
+    }
+    else {
+      final int position = getNewPosition();
+      final DialogEditSVGImageValue dlg = new DialogEditSVGImageValue(null, null);
+      final HexSVGImageValue val = (HexSVGImageValue) dlg.showDialog();
+      if (val != null) {
+        addNewHexValueToList(position, val);
+      }
     }
   }//GEN-LAST:event_menuItemHexTypeSVGActionPerformed
 
   private void tableValuesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableValuesMouseClicked
-    if (evt.isPopupTrigger()){
-      
-    }else if (evt.getClickCount()>1){
-      final int selectedRow = this.tableValues.getSelectedRow();
-      if (selectedRow>0){
-        final HexFieldValue origValue = this.values.get(selectedRow);
-        final HexEditor dlg;
-        if (origValue instanceof HexColorValue){
-          dlg = new DialogEditColorValue(null, (HexColorValue)origValue);
-        }else if (origValue instanceof HexSVGImageValue){
-          dlg = new DialogEditSVGImageValue(null, (HexSVGImageValue) origValue);
-        }else{
-          JOptionPane.showMessageDialog(this, "unsupported Hex value","Error",JOptionPane.ERROR_MESSAGE);
-          return;
-        }
-        final HexFieldValue editedValue = dlg.showDialog();
-        if (editedValue!=null){
-          origValue.load(editedValue);
-          for(final TableModelListener l : this.listeners){
-            l.tableChanged(new TableModelEvent(this, selectedRow));
-          }
-        }
-      }
+    if (evt.isPopupTrigger()) {
+
+    }
+    else if (evt.getClickCount() > 1) {
+      buttonEditSelectedActionPerformed(null);
     }
   }//GEN-LAST:event_tableValuesMouseClicked
 
+  private void buttonEditSelectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditSelectedActionPerformed
+    final int selectedRow = this.tableValues.getSelectedRow();
+    if (selectedRow > 0) {
+      final HexFieldValue origValue = this.values.get(selectedRow);
+      final HexEditor dlg;
+      if (origValue instanceof HexColorValue) {
+        dlg = new DialogEditColorValue(null, (HexColorValue) origValue);
+      }
+      else if (origValue instanceof HexSVGImageValue) {
+        dlg = new DialogEditSVGImageValue(null, (HexSVGImageValue) origValue);
+      }
+      else {
+        JOptionPane.showMessageDialog(this, "unsupported Hex value", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      final HexFieldValue editedValue = dlg.showDialog();
+      if (editedValue != null) {
+        origValue.load(editedValue);
+        for (final TableModelListener l : this.listeners) {
+          l.tableChanged(new TableModelEvent(this, selectedRow));
+        }
+      }
+    }
+  }//GEN-LAST:event_buttonEditSelectedActionPerformed
+
+  private void buttonChangeValueTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonChangeValueTypeActionPerformed
+    if (buttonChangeValueType.isSelected()) {
+      final HexFieldValue origValue = this.values.get(this.tableValues.getSelectedRow());
+
+      menuItemHexTypeColor.setEnabled(!(origValue instanceof HexColorValue));
+      menuItemHexTypeSVG.setEnabled(!(origValue instanceof HexSVGImageValue));
+
+      currentPopupParent = this.buttonChangeValueType;
+
+      popupSelectType.show((Component) evt.getSource(), 0, ((Component) evt.getSource()).getHeight());
+    }
+  }//GEN-LAST:event_buttonChangeValueTypeActionPerformed
+
   private void addNewHexValueToList(final int position, final HexFieldValue v) {
     v.setIndex(position);
-    if (position<this.values.size()){
+    if (position < this.values.size()) {
       this.insertedIndexes.add(position);
     }
-    
+
     this.values.add(position, v);
     for (final TableModelListener l : this.listeners) {
       l.tableChanged(new TableModelEvent(this));
@@ -368,6 +434,8 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JToggleButton buttonAddPopup;
   private javax.swing.JButton buttonCancel;
+  private javax.swing.JToggleButton buttonChangeValueType;
+  private javax.swing.JButton buttonEditSelected;
   private javax.swing.JButton buttonRemoveSelected;
   private javax.swing.JButton buttonSave;
   private javax.swing.JLabel jLabel1;
@@ -459,16 +527,19 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
     }
   }
 
-  public int getNewPosition(){
+  public int getNewPosition() {
     final int currentSelected = this.tableValues.getSelectedRow();
-    if (currentSelected <= 0) return this.values.size();
-    if (JOptionPane.showConfirmDialog(null, "Insert the new value before the selected one?\nIf 'No' then the new one will be added at the end.","Confirmation",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+    if (currentSelected <= 0) {
+      return this.values.size();
+    }
+    if (JOptionPane.showConfirmDialog(null, "Insert the new value before the selected one?\nIf 'No' then the new one will be added at the end.", "Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
       return currentSelected;
-    }else{
+    }
+    else {
       return this.values.size();
     }
   }
-  
+
   @Override
   public void addTableModelListener(final TableModelListener l) {
     this.listeners.add(l);
@@ -483,5 +554,36 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
   public void valueChanged(final ListSelectionEvent e) {
     final int selectedRowindex = this.tableValues.getSelectedRow();
     this.buttonRemoveSelected.setEnabled(selectedRowindex > 0);
+
+    final boolean enableEdit = selectedRowindex > 0 && this.tableValues.getSelectedRowCount() == 1;
+
+    this.buttonEditSelected.setEnabled(enableEdit);
+    this.buttonChangeValueType.setEnabled(enableEdit);
+
+  }
+
+  private void changeValueTypeTo(final int index, final Class<? extends HexFieldValue> newClazz) {
+    final HexFieldValue origValue = this.values.get(index);
+    if (JOptionPane.showConfirmDialog(this.parent, "Do you really want change type of the value?","Confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+      final HexEditor dlg;
+      if (newClazz == HexColorValue.class) {
+        dlg = new DialogEditColorValue(this.parent, new HexColorValue(origValue.getName(),origValue.getComment(),Color.ORANGE,origValue.getIndex()));
+      }
+      else if (newClazz == HexSVGImageValue.class) {
+        dlg = new DialogEditSVGImageValue(this.parent, new HexSVGImageValue(origValue.getName(), origValue.getComment(), null, origValue.getIndex()));
+      }
+      else {
+        JOptionPane.showMessageDialog(this, "unsupported Hex value", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      
+      final HexFieldValue newValue = dlg.showDialog();
+      if (newValue!=null){
+        this.values.set(index, newValue);
+        for (final TableModelListener l : this.listeners) {
+          l.tableChanged(new TableModelEvent(this, index));
+        }
+      }
+    }
   }
 }
