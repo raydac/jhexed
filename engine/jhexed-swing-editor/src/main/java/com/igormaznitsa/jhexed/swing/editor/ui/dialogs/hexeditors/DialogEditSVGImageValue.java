@@ -28,47 +28,52 @@ import java.util.Locale;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexEditor {
-  
+
   private static final int PREVIEW_SIZE = 80;
-  
+
   private static File lastOpenedFile = null;
   private static final long serialVersionUID = 4558151613564722143L;
 
   private final HexSVGImageValue value;
   private HexSVGImageValue result;
-  
+  private final java.awt.Frame parent;
+
   public DialogEditSVGImageValue(java.awt.Frame parent, final HexSVGImageValue value) {
     super(parent, true);
+    this.parent = parent;
     initComponents();
-    
-    if (value == null){
+
+    if (value == null) {
       setTitle("New SVG value");
-      this.value = new HexSVGImageValue("", "", null, -1);    
+      this.value = new HexSVGImageValue("", "", null, -1);
       this.buttonOk.setEnabled(false);
-    }else{
-      setTitle("Edit SVG value '"+value.getName()+'\'');
+    }
+    else {
+      setTitle("Edit SVG value '" + value.getName() + '\'');
       this.value = (HexSVGImageValue) value.cloneValue();
     }
     load();
-    
-    if (value.getImage() == null){
+
+    if (value.getImage() == null) {
       buttonOk.setEnabled(false);
       buttonSaveAs.setEnabled(false);
     }
-    
+
     this.setLocationRelativeTo(parent);
   }
 
-  private void load(){
+  private void load() {
     this.textName.setText(this.value.getName());
     this.textComments.setText(this.value.getComment());
     final SVGImage img = this.value.getImage();
-    if (img == null){
+    if (img == null) {
       this.buttonSaveAs.setEnabled(false);
       this.panelPreview.removeAll();
-    }else{
+    }
+    else {
       try {
         final JLabel label = new JLabel(new ImageIcon(img.rasterize(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB)));
         this.panelPreview.removeAll();
@@ -81,12 +86,12 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
       }
     }
   }
-  
-  private void save(){
+
+  private void save() {
     this.value.setName(this.textName.getText());
     this.value.setComment(this.textComments.getText());
   }
-  
+
   /**
    * This method is called from within the constructor to initialize the form.
    * WARNING: Do NOT modify this code. The content of this method is always
@@ -221,25 +226,25 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
     openDialog.setDialogTitle("Select SVG file");
     openDialog.setAcceptAllFileFilterUsed(true);
     openDialog.setFileFilter(Utils.SVG_FILE_FILTER);
-    
-    if (openDialog.showOpenDialog(this) == JFileChooser.APPROVE_OPTION){
+
+    if (openDialog.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
       lastOpenedFile = openDialog.getSelectedFile();
       try {
         final SVGImage img = new SVGImage(lastOpenedFile);
 
         this.value.setImage(img);
-        
+
         this.panelPreview.removeAll();
-        this.panelPreview.add(new JLabel(new ImageIcon(img.rasterize(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB))),BorderLayout.CENTER);
+        this.panelPreview.add(new JLabel(new ImageIcon(img.rasterize(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB))), BorderLayout.CENTER);
         this.panelPreview.revalidate();
         this.panelPreview.repaint();
-        
+
         this.buttonOk.setEnabled(true);
         this.buttonSaveAs.setEnabled(true);
       }
       catch (IOException ex) {
-        Log.error("Can't rasterize image ["+lastOpenedFile+']', ex);
-        JOptionPane.showMessageDialog(this, "Can't load the file, may be it is not a SVG file","Can't load the file",JOptionPane.ERROR_MESSAGE);
+        Log.error("Can't rasterize image [" + lastOpenedFile + ']', ex);
+        JOptionPane.showMessageDialog(this, "Can't load the file, may be it is not a SVG file", "Can't load the file", JOptionPane.ERROR_MESSAGE);
       }
     }
   }//GEN-LAST:event_buttonLoadActionPerformed
@@ -268,25 +273,35 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
         return "SVG files (*.svg)";
       }
     });
-    
-    if (dlg.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
-      final File file = dlg.getSelectedFile();
-      try{
+
+    if (dlg.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+      File file = dlg.getSelectedFile();
+
+      if (FilenameUtils.getExtension(file.getName()).isEmpty()) {
+        file = new File(file.getParentFile(), file.getName() + ".svg");
+      }
+
+      if (file.exists() && JOptionPane.showConfirmDialog(this.parent, "Overwrite file '" + file.getAbsolutePath() + "\'?", "Overwriting", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
+        return;
+      }
+      try {
         FileUtils.writeByteArrayToFile(file, this.value.getImage().getImageData());
-      }catch(IOException ex){
-        Log.error("Can't write image ["+file+']', ex);
-        JOptionPane.showMessageDialog(this, "Can't save the file for error!","IO Error",JOptionPane.ERROR_MESSAGE);
+      }
+      catch (IOException ex) {
+        Log.error("Can't write image [" + file + ']', ex);
+        JOptionPane.showMessageDialog(this, "Can't save the file for error!", "IO Error", JOptionPane.ERROR_MESSAGE);
       }
     }
-    
+
+
   }//GEN-LAST:event_buttonSaveAsActionPerformed
 
   private void panelPreviewMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelPreviewMouseClicked
-    if (evt.getClickCount()>1){
+    if (evt.getClickCount() > 1) {
       this.buttonLoadActionPerformed(null);
     }
   }//GEN-LAST:event_panelPreviewMouseClicked
-  
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton buttonCancel;
@@ -311,6 +326,4 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
     return getHexEditResult();
   }
 
-  
 }
-
