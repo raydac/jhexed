@@ -50,7 +50,7 @@ public enum ToolType {
         this.options = optionsClass.getConstructor().newInstance();
       }
       catch (Throwable ex) {
-        Log.error("Can't make options ["+optionsClass+']', ex);
+        Log.error("Can't make options [" + optionsClass + ']', ex);
         return null;
       }
     }
@@ -67,20 +67,20 @@ public enum ToolType {
 
   private static void fill(final HexEngine<?> engine, final HexFieldLayer field, final int col, final int row, final int fillIndex, final int borderIndex) {
     final List<Integer> stack = new ArrayList<Integer>(16384);
-    
+
     stack.add(HexEngine.packColumnRow(col, row));
-    
-    while(!stack.isEmpty()){
-      final int stackTop = stack.remove(stack.size()-1);
+
+    while (!stack.isEmpty()) {
+      final int stackTop = stack.remove(stack.size() - 1);
       final int curColumn = HexEngine.extractColumn(stackTop);
       final int curRow = HexEngine.extractRow(stackTop);
 
       field.setValueAtPos(curColumn, curRow, fillIndex);
-      
+
       if (curColumn < 0 || curColumn >= field.getColumnNumber() || curRow < 0 || curRow >= field.getRowNumber()) {
         continue;
       }
-      
+
       final int[] packed = engine.getPackedNeighbourPositions(null, curColumn, curRow, 1);
 
       for (int i = 0; i < packed.length; i++) {
@@ -88,9 +88,17 @@ public enum ToolType {
         final int ir = HexEngine.extractRow(packed[i]);
 
         final int iv = field.getValueAtPos(ic, ir);
-        if (iv == fillIndex || iv == borderIndex) {
-          continue;
+        if (borderIndex < 0) {
+          if (iv == fillIndex || iv > 0) {
+            continue;
+          }
         }
+        else {
+          if (iv == fillIndex || iv == borderIndex) {
+            continue;
+          }
+        }
+
         field.setValueAtPos(ic, ir, fillIndex);
         stack.add(HexEngine.packColumnRow(ic, ir));
       }
@@ -133,16 +141,11 @@ public enum ToolType {
         final HexFieldValue borderValue = opt.getBorderValue();
 
         if (fillValue == null) {
-          JOptionPane.showMessageDialog(null, "You have to select the fill value", "Fill value", JOptionPane.WARNING_MESSAGE);
+          JOptionPane.showMessageDialog(null, "You must select the fill value", "Fill value", JOptionPane.WARNING_MESSAGE);
           return;
         }
 
-        if (borderValue == null) {
-          JOptionPane.showMessageDialog(null, "You have to select the border value", "Border value", JOptionPane.WARNING_MESSAGE);
-          return;
-        }
-
-        fill(engine, field, position.getColumn(), position.getRow(), fillValue.getIndex(), borderValue.getIndex());
+        fill(engine, field, position.getColumn(), position.getRow(), fillValue.getIndex(), borderValue == null ? -1 : borderValue.getIndex());
       }
       break;
       case PENCIL: {
@@ -180,7 +183,7 @@ public enum ToolType {
       return new ImageIcon(Utils.loadIcon(name));
     }
     catch (Exception ex) {
-      Log.error("Can't load image ["+name+']', ex);
+      Log.error("Can't load image [" + name + ']', ex);
       return new ImageIcon(new BufferedImage(32, 32, BufferedImage.TYPE_INT_RGB));
     }
   }

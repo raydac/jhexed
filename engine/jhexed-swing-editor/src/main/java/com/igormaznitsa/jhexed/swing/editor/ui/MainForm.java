@@ -1249,7 +1249,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void mouseWheelMoved(final MouseWheelEvent e) {
-    if ((e.getModifiers() & MouseEvent.CTRL_MASK) != 0) {
+//    if ((e.getModifiers() & MouseEvent.CTRL_MASK) != 0) 
+    {
       final int rotation = e.getWheelRotation();
 
       final Point point = e.getPoint();
