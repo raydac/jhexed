@@ -15,37 +15,48 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.exporters;
 
-import com.igormaznitsa.jhexed.engine.*;
-import com.igormaznitsa.jhexed.engine.misc.*;
+import com.igormaznitsa.jhexed.engine.HexEngine;
+import com.igormaznitsa.jhexed.engine.HexEngineModel;
+import com.igormaznitsa.jhexed.engine.misc.HexPoint2D;
+import com.igormaznitsa.jhexed.engine.misc.HexPosition;
 import com.igormaznitsa.jhexed.engine.renders.HexEngineRender;
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
-import com.igormaznitsa.jhexed.renders.Utils;
+import com.igormaznitsa.jhexed.renders.svg.SVGImage;
 import com.igormaznitsa.jhexed.swing.editor.Log;
 import com.igormaznitsa.jhexed.swing.editor.model.DocumentCellComments;
+import com.igormaznitsa.jhexed.swing.editor.ui.Utils;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.*;
 import com.igormaznitsa.jhexed.values.*;
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.Color;
 import java.io.*;
-import java.util.*;
-import java.util.List;
-import java.util.Map.Entry;
-import org.apache.batik.dom.GenericDOMImplementation;
-import org.apache.batik.gvt.GraphicsNode;
-import org.apache.batik.svggen.*;
+import java.nio.charset.Charset;
+import java.text.DecimalFormat;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
+import org.apache.commons.lang3.StringEscapeUtils;
 
-/**
- *
- * @author Igor Maznitsa (http://www.igormaznitsa.com)
- */
-public class SVGImageExporter implements Exporter {
+public class SVGImageExporter implements Exporter, HexEngineModel<SVGImageExporter> {
+
+  private enum Mode {
+
+    LAYERS,
+    BORDER,
+    COMMENTS;
+  }
+
+  private static final String HEX_SHAPE = "b";
+  private static final String HEX_MASK = "m";
+  private static final String BACKGROUND = "backImage";
+  private static final Charset UTF8 = Charset.forName("UTF-8");
 
   private final DocumentOptions docOptions;
   private final SelectLayersExportData exportData;
   private final DocumentCellComments cellComments;
+
+  private int exportingLayerCounter;
+  private Mode currentMode;
+
+  private static final DecimalFormat formatter = new DecimalFormat("0.000");
 
   public SVGImageExporter(final DocumentOptions docOptions, final SelectLayersExportData exportData, final DocumentCellComments cellComments) {
     this.docOptions = docOptions;
@@ -53,144 +64,181 @@ public class SVGImageExporter implements Exporter {
     this.cellComments = cellComments;
   }
 
-  public byte[] generateImage() throws IOException {
-    final DOMImplementation impl = GenericDOMImplementation.getDOMImplementation();
-    final String svgNS = "http://www.w3.org/2000/svg";
-    final Document myFactory = impl.createDocument(svgNS, "svg", null);
+  private static final String num2str(final float value) {
+    return formatter.format(value);
+  }
 
-    final SVGGeneratorContext ctx = SVGGeneratorContext.createDefault(myFactory);
-    ctx.setPrecision(3);
-    final SVGGraphics2D g2d = new SVGGraphics2D(ctx, false);
+  private void addHexMask(final StringBuilder buffer, final HexPoint2D[] points) {
+    buffer.append("<clipPath id=\"").append(HEX_MASK).append("\">").append(startPolygonWithCoords(null, points)).append("/></clipPath>");
+  }
 
-    if (exportData.isBackgroundImageExport() && this.docOptions.getImage() != null) {
-      this.docOptions.getImage().render(g2d);
-    }
+  private static void addSvgElement(final StringBuilder buffer, final int width, final int height) {
+    buffer.append("<svg xmlns=\"http://www.w3.org/2000/svg\"  xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"").append(width).append("\" height=\"").append(height).append("\">\n");
+  }
 
-    final HexEngine<SVGGraphics2D> engine = new HexEngine<SVGGraphics2D>(48, 48, this.docOptions.getHexOrientation());
+  private static void addEndSvgElement(final StringBuilder buffer) {
+    buffer.append("</svg>\n");
+  }
 
-    final List<HexFieldLayer> reversedNormalizedStack = new ArrayList<HexFieldLayer>();
-    for (int i = this.exportData.getLayers().size() - 1; i >= 0; i--) {
-      final LayerExportRecord rec = this.exportData.getLayers().get(i);
-      if (rec.isAllowed()) {
-        reversedNormalizedStack.add(rec.getLayer());
-      }
-    }
-
-    final HexFieldValue[] stackOfValues = new HexFieldValue[reversedNormalizedStack.size()];
-
-    engine.setModel(new HexEngineModel<HexFieldValue[]>() {
-
-      @Override
-      public int getColumnNumber() {
-        return docOptions.getColumns();
-      }
-
-      @Override
-      public int getRowNumber() {
-        return docOptions.getRows();
-      }
-
-      @Override
-      public HexFieldValue[] getValueAt(final int col, final int row) {
-        Arrays.fill(stackOfValues, null);
-
-        for (int index = 0; index < reversedNormalizedStack.size(); index++) {
-          stackOfValues[index] = reversedNormalizedStack.get(index).getHexValueAtPos(col, row);
+  private void drawCell(final StringBuilder buffer, final float x, final float y, final float cellWidth, final float cellHeight, final int col, final int row) {
+    switch (currentMode) {
+      case LAYERS: {
+        final HexFieldLayer thelayer = this.exportData.getLayers().get(this.exportingLayerCounter).getLayer();
+        final HexFieldValue thevalue = thelayer.getHexValueAtPos(col, row);
+        if (thevalue != null) {
+          final String id = vid(this.exportingLayerCounter, thevalue.getIndex());
+          buffer.append("<g transform=\"translate(").append(num2str(x)).append(',').append(num2str(y)).append(")\" clip-path=\"url(#").append(HEX_MASK).append(")\">")
+                  .append("<use xlink:href=\"#").append(id).append("\"/></g>\n");
         }
-        return stackOfValues;
       }
-
-      @Override
-      public HexFieldValue[] getValueAt(final HexPosition pos) {
-        return this.getValueAt(pos.getColumn(), pos.getRow());
+      break;
+      case BORDER: {
+        buffer.append("<use xlink:href=\"#").append(HEX_SHAPE).append("\" x=\"").append(num2str(x)).append("\" y=\"").append(num2str(y)).append("\"/>\n");
       }
-
-      @Override
-      public void setValueAt(int col, int row, HexFieldValue[] value) {
+      break;
+      case COMMENTS: {
+        final String text = this.cellComments.getForHex(new HexPosition(col, row));
+        if (text != null) {
+          final float thex = x+(cellWidth/2.0f);
+          buffer.append("<text x=\"").append(num2str(thex)).append("\" y=\"").append(num2str(y-5.0f)).append("\" style=\"text-anchor:middle;font-size:12;font-weight:bold;font-family:Arial;fill:white;stroke:black;stroke-width:0.5\">")
+                  .append(StringEscapeUtils.escapeXml10(text))
+                  .append("</text>\n");
+        }
       }
+      break;
+    }
+  }
 
-      @Override
-      public void setValueAt(HexPosition pos, HexFieldValue[] value) {
+  private String startPolygonWithCoords(final String id, final HexPoint2D[] points) {
+    final StringBuilder buffer = new StringBuilder();
+    buffer.append("<polygon");
+    if (id != null) {
+      buffer.append(" id=\"").append(id).append('\"');
+    }
+    buffer.append(" points=\"");
+    boolean nofirst = false;
+    for (final HexPoint2D p : points) {
+      if (nofirst) {
+        buffer.append(' ');
       }
-
-      @Override
-      public boolean isPositionValid(final int col, final int row) {
-        return col >= 0 && col < docOptions.getColumns() && row >= 0 && row < docOptions.getRows();
+      else {
+        nofirst = true;
       }
+      buffer.append(num2str(p.getX())).append(',').append(num2str(p.getY()));
+    }
+    buffer.append('\"');
+    return buffer.toString();
+  }
 
-      @Override
-      public boolean isPositionValid(final HexPosition pos) {
-        return this.isPositionValid(pos.getColumn(), pos.getRow());
-      }
+  private void defineGridCell(final StringBuilder buffer, final HexPoint2D[] hexPoints) {
+    buffer.append(startPolygonWithCoords(HEX_SHAPE, hexPoints)).append(" style=\"stroke:").append(Utils.color2html(this.docOptions.getColor(), false))
+            .append(";stroke-width:").append(num2str(this.docOptions.getLineWidth()))
+            .append(";fill:none;\"/>\n");
+  }
 
-      @Override
-      public void attachedToEngine(final HexEngine<?> engine) {
-      }
+  private static String alphaToSVG(final Color color) {
+    final int a = color.getAlpha();
+    if (a == 0) {
+      return "0.0";
+    }
+    if (a >= 255) {
+      return "1.0";
+    }
+    return num2str((float) a / (float) 255);
+  }
 
-      @Override
-      public void detachedFromEngine(final HexEngine<?> engine) {
-      }
-    });
+  private static String vid(final int layerIndex, final int valueIndex) {
+    return "l" + layerIndex + '_' + valueIndex;
+  }
 
-    final HexRect2D visibleSize = engine.getVisibleSize();
-    if (this.docOptions.getImage() != null) {
-      final float xcoeff = this.docOptions.getImage().getSVGWidth() / visibleSize.getWidth();
-      final float ycoeff = this.docOptions.getImage().getSVGHeight() / visibleSize.getHeight();
-      engine.setScale(xcoeff, ycoeff);
+  private static String svgToImageTag(final String id, final SVGImage svgImage, final float cellWidth, final float cellHeight, final boolean scale) {
+    final String baseEncoded = new Base64().encodeAsString(svgImage.getImageData());
+    final StringBuilder result = new StringBuilder("<image id=\"").append(id).append('\"');
+
+    final String xscale = scale ? num2str(cellWidth / svgImage.getSVGWidth()) : null;
+    final String yscale = scale ? num2str(cellHeight / svgImage.getSVGHeight()) : null;
+
+    result.append(" xlink:href=\"data:image/svg+xml;base64,").append(baseEncoded).append('\"');
+    result.append(" width=\"").append(num2str(svgImage.getSVGWidth())).append("\" height=\"").append(svgImage.getSVGHeight()).append('\"');
+    if (scale) {
+      result.append(" transform=\"scale(").append(xscale).append(',').append(yscale).append(")\"");
     }
 
-    final Path2D hexShape = Utils.getHexShapeAsPath(engine, true);
-    final int cellWidth = hexShape.getBounds().width;
-    final int cellHeight = hexShape.getBounds().height;
+    result.append("/>");
+    return result.toString();
+  }
 
-    final HexFieldValue[][] cachedIcons = new HexFieldValue[this.exportData.getLayers().size()][];
-    engine.setRenderer(new HexEngineRender<SVGGraphics2D>() {
-      @Override
-      public void renderHexCell(final HexEngine<SVGGraphics2D> engine, final SVGGraphics2D gfx, final float x, final float y, final int col, final int row) {
-        final HexFieldValue[] stackValues = (HexFieldValue[]) engine.getModel().getValueAt(col, row);
-        for (int i = 0; i < stackValues.length; i++) {
-          final HexFieldValue valueToDraw = stackValues[i];
-          if (valueToDraw == null) {
+  private void defineLayerValues(final StringBuilder buffer, final HexEngine<?> engine) {
+    int layerindex = 0;
+
+    final HexPoint2D[] shape = engine.getHexScaledPoints();
+
+    final float cellwidth = engine.getScaledCellWidth();
+    final float cellheight = engine.getScaledCellHeight();
+
+    for (final LayerExportRecord rec : this.exportData.getLayers()) {
+      if (rec.isAllowed()) {
+        final HexFieldLayer layer = rec.getLayer();
+
+        for (int i = 0; i < layer.getHexValuesNumber(); i++) {
+          final HexFieldValue v = layer.getHexValueForIndex(i);
+          if (v == null) {
             continue;
           }
-          drawValue(gfx, x, y, cachedIcons[i][valueToDraw.getIndex()]);
+          final String id = vid(layerindex, v.getIndex());
+          if (v instanceof NullHexValue) {
+            continue;
+          }
+          else {
+            if (v instanceof HexColorValue) {
+              final HexColorValue thevalue = (HexColorValue) v;
+              buffer.append(startPolygonWithCoords(id, shape)).append(" style=\"stroke:none;fill:").append(Utils.color2html(thevalue.getColor(), false)).append(";fill-opacity:").append(alphaToSVG(thevalue.getColor())).append("\"/>\n");
+            }
+            else if (v instanceof HexSVGImageValue) {
+              final HexSVGImageValue thevalue = (HexSVGImageValue) v;
+              buffer.append(svgToImageTag(id, thevalue.getImage(), cellwidth, cellheight, true)).append('\n');
+            }
+          }
         }
       }
+      layerindex++;
+    }
+  }
 
-      private void drawValue(final SVGGraphics2D gfx, float x, float y, final HexFieldValue val) {
-        hexShape.transform(AffineTransform.getTranslateInstance(x, y));
-        try {
-          if (val instanceof HexColorValue) {
-            final HexColorValue v = (HexColorValue) val;
-            gfx.setPaint(v.getColor());
-            gfx.fill(hexShape);
-          }
-          else if (val instanceof HexSVGImageValue) {
-            gfx.setClip(hexShape);
-            final HexSVGImageValue v = (HexSVGImageValue) val;
+  public byte[] generateImage() throws IOException {
+    final StringBuilder buffer = new StringBuilder(128000);
+    buffer.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
+    buffer.append("<!--").append(StringEscapeUtils.escapeXml10("Generated by the JHexed Swing Editor (https://code.google.com/p/jhexed/)")).append("-->\n");
+    
+    final HexEngine<SVGImageExporter> engine = new HexEngine<SVGImageExporter>(64, 64, this.docOptions.getHexOrientation());
+    engine.setModel(this);
 
-            final GraphicsNode obj = v.getImage().getSVGGraphicsNode();
-            final AffineTransform t = obj.getTransform();
-            try {
-              final AffineTransform tr = AffineTransform.getTranslateInstance(x, y);
-              tr.scale(cellWidth / v.getImage().getSVGWidth(), cellHeight / v.getImage().getSVGHeight());
-              obj.setTransform(tr);
-              gfx.setClip(hexShape);
-              obj.paint(gfx);
-            }
-            finally {
-              if (t == null) {
-                obj.setTransform(new AffineTransform());
-              }
-              else {
-                obj.setTransform(t);
-              }
-            }
-          }
-        }
-        finally {
-          hexShape.transform(AffineTransform.getTranslateInstance(-x, -y));
-        }
+    if (this.docOptions.getImage() != null) {
+      final float imageWidth = this.docOptions.getImage().getSVGWidth();
+      final float imageHeight = this.docOptions.getImage().getSVGHeight();
+      engine.setScale(imageWidth / engine.getVisibleSize().getWidth(), imageHeight / engine.getVisibleSize().getHeight());
+    }
+
+    addSvgElement(buffer, engine.getVisibleSize().getWidthAsInt(), engine.getVisibleSize().getHeightAsInt());
+
+    buffer.append("<defs>");
+    addHexMask(buffer, engine.getHexScaledPoints());
+    if (this.exportData.isExportHexBorders()) {
+      defineGridCell(buffer, engine.getHexScaledPoints());
+    }
+    
+    defineLayerValues(buffer, engine);
+    buffer.append("</defs>\n");
+
+    if (this.exportData.isBackgroundImageExport() && this.docOptions.getImage() != null) {
+      buffer.append(svgToImageTag(BACKGROUND, this.docOptions.getImage(), exportingLayerCounter, exportingLayerCounter, false)).append('\n');
+    }
+
+    engine.setRenderer(new HexEngineRender<SVGImageExporter>() {
+
+      @Override
+      public void renderHexCell(final HexEngine<SVGImageExporter> engine, final SVGImageExporter gfx, final float x, final float y, final int col, final int row) {
+        drawCell(buffer, x, y, engine.getScaledCellWidth(),engine.getScaledCellHeight(),col, row);
       }
 
       @Override
@@ -203,72 +251,92 @@ public class SVGImageExporter implements Exporter {
 
     });
 
-    for (int layerIndex = 0; layerIndex < reversedNormalizedStack.size() && !Thread.currentThread().isInterrupted(); layerIndex++) {
-      final HexFieldLayer theLayer = reversedNormalizedStack.get(layerIndex);
-      final HexFieldValue[] cacheLineForLayer = new HexFieldValue[theLayer.getHexValuesNumber()];
-      for (int valueIndex = 1; valueIndex < theLayer.getHexValuesNumber(); valueIndex++) {
-        cacheLineForLayer[valueIndex] = theLayer.getHexValueForIndex(valueIndex);
-      }
-      cachedIcons[layerIndex] = cacheLineForLayer;
-    }
-
-    engine.drawWithThreadInterruptionCheck(g2d);
-
-    if (Thread.currentThread().isInterrupted()) return null;
-    
-    if (this.exportData.isExportHexBorders()) {
-      g2d.setStroke(new BasicStroke(docOptions.getLineWidth()));
-      g2d.setColor(docOptions.getColor());
-      for (int x = 0; x < engine.getModel().getColumnNumber() && !Thread.currentThread().isInterrupted(); x++) {
-        for (int y = 0; y < engine.getModel().getRowNumber(); y++) {
-          final float cx = engine.calculateX(x, y);
-          final float cy = engine.calculateY(x, y);
-          g2d.translate(cx, cy);
-          g2d.draw(hexShape);
-          g2d.translate(-cx, -cy);
-        }
+    buffer.append("<g id=\"LAYERS\">\n");
+    currentMode = Mode.LAYERS;
+    for (int i = exportData.getLayers().size()-1; i>=0; i--) {
+      exportingLayerCounter = i;
+      final LayerExportRecord rec = exportData.getLayers().get(i);
+      if (rec.isAllowed()) {
+        buffer.append("<g id=\"layer").append(exportingLayerCounter).append("\">\n");
+        engine.draw(this);
+        buffer.append("</g>\n");
       }
     }
+    buffer.append("</g>\n");
 
-    if (this.exportData.isCellCommentariesExport()) {
-      final Iterator<Entry<HexPosition, String>> iterator = this.cellComments.iterator();
-      g2d.setFont(new Font("Arial", Font.BOLD, 12));
-      while (!Thread.currentThread().isInterrupted() && iterator.hasNext()) {
-        final Entry<HexPosition, String> item = iterator.next();
-        final HexPosition pos = item.getKey();
-        final String text = item.getValue();
-        final float x = engine.calculateX(pos.getColumn(), pos.getRow());
-        final float y = engine.calculateY(pos.getColumn(), pos.getRow());
-
-        final Rectangle2D textBounds = g2d.getFontMetrics().getStringBounds(text, g2d);
-
-        final float dx = x - ((float) textBounds.getWidth() - engine.getCellWidth()) / 2;
-
-        g2d.setColor(Color.BLACK);
-        g2d.drawString(text, dx, y);
-        g2d.setColor(Color.WHITE);
-        g2d.drawString(text, dx - 2, y - 2);
-      }
+    if (exportData.isExportHexBorders()) {
+      currentMode = Mode.BORDER;
+      buffer.append("<g id=\"HEXES\">\n");
+      engine.draw(this);
+      buffer.append("</g>\n");
     }
 
-    if (Thread.currentThread().isInterrupted()) return null;
-    
-    final ByteArrayOutputStream result = new ByteArrayOutputStream(256000);
-    final Writer writer = new OutputStreamWriter(result, "UTF-8");
-    g2d.stream(writer, true);
-    writer.close();
-    g2d.dispose();
+    if (exportData.isCellCommentariesExport()) {
+      currentMode = Mode.COMMENTS;
+      buffer.append("<g id=\"COMMENTS\">\n");
+      engine.draw(this);
+      buffer.append("</g>\n");
+    }
 
-    return result.toByteArray();
+    addEndSvgElement(buffer);
+
+    return buffer.toString().getBytes(UTF8);
   }
 
   @Override
   public void export(final File file) throws IOException {
     final byte[] img = generateImage();
-    if (img!=null && !Thread.currentThread().isInterrupted()) {
+    if (img != null && !Thread.currentThread().isInterrupted()) {
       FileUtils.writeByteArrayToFile(file, img);
-    }else{
+    }
+    else {
       Log.warn("SVG export thread has been interrupted");
     }
+  }
+
+  @Override
+  public int getColumnNumber() {
+    return this.docOptions.getColumns();
+  }
+
+  @Override
+  public int getRowNumber() {
+    return this.docOptions.getRows();
+  }
+
+  @Override
+  public SVGImageExporter getValueAt(final int col, final int row) {
+    return this;
+  }
+
+  @Override
+  public SVGImageExporter getValueAt(final HexPosition pos) {
+    return this;
+  }
+
+  @Override
+  public void setValueAt(int col, int row, SVGImageExporter value) {
+  }
+
+  @Override
+  public void setValueAt(HexPosition pos, SVGImageExporter value) {
+  }
+
+  @Override
+  public boolean isPositionValid(int col, int row) {
+    return true;
+  }
+
+  @Override
+  public boolean isPositionValid(HexPosition pos) {
+    return true;
+  }
+
+  @Override
+  public void attachedToEngine(HexEngine<?> engine) {
+  }
+
+  @Override
+  public void detachedFromEngine(HexEngine<?> engine) {
   }
 }

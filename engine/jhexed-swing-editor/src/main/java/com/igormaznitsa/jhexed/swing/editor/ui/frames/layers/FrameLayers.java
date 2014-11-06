@@ -20,11 +20,12 @@ import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.EditLayerDialog;
 import com.igormaznitsa.jhexed.hexmap.HexMapPanel;
 import com.igormaznitsa.jhexed.hexmap.HexMapPanelListener;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
+import com.igormaznitsa.jhexed.swing.editor.ui.frames.AbstractToolFrame;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameType;
 import java.awt.geom.Path2D;
 import javax.swing.JOptionPane;
 
-public class FrameLayers extends javax.swing.JInternalFrame implements InsideApplicationBus.AppBusListener, HexMapPanelListener {
+public class FrameLayers extends AbstractToolFrame implements HexMapPanelListener {
   private static final long serialVersionUID = -3120809272379715966L;
   private final LayerListComponent layerList;
 
@@ -182,10 +183,10 @@ public class FrameLayers extends javax.swing.JInternalFrame implements InsideApp
   }//GEN-LAST:event_buttonLayerDownActionPerformed
 
   private void buttonDeleteLayerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteLayerActionPerformed
-    final LayerRecordPanel panel = this.layerList.getSelectedValue();
-    if (panel!=null){
-      if (JOptionPane.showConfirmDialog(null, "Do you really want to remove '"+panel.getLayer().getLayerName()+'\'',"Delete layer",JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
-        this.layerList.delete(panel.getLayer());
+    final LayerRecordPanel thelayerpanel = this.layerList.getSelectedValue();
+    if (thelayerpanel!=null){
+      if (JOptionPane.showConfirmDialog(null, "Do you really want to remove '"+thelayerpanel.getLayer().getLayerName()+'\'',"Delete layer",JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
+        this.layerList.delete(thelayerpanel.getLayer());
         this.layerList.clearSelection();
         InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED,(Object)null);
         InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT);
@@ -194,9 +195,9 @@ public class FrameLayers extends javax.swing.JInternalFrame implements InsideApp
   }//GEN-LAST:event_buttonDeleteLayerActionPerformed
 
   private void buttonEditLayerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditLayerActionPerformed
-    final LayerRecordPanel panel = this.layerList.getSelectedValue();
-    if (panel!=null){
-      InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.LAYER_NEEDS_EDITION, panel);
+    final LayerRecordPanel thelayerpanel = this.layerList.getSelectedValue();
+    if (thelayerpanel!=null){
+      InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.LAYER_NEEDS_EDITION, thelayerpanel);
     }
   }//GEN-LAST:event_buttonEditLayerActionPerformed
 

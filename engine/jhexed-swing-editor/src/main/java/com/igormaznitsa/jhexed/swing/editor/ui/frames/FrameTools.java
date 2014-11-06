@@ -22,11 +22,12 @@ import java.util.Enumeration;
 import javax.swing.*;
 import org.jdesktop.swingx.WrapLayout;
 
-public class FrameTools extends javax.swing.JInternalFrame implements InsideApplicationBus.AppBusListener, ActionListener {
+public class FrameTools extends AbstractToolFrame implements ActionListener {
 
   private static final long serialVersionUID = -2106015366224156744L;
 
   public FrameTools() {
+    super();
     initComponents();
 
     InsideApplicationBus.getInstance().addAppBusListener(this);

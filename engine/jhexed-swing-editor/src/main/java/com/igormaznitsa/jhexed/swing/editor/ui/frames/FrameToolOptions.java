@@ -19,7 +19,7 @@ import com.igormaznitsa.jhexed.swing.editor.model.*;
 import java.awt.*;
 import javax.swing.*;
 
-public class FrameToolOptions extends javax.swing.JInternalFrame implements InsideApplicationBus.AppBusListener {
+public class FrameToolOptions extends AbstractToolFrame {
   private static final long serialVersionUID = -1997778093948284499L;
   private final JPanel NO_SELECTED_TOOL;
   

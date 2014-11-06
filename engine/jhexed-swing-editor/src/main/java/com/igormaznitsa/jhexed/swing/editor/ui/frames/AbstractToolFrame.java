@@ -1,5 +1,5 @@
-/* 
- * Copyright 2014 Igor Maznitsa (http://www.igormaznitsa.com).
+/*
+ * Copyright 2014 Igor Maznitsa.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,13 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.frames;
 
-import com.igormaznitsa.jhexed.swing.editor.model.ToolType;
-import java.awt.Insets;
-import javax.swing.JToggleButton;
+import com.igormaznitsa.jhexed.swing.editor.model.InsideApplicationBus;
 
-public class ToolButton extends JToggleButton {
-  private static final long serialVersionUID = -4462439797288345867L;
-  private final ToolType type;
-  
-  public ToolButton(final ToolType type){
+public abstract class AbstractToolFrame extends javax.swing.JInternalFrame implements InsideApplicationBus.AppBusListener {
+  private static final long serialVersionUID = -1514813425003341373L;
+
+  public AbstractToolFrame() {
     super();
-    this.type = type;
-    this.setMargin(new Insets(5, 5, 5, 5));
   }
   
-  public ToolType getType(){
-    return this.type;
-  }
 }
