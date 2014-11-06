@@ -269,6 +269,15 @@ public final class HexEngine<G> {
   }
 
   /**
+   * Get scaled cell width
+   *
+   * @return the current scaled cell width
+   */
+  public float getScaledCellWidth() {
+    return this.scaledCellWidth;
+  }
+
+  /**
    * Get cell height
    * @return the cell height
    */
@@ -276,6 +285,15 @@ public final class HexEngine<G> {
     return this.cellHeight;
   }
 
+  /**
+   * Get scaled cell height
+   *
+   * @return the current scaled cell height
+   */
+  public float getScaledCellHeight() {
+    return this.scaledCellHeight;
+  }
+  
   /**
    * Register a hex engine listener.
    * @param listener
