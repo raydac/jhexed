@@ -92,6 +92,7 @@ public abstract class AbstractDialog extends JDialog {
     final JRootPane theRootPane = new JRootPane();
     final KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
     final Action actionListener = new AbstractAction() {
+      private static final long serialVersionUID = -5644390861803492172L;
 
       @Override
       public void actionPerformed(final ActionEvent e) {
