@@ -16,12 +16,14 @@
 package com.igormaznitsa.jhexed.swing.editor.ui.extensions;
 
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.AbstractDialog;
 import com.igormaznitsa.jhexed.swing.editor.ui.tooloptions.LayerValueIconList;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
+import java.awt.event.ActionEvent;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.ImageIcon;
 
-public class SelectValueDialog extends javax.swing.JDialog implements LayerValueIconList.LayerIconListListener{
+public class SelectValueDialog extends AbstractDialog implements LayerValueIconList.LayerIconListListener{
   private static final long serialVersionUID = 883383692539345227L;
 
   private HexFieldValue [] selected = null;
@@ -134,5 +136,10 @@ public class SelectValueDialog extends javax.swing.JDialog implements LayerValue
   @Override
   public void onRightClick(final HexFieldValue h, final ImageIcon icon) {
     onLeftClick(h, icon);
+  }
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+    buttonCancelActionPerformed(e);
   }
 }

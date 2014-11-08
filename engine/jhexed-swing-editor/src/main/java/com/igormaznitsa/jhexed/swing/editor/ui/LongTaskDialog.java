@@ -15,11 +15,13 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui;
 
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.AbstractDialog;
+import java.awt.event.ActionEvent;
 import java.util.Timer;
 import java.util.concurrent.*;
 import javax.swing.SwingUtilities;
 
-public class LongTaskDialog extends javax.swing.JDialog {
+public class LongTaskDialog extends AbstractDialog {
   private static final long serialVersionUID = -5421216804205052165L;
 
   private static final ExecutorService executors = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -144,4 +146,8 @@ public class LongTaskDialog extends javax.swing.JDialog {
   private javax.swing.JLabel labelTaskName;
   private javax.swing.JProgressBar progressBar;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+  }
 }

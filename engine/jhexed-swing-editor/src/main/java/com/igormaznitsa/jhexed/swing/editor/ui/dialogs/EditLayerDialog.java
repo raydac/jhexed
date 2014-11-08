@@ -24,6 +24,7 @@ import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.hexeditors.DialogEditColo
 import com.igormaznitsa.jhexed.swing.editor.model.*;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.hexeditors.HexEditor;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.geom.Path2D;
 import java.util.*;
 import java.util.List;
@@ -31,7 +32,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.TableModel;
 
-public class EditLayerDialog extends javax.swing.JDialog implements TableModel, ListSelectionListener {
+public class EditLayerDialog extends AbstractDialog implements TableModel, ListSelectionListener {
 
   private static final int ICON_SIZE = 48;
 
@@ -585,5 +586,10 @@ public class EditLayerDialog extends javax.swing.JDialog implements TableModel, 
         }
       }
     }
+  }
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+    buttonCancelActionPerformed(e);
   }
 }

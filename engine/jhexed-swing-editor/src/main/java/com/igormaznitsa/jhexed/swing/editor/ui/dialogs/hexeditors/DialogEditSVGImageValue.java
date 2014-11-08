@@ -20,7 +20,9 @@ import com.igormaznitsa.jhexed.swing.editor.Log;
 import com.igormaznitsa.jhexed.values.HexSVGImageValue;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
 import com.igormaznitsa.jhexed.swing.editor.ui.Utils;
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.AbstractDialog;
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +32,7 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
-public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexEditor {
+public class DialogEditSVGImageValue extends AbstractDialog implements HexEditor {
 
   private static final int PREVIEW_SIZE = 80;
 
@@ -324,6 +326,11 @@ public class DialogEditSVGImageValue extends javax.swing.JDialog implements HexE
   public HexFieldValue showDialog() {
     this.setVisible(true);
     return getHexEditResult();
+  }
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+    buttonCancelActionPerformed(e);
   }
 
 }

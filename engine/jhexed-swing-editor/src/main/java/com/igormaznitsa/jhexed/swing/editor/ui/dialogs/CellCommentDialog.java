@@ -15,13 +15,10 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-/**
- *
- * @author Igor Maznitsa (http://www.igormaznitsa.com)
- */
-public class CellCommentDialog extends javax.swing.JDialog {
+public class CellCommentDialog extends AbstractDialog {
 
   private static final long serialVersionUID = 2114970595029076215L;
 
@@ -142,5 +139,10 @@ public class CellCommentDialog extends javax.swing.JDialog {
 
   public String getResult() {
     return this.result;
+  }
+
+  @Override
+  public void processEscape(ActionEvent e) {
+    buttonCancelActionPerformed(e);
   }
 }

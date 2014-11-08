@@ -15,7 +15,10 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.extensions;
 
-public class LongInfoDialog extends javax.swing.JDialog {
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.AbstractDialog;
+import java.awt.event.ActionEvent;
+
+public class LongInfoDialog extends AbstractDialog {
   private static final long serialVersionUID = -5138953562455242739L;
 
   public LongInfoDialog(final java.awt.Frame parent, final String title, final String text) {
@@ -90,4 +93,9 @@ public class LongInfoDialog extends javax.swing.JDialog {
   private javax.swing.JScrollPane scrollText;
   private javax.swing.JTextArea textArea;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+    buttonOkActionPerformed(e);
+  }
 }

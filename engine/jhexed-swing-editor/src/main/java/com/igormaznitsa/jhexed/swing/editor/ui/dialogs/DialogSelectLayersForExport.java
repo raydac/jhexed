@@ -15,6 +15,7 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs;
 
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.event.TableModelListener;
@@ -24,10 +25,9 @@ import javax.swing.table.TableModel;
  *
  * @author Igor Maznitsa (http://www.igormaznitsa.com)
  */
-public class DialogSelectLayersForExport extends javax.swing.JDialog {
+public class DialogSelectLayersForExport extends AbstractDialog {
   private static final long serialVersionUID = -6786553292919498744L;
 
-  
   
   private static class LayersModel implements TableModel{
 
@@ -254,4 +254,9 @@ public class DialogSelectLayersForExport extends javax.swing.JDialog {
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JTable tableListOfLayers;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+    buttonCancelActionPerformed(e);
+  }
 }

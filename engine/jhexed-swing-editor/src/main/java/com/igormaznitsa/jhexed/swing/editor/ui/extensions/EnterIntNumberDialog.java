@@ -15,9 +15,11 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.extensions;
 
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.AbstractDialog;
+import java.awt.event.ActionEvent;
 import javax.swing.SpinnerModel;
 
-public class EnterIntNumberDialog extends javax.swing.JDialog {
+public class EnterIntNumberDialog extends AbstractDialog {
   private static final long serialVersionUID = 941086763102265587L;
 
   boolean ok;
@@ -125,4 +127,9 @@ public class EnterIntNumberDialog extends javax.swing.JDialog {
   private javax.swing.JLabel labelText;
   private javax.swing.JSpinner spinnerValue;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+    buttonCancelActionPerformed(e);
+  }
 }

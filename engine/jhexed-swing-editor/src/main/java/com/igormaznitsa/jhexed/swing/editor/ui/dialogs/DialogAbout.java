@@ -17,10 +17,11 @@ package com.igormaznitsa.jhexed.swing.editor.ui.dialogs;
 
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.event.ActionEvent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-public class DialogAbout extends javax.swing.JDialog {
+public class DialogAbout extends AbstractDialog {
   private static final long serialVersionUID = -8850290336144697768L;
 
   public DialogAbout(java.awt.Frame parent) {
@@ -120,4 +121,9 @@ public class DialogAbout extends javax.swing.JDialog {
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JLabel labelImage;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void processEscape(ActionEvent e) {
+    buttonCloseActionPerformed(e);
+  }
 }

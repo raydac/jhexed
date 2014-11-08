@@ -20,10 +20,11 @@ import com.igormaznitsa.jhexed.renders.svg.SVGImage;
 import com.igormaznitsa.jhexed.swing.editor.Log;
 import com.igormaznitsa.jhexed.swing.editor.ui.Utils;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.*;
 import javax.swing.*;
 
-public class DialogDocumentOptions extends javax.swing.JDialog {
+public class DialogDocumentOptions extends AbstractDialog {
 
   private static final long serialVersionUID = 252529293457935862L;
 
@@ -357,4 +358,9 @@ public class DialogDocumentOptions extends javax.swing.JDialog {
   private javax.swing.JSpinner spinnerNumberRows;
   private javax.swing.JTextArea textCommentary;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+    buttonCancelActionPerformed(e);
+  }
 }

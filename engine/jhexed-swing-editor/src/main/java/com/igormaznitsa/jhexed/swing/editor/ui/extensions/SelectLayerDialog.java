@@ -17,13 +17,15 @@ package com.igormaznitsa.jhexed.swing.editor.ui.extensions;
 
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.model.LayerListModel;
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.AbstractDialog;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.layers.LayerRecordPanel;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 @SuppressWarnings("rawtypes")
-public class SelectLayerDialog extends javax.swing.JDialog {
+public class SelectLayerDialog extends AbstractDialog {
   private static final long serialVersionUID = 6969556541848786336L;
 
   private HexFieldLayer [] result;
@@ -151,4 +153,9 @@ public class SelectLayerDialog extends javax.swing.JDialog {
   private javax.swing.JList listOfLayers;
   private javax.swing.JScrollPane scrollLayers;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+    buttonCancelActionPerformed(e);
+  }
 }

@@ -15,6 +15,7 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.dialogs.hexeditors;
 
+import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.AbstractDialog;
 import com.igormaznitsa.jhexed.values.HexColorValue;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.awt.BorderLayout;
@@ -28,7 +29,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.event.MouseInputListener;
 
-public class DialogEditColorValue extends javax.swing.JDialog implements HexEditor, ActionListener {
+public class DialogEditColorValue extends AbstractDialog implements HexEditor, ActionListener {
   private static final long serialVersionUID = -1165115255188795383L;
 
   private static final class ColorLabel extends JLabel {
@@ -400,4 +401,9 @@ public class DialogEditColorValue extends javax.swing.JDialog implements HexEdit
   private javax.swing.JEditorPane textComments;
   private javax.swing.JTextField textName;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void processEscape(final ActionEvent e) {
+    buttonCancelActionPerformed(e);
+  }
 }

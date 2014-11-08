@@ -86,6 +86,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   public static final Preferences REGISTRY = Preferences.userRoot().node(MainForm.class.getName());
 
+  private final JPopupMenu popupMenu;
+  private HexPosition popupHex;
+  
   public MainForm(final String fileToOpen) {
     initComponents();
 
@@ -109,6 +112,24 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       menuLANDF.add(landfItem);
     }
 
+    popupMenu = new JPopupMenu();
+    final JMenuItem comments = new JMenuItem("Comments");
+    comments.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        // open dialog for cell comment
+        final CellCommentDialog commentDialog = new CellCommentDialog(theFrame, "Commentaries for " + popupHex.getColumn() + "," + popupHex.getRow() + " cell", cellComments.getForHex(popupHex));
+        commentDialog.setVisible(true);
+        final String result = commentDialog.getResult();
+        if (result != null) {
+          cellComments.setForHex(popupHex, result);
+        }
+      }
+    });
+    popupMenu.add(comments);
+    
+    
     hexMapPanelDesktop = new Desktop();
     layers = new LayerListModel(256, 128);
 
@@ -1058,6 +1079,13 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
+  private void onPopup(final Point mousePoint, final HexPosition hexNumber){
+    this.popupHex = hexNumber;
+    if (hexNumber != null && this.hexMapPanel.isValidPosition(hexNumber)) {
+      popupMenu.show(this.hexMapPanel, mousePoint.x, mousePoint.y);
+    }
+  }
+  
   @Override
   public void mouseClicked(final MouseEvent e) {
     switch (e.getButton()) {
@@ -1066,50 +1094,50 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         useCurrentToolAtPosition(hexNumber);
       }
       break;
-      case MouseEvent.BUTTON3: {
-        if (e.getClickCount() > 1) {
-          final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
-          if (hexNumber != null && this.hexMapPanel.isValidPosition(hexNumber)) {
-            // open dialog for cell comment
-            final CellCommentDialog commentDialog = new CellCommentDialog(this, "Commentaries for " + hexNumber.getColumn() + "," + hexNumber.getRow() + " cell", this.cellComments.getForHex(hexNumber));
-            commentDialog.setVisible(true);
-            final String result = commentDialog.getResult();
-            if (result != null) {
-              this.cellComments.setForHex(hexNumber, result);
-            }
-          }
-        }
-      }
     }
   }
 
   @Override
   public void mousePressed(final MouseEvent e) {
-    switch (e.getButton()) {
-      case MouseEvent.BUTTON1: {
-        if (selectedToolType != null && this.selectedLayer != null) {
-          addedUndoStep(new HexFieldLayer[]{this.selectedLayer});
-          final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
-          useCurrentToolAtPosition(hexNumber);
+    if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0 && e.isPopupTrigger()) {
+      final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
+      onPopup(e.getPoint(), hexNumber);
+    }
+    else {
+      switch (e.getButton()) {
+        case MouseEvent.BUTTON1: {
+          if (selectedToolType != null && this.selectedLayer != null) {
+            addedUndoStep(new HexFieldLayer[]{this.selectedLayer});
+            final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
+            useCurrentToolAtPosition(hexNumber);
+          }
         }
+        break;
+        case MouseEvent.BUTTON3: {
+          if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
+            this.dragging = true;
+            this.hexMapPanelDesktop.initDrag(e.getPoint());
+          }
+        }
+        break;
       }
-      break;
-      case MouseEvent.BUTTON3: {
-        this.dragging = true;
-        this.hexMapPanelDesktop.initDrag(e.getPoint());
-      }
-      break;
     }
   }
 
   @Override
   public void mouseReleased(final MouseEvent e) {
-    switch (e.getButton()) {
-      case MouseEvent.BUTTON3: {
-        this.dragging = false;
-        this.hexMapPanelDesktop.endDrag();
+    if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0 && e.isPopupTrigger()) {
+      final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
+      onPopup(e.getPoint(), hexNumber);
+    }
+    else {
+      switch (e.getButton()) {
+        case MouseEvent.BUTTON3: {
+          this.dragging = false;
+          this.hexMapPanelDesktop.endDrag();
+        }
+        break;
       }
-      break;
     }
   }
 
