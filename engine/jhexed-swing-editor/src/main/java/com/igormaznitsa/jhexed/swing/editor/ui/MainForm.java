@@ -119,7 +119,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       @Override
       public void actionPerformed(ActionEvent e) {
         // open dialog for cell comment
-        final CellCommentDialog commentDialog = new CellCommentDialog(theFrame, "Commentaries for " + popupHex.getColumn() + "," + popupHex.getRow() + " cell", cellComments.getForHex(popupHex));
+        final CellCommentDialog commentDialog = new CellCommentDialog(theFrame, "Commentaries for the cell at " + popupHex.getColumn() + "," + popupHex.getRow(), cellComments.getForHex(popupHex));
         commentDialog.setVisible(true);
         final String result = commentDialog.getResult();
         if (result != null) {
