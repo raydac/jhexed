@@ -26,6 +26,12 @@ import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.EditLayerDialog;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogDocumentOptions;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogAbout;
 import com.igormaznitsa.jhexed.engine.misc.*;
+import com.igormaznitsa.jhexed.extapp.Application;
+import com.igormaznitsa.jhexed.extapp.ApplicationContext;
+import com.igormaznitsa.jhexed.extapp.hexes.HexLayer;
+import com.igormaznitsa.jhexed.extapp.lookup.Lookup;
+import com.igormaznitsa.jhexed.extapp.lookup.ObjectLookup;
+import com.igormaznitsa.jhexed.renders.svg.SVGImage;
 import com.igormaznitsa.jhexed.swing.editor.Log;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainer;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainerSection;
@@ -51,7 +57,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 
-public class MainForm extends javax.swing.JFrame implements MouseListener, MouseMotionListener, MouseWheelListener, HexMapPanelListener, InsideApplicationBus.AppBusListener {
+public class MainForm extends javax.swing.JFrame implements MouseListener, MouseMotionListener, MouseWheelListener, HexMapPanelListener, InsideApplicationBus.AppBusListener, ApplicationContext {
 
   private static final long serialVersionUID = 3235266727080222251L;
 
@@ -88,8 +94,79 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private final JPopupMenu popupMenu;
   private HexPosition popupHex;
-  
+
+  private final Lookup lookupContainer;
+  private final java.util.List<HexLayer> hexLayerList;
+  private final Application application;
+
+  public MainForm(final Application application) throws Exception {
+    Log.info("Start in application mode, application \"" + application.getID() + '\"');
+    this.application = application;
+
+    initComponents();
+    this.setJMenuBar(application.lookup(JMenuBar.class));
+    this.popupMenu = application.lookup(JPopupMenu.class);
+
+    hexMapPanelDesktop = new Desktop();
+    layers = new LayerListModel(256, 128);
+
+    try {
+      this.setIconImage(ImageIO.read(this.getClass().getClassLoader().getResource("com/igormaznitsa/jhexed/swing/editor/icons/logo.png")));
+    }
+    catch (Exception ex) {
+      Log.error("Can't load app icon", ex);
+    }
+
+    hexMapPanel = new HexMapPanel(this.layers);
+    hexMapPanel.addHexMapPanelListener(this);
+
+    hexMapPanel.addMouseListener(this);
+    hexMapPanel.addMouseMotionListener(this);
+    hexMapPanel.addMouseWheelListener(this);
+
+    this.panelMainArea.add(hexMapPanelDesktop, BorderLayout.CENTER);
+    hexMapPanelDesktop.setContentPane(hexMapPanel);
+
+    this.frameLayers = null;
+    this.frameToolOptions = null;
+    this.frameTools = null;
+    this.dsl = null;
+    this.groovyShell = null;
+    this.compilerConfiguration = null;
+
+    this.lookupContainer = new ObjectLookup(this.hexMapPanel.getHexEngine(), this, Log.makeApplicationLog());
+
+    final InputStream initialMap = application.getInitialMap(this);
+    try {
+      final FileContainer container = new FileContainer(initialMap);
+      loadState(container);
+    }
+    catch (Exception ex) {
+      Log.error("Can't load initial map data or read that", ex);
+      throw ex;
+    }
+    finally {
+      IOUtils.closeQuietly(initialMap);
+    }
+
+    loadSettings();
+
+    final java.util.List<HexLayer> listOfLayers = new ArrayList<HexLayer>();
+    for (int i = 0; i < this.layers.getSize(); i++) {
+      final LayerRecordPanel alayer = this.layers.getElementAt(i);
+      listOfLayers.add(alayer);
+    }
+    this.hexLayerList = Collections.unmodifiableList(listOfLayers);
+    
+    this.hexMapPanel.setZoom(1.0f);
+  }
+
   public MainForm(final String fileToOpen) {
+    Log.info("Start in editor mode");
+
+    this.application = null;
+    this.hexLayerList = null;
+
     initComponents();
 
     final JFrame theFrame = this;
@@ -128,8 +205,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       }
     });
     popupMenu.add(comments);
-    
-    
+
     hexMapPanelDesktop = new Desktop();
     layers = new LayerListModel(256, 128);
 
@@ -184,6 +260,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       final File file = new File(fileToOpen);
       loadFromFile(file);
     }
+
+    this.lookupContainer = new ObjectLookup(this.hexMapPanel.getHexEngine(), this, Log.makeApplicationLog());
   }
 
   private void registerInternalPlugins() {
@@ -303,13 +381,18 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private void loadSettings() {
     this.setBounds(loadPosition("mainForm", new Rectangle(10, 10, 800, 600)));
-    this.frameLayers.setBounds(loadPosition("frameLayers", new Rectangle(10, 10, this.frameLayers.getPreferredSize().width, frameLayers.getPreferredSize().height)));
-    this.frameTools.setBounds(loadPosition("frameTools", new Rectangle(10, 10 + this.frameLayers.getPreferredSize().height + 20, this.frameTools.getPreferredSize().width, frameTools.getPreferredSize().height)));
-    this.frameToolOptions.setBounds(loadPosition("frameToolOptions", new Rectangle(10 + this.frameLayers.getPreferredSize().width + 20, 10, this.frameToolOptions.getPreferredSize().width, this.frameToolOptions.getPreferredSize().height)));
-
-    this.frameLayers.setVisible(REGISTRY.getBoolean("frameLayers.visible", true));
-    this.frameTools.setVisible(REGISTRY.getBoolean("frameTools.visible", true));
-    this.frameToolOptions.setVisible(REGISTRY.getBoolean("frameToolOptions.visible", true));
+    if (this.frameLayers != null) {
+      this.frameLayers.setBounds(loadPosition("frameLayers", new Rectangle(10, 10, this.frameLayers.getPreferredSize().width, frameLayers.getPreferredSize().height)));
+      this.frameLayers.setVisible(REGISTRY.getBoolean("frameLayers.visible", true));
+    }
+    if (this.frameTools != null) {
+      this.frameTools.setBounds(loadPosition("frameTools", new Rectangle(10, 10 + this.frameLayers.getPreferredSize().height + 20, this.frameTools.getPreferredSize().width, frameTools.getPreferredSize().height)));
+      this.frameTools.setVisible(REGISTRY.getBoolean("frameTools.visible", true));
+    }
+    if (this.frameToolOptions != null) {
+      this.frameToolOptions.setBounds(loadPosition("frameToolOptions", new Rectangle(10 + this.frameLayers.getPreferredSize().width + 20, 10, this.frameToolOptions.getPreferredSize().width, this.frameToolOptions.getPreferredSize().height)));
+      this.frameToolOptions.setVisible(REGISTRY.getBoolean("frameToolOptions.visible", true));
+    }
 
     this.menuViewBackImage.setSelected(REGISTRY.getBoolean("showBackImage", true));
     this.menuShowHexBorders.setSelected(REGISTRY.getBoolean("showHexBorders", true));
@@ -746,19 +829,35 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }//GEN-LAST:event_menuItemFileOpenActionPerformed
 
   private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-    if (JOptionPane.showConfirmDialog(this, "Do you really want to close the aplication?", "Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+    if (this.application == null) {
+      if (JOptionPane.showConfirmDialog(this, "Do you really want to close the aplication?", "Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 
-      saveSettings();
+        saveSettings();
 
-      this.frameLayers.dispose();
-      this.frameToolOptions.dispose();
-      this.frameTools.dispose();
-      dispose();
+        this.frameLayers.dispose();
+        this.frameToolOptions.dispose();
+        this.frameTools.dispose();
+        dispose();
 
-      Log.info("The MainForm disposed");
+        Log.info("The MainForm disposed");
+      }
+      else {
+        Log.info("Closing rejected by user");
+      }
     }
     else {
-      Log.info("Closing rejected by user");
+      try {
+        if (this.application.isReadyForDestroying(this)) {
+          Log.info("Destroying application");
+          this.application.destroy(this);
+          Log.info("Application has been destroyed");
+          dispose();
+        }
+      }
+      catch (Exception ex) {
+        Log.error("Error during application close operation", ex);
+        dispose();
+      }
     }
   }//GEN-LAST:event_formWindowClosing
 
@@ -1079,13 +1178,15 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
-  private void onPopup(final Point mousePoint, final HexPosition hexNumber){
-    this.popupHex = hexNumber;
-    if (hexNumber != null && this.hexMapPanel.isValidPosition(hexNumber)) {
-      popupMenu.show(this.hexMapPanel, mousePoint.x, mousePoint.y);
+  private void onPopup(final Point mousePoint, final HexPosition hexNumber) {
+    if (this.popupMenu != null) {
+      this.popupHex = hexNumber;
+      if (hexNumber != null && this.hexMapPanel.isValidPosition(hexNumber)) {
+        popupMenu.show(this.hexMapPanel, mousePoint.x, mousePoint.y);
+      }
     }
   }
-  
+
   @Override
   public void mouseClicked(final MouseEvent e) {
     switch (e.getButton()) {
@@ -1172,6 +1273,13 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void onZoomChanged(final HexMapPanel source, final float scale) {
+    if (this.application!=null){
+      for (int i = 0; i < this.layers.getSize(); i++) {
+        final LayerRecordPanel p = this.layers.getElementAt(i);
+        p.getLayer().updatePrerasterizedIcons(source.getHexShape());
+      }
+    }
+    
     final int zoomPercent = Math.round(100 * scale);
     this.labelZoomStatus.setText("Zoom: " + zoomPercent + '%');
   }
@@ -1271,8 +1379,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   private void updateRedoUndoForCurrentLayer() {
-    this.menuEditUndo.setEnabled(!this.undoLayers.isEmpty());
-    this.menuEditRedo.setEnabled(!this.redoLayers.isEmpty());
+    if (this.application == null) {
+      this.menuEditUndo.setEnabled(!this.undoLayers.isEmpty());
+      this.menuEditRedo.setEnabled(!this.redoLayers.isEmpty());
+    }
   }
 
   @Override
@@ -1307,4 +1417,50 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       this.hexMapPanel.scrollRectToVisible(rect);
     }
   }
+
+  @Override
+  public java.util.List<HexLayer> getHexLayers() {
+    return this.hexLayerList;
+  }
+
+  @Override
+  public void endWork() {
+    if (this.application != null) {
+      try {
+        Log.info("Destroing application");
+        this.application.destroy(this);
+      }
+      catch (Exception ex) {
+        Log.error("Exception during application destroying", ex);
+      }
+    }
+  }
+
+  @Override
+  public <T> T lookup(final Class<T> type, final Object... args) {
+    return this.lookupContainer.lookup(type, args);
+  }
+
+  @Override
+  public void refresh() {
+    if (SwingUtilities.isEventDispatchThread()) {
+      hexMapPanel.revalidate();
+      this.hexMapPanel.repaint();
+    }
+    else {
+      SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+          hexMapPanel.revalidate();
+          hexMapPanel.repaint();
+        }
+      });
+    }
+  }
+
+  @Override
+  public SVGImage getBackgroundImage() {
+    return this.hexMapPanel.getImage();
+  }
+
 }

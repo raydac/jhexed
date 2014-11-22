@@ -36,6 +36,26 @@ public class Log {
     }
   }
 
+  public static com.igormaznitsa.jhexed.extapp.Log makeApplicationLog(){
+    return new com.igormaznitsa.jhexed.extapp.Log(){
+
+      @Override
+      public void info(final String text) {
+        Log.info(text);
+      }
+
+      @Override
+      public void warn(final String text) {
+        Log.warn(text);
+      }
+
+      @Override
+      public void error(final String text, final Throwable thr) {
+        Log.error(text, thr);
+      }
+    };
+  }
+  
   public static void info(final String text){
     LOGGER.info(text);
   }

@@ -15,54 +15,88 @@
  */
 package com.igormaznitsa.jhexed.swing.editor;
 
+import com.igormaznitsa.jhexed.extapp.Application;
 import com.igormaznitsa.jhexed.swing.editor.ui.MainForm;
-import java.util.Locale;
+import java.util.*;
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 public class Main {
 
+  private static Application findApplication() {
+    final ServiceLoader<Application> applications = ServiceLoader.load(Application.class);
+    final Iterator<Application> iterator = applications.iterator();
+    if (iterator.hasNext()) {
+      return iterator.next();
+    }
+    return null;
+  }
+
   public static void main(final String... args) {
-    try {
-      final String lookandfeel = MainForm.REGISTRY.get("lookandfeel", null);
+    final Application theApplication = findApplication();
 
-      javax.swing.UIManager.LookAndFeelInfo landf = null;
-      if (lookandfeel == null) {
-        for (final javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-          final String name = info.getName().trim().toLowerCase(Locale.ENGLISH);
-          if (name.startsWith("windows")) {
-            landf = info;
+    if (theApplication != null) {
+      // Start in application mode
+      SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+          final JFrame frame;
+          try{
+            frame = new MainForm(theApplication);
+          }catch(Exception ex){
+            Log.error("Error", ex);
+            System.exit(-1);
+            return;
           }
-          else if (landf == null && name.contains("gtk")) {
-            landf = info;
+          frame.setVisible(true);
+        }
+      });
+    }
+    else {
+
+      try {
+        final String lookandfeel = MainForm.REGISTRY.get("lookandfeel", null);
+
+        javax.swing.UIManager.LookAndFeelInfo landf = null;
+        if (lookandfeel == null) {
+          for (final javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            final String name = info.getName().trim().toLowerCase(Locale.ENGLISH);
+            if (name.startsWith("windows")) {
+              landf = info;
+            }
+            else if (landf == null && name.contains("gtk")) {
+              landf = info;
+            }
           }
         }
-      }
-      else {
-        for (final javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-          if (info.getClassName().equals(lookandfeel)){
-            landf = info;
-            break;
+        else {
+          for (final javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            if (info.getClassName().equals(lookandfeel)) {
+              landf = info;
+              break;
+            }
           }
         }
+        if (landf != null) {
+          System.out.println("Selected L&F: " + landf.getClassName());
+          javax.swing.UIManager.setLookAndFeel(landf.getClassName());
+        }
+        else {
+          System.out.println("Can't find needed L&F");
+        }
       }
-      if (landf != null) {
-        System.out.println("Selected L&F: " + landf.getClassName());
-        javax.swing.UIManager.setLookAndFeel(landf.getClassName());
-      }else{
-        System.out.println("Can't find needed L&F");
+      catch (Exception ex) {
+        ex.printStackTrace();
       }
-    }
-    catch (Exception ex) {
-      ex.printStackTrace();
-    }
 
-    final String file = args.length > 0 ? args[0] : null;
+      final String file = args.length > 0 ? args[0] : null;
 
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        new MainForm(file).setVisible(true);
-      }
-    });
+      SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+          new MainForm(file).setVisible(true);
+        }
+      });
+    }
   }
 }

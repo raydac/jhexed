@@ -15,13 +15,16 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.frames.layers;
 
+import com.igormaznitsa.jhexed.engine.misc.HexPosition;
+import com.igormaznitsa.jhexed.extapp.hexes.HexLayer;
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
 import com.igormaznitsa.jhexed.swing.editor.ui.Utils;
 import static com.igormaznitsa.jhexed.swing.editor.ui.Utils.*;
+import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.awt.*;
 
-public class LayerRecordPanel extends javax.swing.JPanel {
+public class LayerRecordPanel extends javax.swing.JPanel implements HexLayer{
   private static final long serialVersionUID = -6730121049908309123L;
 
   private final HexFieldLayer layer;
@@ -117,4 +120,26 @@ public class LayerRecordPanel extends javax.swing.JPanel {
   public String toString(){
     return this.layer.getLayerName();
   }
+
+  @Override
+  public int getValue(final HexPosition pos) {
+    return this.layer.getHexValueAtPos(pos.getColumn(), pos.getRow()).getIndex();
+  }
+
+  @Override
+  public void setValue(final HexPosition pos, final int value) {
+    if(this.layer.isPositionValid(pos))
+    this.layer.setValueAtPos(pos.getColumn(), pos.getRow(),value);
+  }
+
+  @Override
+  public HexFieldValue findHexViewValueForIndex(final int value) {
+    return this.layer.getHexValueForIndex(value);
+  }
+
+  @Override
+  public int getMaxValue() {
+    return this.layer.getHexValueForIndex(this.layer.getHexValuesNumber()-1).getIndex();
+  }
+
 }

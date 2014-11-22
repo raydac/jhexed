@@ -17,6 +17,7 @@ package com.igormaznitsa.jhexed.swing.editor.model;
 
 import com.igormaznitsa.jhexed.engine.*;
 import com.igormaznitsa.jhexed.engine.misc.HexPosition;
+import com.igormaznitsa.jhexed.extapp.hexes.HexLayer;
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.hexmap.LayerableHexValueSource;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.layers.LayerRecordPanel;
@@ -36,6 +37,7 @@ public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineMod
   private final int initCols;
   private final int initRows;
   
+  private List<HexLayer> hexLayers;
   
   public LayerListModel(final int cols, final int rows) {
     this.initCols = cols;

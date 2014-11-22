@@ -37,6 +37,10 @@ public class FileContainer implements Iterable<FileContainerSection> {
     }
   }
 
+  public FileContainer(final InputStream stream) throws IOException {
+    this.sections = loadFromStream(stream);
+  }
+  
   public FileContainer(final FileContainerSection... sections) {
     this.sections = new ArrayList<FileContainerSection>();
     this.sections.addAll(Arrays.asList(sections));
