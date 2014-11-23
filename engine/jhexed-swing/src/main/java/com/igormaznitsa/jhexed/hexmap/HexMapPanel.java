@@ -175,4 +175,8 @@ public class HexMapPanel extends JPanel {
   public void setShowBackImage(final boolean show) {
     this.mapImage.setShowImage(show);
   }
+  
+  public boolean isShowBackImage(){
+    return this.mapImage.isShowImage();
+  }
 }
