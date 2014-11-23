@@ -26,11 +26,11 @@ import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.EditLayerDialog;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogDocumentOptions;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.DialogAbout;
 import com.igormaznitsa.jhexed.engine.misc.*;
-import com.igormaznitsa.jhexed.extapp.Application;
-import com.igormaznitsa.jhexed.extapp.ApplicationContext;
+import com.igormaznitsa.jhexed.extapp.*;
 import com.igormaznitsa.jhexed.extapp.hexes.HexLayer;
 import com.igormaznitsa.jhexed.extapp.lookup.Lookup;
 import com.igormaznitsa.jhexed.extapp.lookup.ObjectLookup;
+import com.igormaznitsa.jhexed.hexmap.*;
 import com.igormaznitsa.jhexed.renders.svg.SVGImage;
 import com.igormaznitsa.jhexed.swing.editor.Log;
 import com.igormaznitsa.jhexed.swing.editor.filecontainer.FileContainer;
@@ -99,6 +99,29 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private final java.util.List<HexLayer> hexLayerList;
   private final Application application;
 
+  private static void setComponentForPosition(final JPanel panel, final UIComponentPosition position, final JComponent component) {
+    if (component != null) {
+      final Object layoutPosition;
+      switch (position) {
+        case BOTTOM_PANEL:
+          layoutPosition = BorderLayout.SOUTH;
+          break;
+        case LEFT_PANEL:
+          layoutPosition = BorderLayout.WEST;
+          break;
+        case RIGHT_PANEL:
+          layoutPosition = BorderLayout.EAST;
+          break;
+        case TOP_PANEL:
+          layoutPosition = BorderLayout.NORTH;
+          break;
+        default:
+          throw new Error("Unexpected position [" + position + ']');
+      }
+      panel.add(component, layoutPosition);
+    }
+  }
+
   public MainForm(final Application application) throws Exception {
     Log.info("Start in application mode, application \"" + application.getID() + '\"');
     this.application = application;
@@ -123,6 +146,22 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     hexMapPanel.addMouseListener(this);
     hexMapPanel.addMouseMotionListener(this);
     hexMapPanel.addMouseWheelListener(this);
+
+    final Image icon = application.getApplicationIcon();
+    if (icon != null) {
+      this.setIconImage(icon);
+    }
+    final String title = application.getTitle();
+    if (title != null) {
+      this.setTitle(title);
+    }
+
+    this.panelMainArea.removeAll();
+
+    setComponentForPosition(this.panelMainArea, UIComponentPosition.TOP_PANEL, application.getUIComponent(UIComponentPosition.TOP_PANEL));
+    setComponentForPosition(this.panelMainArea, UIComponentPosition.LEFT_PANEL, application.getUIComponent(UIComponentPosition.LEFT_PANEL));
+    setComponentForPosition(this.panelMainArea, UIComponentPosition.RIGHT_PANEL, application.getUIComponent(UIComponentPosition.RIGHT_PANEL));
+    setComponentForPosition(this.panelMainArea, UIComponentPosition.BOTTOM_PANEL, application.getUIComponent(UIComponentPosition.BOTTOM_PANEL));
 
     this.panelMainArea.add(hexMapPanelDesktop, BorderLayout.CENTER);
     hexMapPanelDesktop.setContentPane(hexMapPanel);
@@ -157,7 +196,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       listOfLayers.add(alayer);
     }
     this.hexLayerList = Collections.unmodifiableList(listOfLayers);
-    
+
     this.hexMapPanel.setZoom(1.0f);
   }
 
@@ -1135,38 +1174,43 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   // End of variables declaration//GEN-END:variables
 
   private void updateActivehexCoord(final HexPosition position) {
-    final String comment = this.cellComments.getForHex(position);
-    this.labelCellUnderMouse.setText("Hex " + position.getColumn() + ',' + position.getRow() + ' ' + (comment == null ? "" : comment));
-    if (this.hexMapPanel.isValidPosition(position)) {
-      final StringBuilder buffer = new StringBuilder();
+    if (this.application == null) {
+      final String comment = this.cellComments.getForHex(position);
+      this.labelCellUnderMouse.setText("Hex " + position.getColumn() + ',' + position.getRow() + ' ' + (comment == null ? "" : comment));
+      if (this.hexMapPanel.isValidPosition(position)) {
+        final StringBuilder buffer = new StringBuilder();
 
-      if (comment != null) {
-        buffer.append("<h4>").append(StringEscapeUtils.escapeHtml4(comment)).append("</h4>");
-      }
+        if (comment != null) {
+          buffer.append("<h4>").append(StringEscapeUtils.escapeHtml4(comment)).append("</h4>");
+        }
 
-      for (int i = 0; i < this.layers.getSize(); i++) {
-        final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
-        if (field.isLayerVisible()) {
-          final String layerName = field.getLayerName().isEmpty() ? "Untitled" : field.getLayerName();
-          final HexFieldValue layerValue = field.getHexValueAtPos(position.getColumn(), position.getRow());
-          if (layerValue != null) {
-            if (buffer.length() > 0) {
-              buffer.append("<br>");
+        for (int i = 0; i < this.layers.getSize(); i++) {
+          final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
+          if (field.isLayerVisible()) {
+            final String layerName = field.getLayerName().isEmpty() ? "Untitled" : field.getLayerName();
+            final HexFieldValue layerValue = field.getHexValueAtPos(position.getColumn(), position.getRow());
+            if (layerValue != null) {
+              if (buffer.length() > 0) {
+                buffer.append("<br>");
+              }
+              final String valueName = layerValue.getName().isEmpty() ? layerValue.getComment() : layerValue.getName();
+              buffer.append("<b>").append(StringEscapeUtils.escapeHtml4(layerName)).append(":</b>").append(StringEscapeUtils.escapeHtml4(valueName));
             }
-            final String valueName = layerValue.getName().isEmpty() ? layerValue.getComment() : layerValue.getName();
-            buffer.append("<b>").append(StringEscapeUtils.escapeHtml4(layerName)).append(":</b>").append(StringEscapeUtils.escapeHtml4(valueName));
           }
         }
-      }
-      if (buffer.length() > 0) {
-        this.hexMapPanel.setToolTipText("<html>" + buffer + "</html>");
+        if (buffer.length() > 0) {
+          this.hexMapPanel.setToolTipText("<html>" + buffer + "</html>");
+        }
+        else {
+          this.hexMapPanel.setToolTipText(null);
+        }
       }
       else {
         this.hexMapPanel.setToolTipText(null);
       }
     }
     else {
-      this.hexMapPanel.setToolTipText(null);
+      this.hexMapPanel.setToolTipText(this.application.processHexAction(HexAction.OVER, position));
     }
   }
 
@@ -1189,55 +1233,79 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void mouseClicked(final MouseEvent e) {
-    switch (e.getButton()) {
-      case MouseEvent.BUTTON1: {
+    if (this.application != null) {
+      if (e.getButton() == MouseEvent.BUTTON1) {
         final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
-        useCurrentToolAtPosition(hexNumber);
+        this.hexMapPanel.setToolTipText(this.application.processHexAction(HexAction.CLICK, hexNumber));
       }
-      break;
+    }
+    else {
+      switch (e.getButton()) {
+        case MouseEvent.BUTTON1: {
+          final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
+          useCurrentToolAtPosition(hexNumber);
+        }
+        break;
+      }
     }
   }
 
   @Override
   public void mousePressed(final MouseEvent e) {
-    if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0 && e.isPopupTrigger()) {
-      final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
-      onPopup(e.getPoint(), hexNumber);
+    if (this.application == null) {
+      if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0 && e.isPopupTrigger()) {
+        final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
+        onPopup(e.getPoint(), hexNumber);
+      }
+      else {
+        switch (e.getButton()) {
+          case MouseEvent.BUTTON1: {
+            if (selectedToolType != null && this.selectedLayer != null) {
+              addedUndoStep(new HexFieldLayer[]{this.selectedLayer});
+              final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
+              useCurrentToolAtPosition(hexNumber);
+            }
+          }
+          break;
+          case MouseEvent.BUTTON3: {
+            if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
+              this.dragging = true;
+              this.hexMapPanelDesktop.initDrag(e.getPoint());
+            }
+          }
+          break;
+        }
+      }
     }
     else {
-      switch (e.getButton()) {
-        case MouseEvent.BUTTON1: {
-          if (selectedToolType != null && this.selectedLayer != null) {
-            addedUndoStep(new HexFieldLayer[]{this.selectedLayer});
-            final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
-            useCurrentToolAtPosition(hexNumber);
-          }
-        }
-        break;
-        case MouseEvent.BUTTON3: {
-          if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
-            this.dragging = true;
-            this.hexMapPanelDesktop.initDrag(e.getPoint());
-          }
-        }
-        break;
+      if (e.getButton() == MouseEvent.BUTTON3){
+        this.dragging = true;
+        this.hexMapPanelDesktop.initDrag(e.getPoint());
       }
     }
   }
 
   @Override
   public void mouseReleased(final MouseEvent e) {
-    if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0 && e.isPopupTrigger()) {
-      final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
-      onPopup(e.getPoint(), hexNumber);
+    if (this.application == null) {
+      if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0 && e.isPopupTrigger()) {
+        final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
+        onPopup(e.getPoint(), hexNumber);
+      }
+      else {
+        switch (e.getButton()) {
+          case MouseEvent.BUTTON3: {
+            this.dragging = false;
+            this.hexMapPanelDesktop.endDrag();
+          }
+          break;
+        }
+      }
     }
     else {
-      switch (e.getButton()) {
-        case MouseEvent.BUTTON3: {
-          this.dragging = false;
-          this.hexMapPanelDesktop.endDrag();
-        }
-        break;
+      if (e.getButton() == MouseEvent.BUTTON3){
+        this.dragging = false;
+        this.hexMapPanelDesktop.endDrag();
       }
     }
   }
@@ -1273,13 +1341,13 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void onZoomChanged(final HexMapPanel source, final float scale) {
-    if (this.application!=null){
+    if (this.application != null) {
       for (int i = 0; i < this.layers.getSize(); i++) {
         final LayerRecordPanel p = this.layers.getElementAt(i);
         p.getLayer().updatePrerasterizedIcons(source.getHexShape());
       }
     }
-    
+
     final int zoomPercent = Math.round(100 * scale);
     this.labelZoomStatus.setText("Zoom: " + zoomPercent + '%');
   }
@@ -1442,7 +1510,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void refresh() {
+  public void refreshUi() {
     if (SwingUtilities.isEventDispatchThread()) {
       hexMapPanel.revalidate();
       this.hexMapPanel.repaint();
@@ -1461,6 +1529,38 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   @Override
   public SVGImage getBackgroundImage() {
     return this.hexMapPanel.getImage();
+  }
+
+  @Override
+  public MapOptions getMapOptions() {
+    final MapOptions options = new MapOptions();
+
+    final LayerableHexValueSourceRender renderer = this.hexMapPanel.getHexRenderer();
+
+    options.borderColor = renderer.isShowBorders() ? renderer.getCommonBorderColor() : null;
+    options.borderWidth = renderer.getLineWidth();
+    options.showBackgroundImage = this.hexMapPanel.isShowBackImage();
+    options.zoom = this.hexMapPanel.getZoom();
+
+    return options;
+  }
+
+  @Override
+  public void setMapOptions(final MapOptions options) {
+    if (options != null) {
+      this.hexMapPanel.setShowBackImage(options.showBackgroundImage);
+      this.hexMapPanel.setZoom(Math.max(0.2f, Math.min(10.0f, options.zoom)));
+      final LayerableHexValueSourceRender renderer = this.hexMapPanel.getHexRenderer();
+      renderer.setLineWidth(Math.max(0.05f, options.borderWidth));
+      if (options.borderColor == null) {
+        renderer.setShowBorders(false);
+      }
+      else {
+        renderer.setCommonBorderColor(options.borderColor);
+        renderer.setShowBorders(true);
+      }
+    }
+    repaint();
   }
 
 }

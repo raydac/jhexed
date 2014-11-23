@@ -16,6 +16,7 @@
 package com.igormaznitsa.jhexed.swing.editor;
 
 import com.igormaznitsa.jhexed.extapp.Application;
+import com.igormaznitsa.jhexed.extapp.ApplicationContext;
 import com.igormaznitsa.jhexed.swing.editor.ui.MainForm;
 import java.util.*;
 import javax.swing.JFrame;
@@ -43,12 +44,23 @@ public class Main {
           final JFrame frame;
           try{
             frame = new MainForm(theApplication);
+            frame.setVisible(true);
+            SwingUtilities.invokeLater(new Runnable(){
+              @Override
+              public void run() {
+                try{
+                  theApplication.start((ApplicationContext)frame);
+                }catch(Exception ex){
+                  Log.error("Error during application start", ex);
+                  System.exit(-10);
+                }
+              }
+            });
           }catch(Exception ex){
             Log.error("Error", ex);
             System.exit(-1);
             return;
           }
-          frame.setVisible(true);
         }
       });
     }

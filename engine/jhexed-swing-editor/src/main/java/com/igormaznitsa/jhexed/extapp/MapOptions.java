@@ -15,16 +15,11 @@
  */
 package com.igormaznitsa.jhexed.extapp;
 
-import com.igormaznitsa.jhexed.extapp.hexes.HexLayer;
-import com.igormaznitsa.jhexed.extapp.lookup.Lookup;
-import com.igormaznitsa.jhexed.renders.svg.SVGImage;
-import java.util.List;
+import java.awt.Color;
 
-public interface ApplicationContext extends Lookup {
-  List<HexLayer> getHexLayers();
-  SVGImage getBackgroundImage();
-  void refreshUi();
-  MapOptions getMapOptions();
-  void setMapOptions(MapOptions options);
-  void endWork();
+public final class MapOptions {
+  public Color borderColor = Color.black;
+  public float borderWidth = 0.2f;
+  public boolean showBackgroundImage = true;
+  public float zoom = 1.0f;
 }

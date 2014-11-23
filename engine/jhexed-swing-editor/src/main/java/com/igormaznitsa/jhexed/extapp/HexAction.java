@@ -15,16 +15,7 @@
  */
 package com.igormaznitsa.jhexed.extapp;
 
-import com.igormaznitsa.jhexed.extapp.hexes.HexLayer;
-import com.igormaznitsa.jhexed.extapp.lookup.Lookup;
-import com.igormaznitsa.jhexed.renders.svg.SVGImage;
-import java.util.List;
-
-public interface ApplicationContext extends Lookup {
-  List<HexLayer> getHexLayers();
-  SVGImage getBackgroundImage();
-  void refreshUi();
-  MapOptions getMapOptions();
-  void setMapOptions(MapOptions options);
-  void endWork();
+public enum HexAction {
+  OVER,
+  CLICK
 }

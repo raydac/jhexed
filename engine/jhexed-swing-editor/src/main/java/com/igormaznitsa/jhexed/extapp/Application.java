@@ -15,13 +15,21 @@
  */
 package com.igormaznitsa.jhexed.extapp;
 
+import com.igormaznitsa.jhexed.engine.misc.HexPosition;
 import com.igormaznitsa.jhexed.extapp.lookup.Lookup;
+import java.awt.Image;
 import java.io.InputStream;
+import javax.swing.JComponent;
 
 public interface Application extends Lookup {
   void init(ApplicationContext context);
+  void start(ApplicationContext context);
   boolean isReadyForDestroying(ApplicationContext context);
   void destroy(ApplicationContext context);
   String getID();
   InputStream getInitialMap(ApplicationContext context);
+  JComponent getUIComponent(UIComponentPosition position);
+  Image getApplicationIcon();
+  String getTitle();
+  String processHexAction(final HexAction action, final HexPosition pos);
 }
