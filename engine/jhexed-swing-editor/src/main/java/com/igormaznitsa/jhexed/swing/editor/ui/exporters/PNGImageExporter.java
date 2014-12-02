@@ -33,10 +33,6 @@ import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 import org.apache.commons.io.FileUtils;
 
-/**
- *
- * @author Igor Maznitsa (http://www.igormaznitsa.com)
- */
 public class PNGImageExporter implements Exporter {
 
   private final DocumentOptions docOptions;

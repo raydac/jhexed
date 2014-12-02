@@ -51,8 +51,7 @@ import java.util.*;
 import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.*;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -492,6 +491,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     menuFileExportAsImage = new javax.swing.JMenuItem();
     menuFileExportAsSVG = new javax.swing.JMenuItem();
     menuFileExportAsXML = new javax.swing.JMenuItem();
+    menuFileExportAsJavaConstants = new javax.swing.JMenuItem();
     jSeparator3 = new javax.swing.JPopupMenu.Separator();
     menuFileDocumentOptions = new javax.swing.JMenuItem();
     jSeparator4 = new javax.swing.JPopupMenu.Separator();
@@ -633,6 +633,14 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       }
     });
     menuFileExportAs.add(menuFileExportAsXML);
+
+    menuFileExportAsJavaConstants.setText("Java constants");
+    menuFileExportAsJavaConstants.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        menuFileExportAsJavaConstantsActionPerformed(evt);
+      }
+    });
+    menuFileExportAs.add(menuFileExportAsJavaConstants);
 
     menuFile.add(menuFileExportAs);
     menuFile.add(jSeparator3);
@@ -1049,7 +1057,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
       fileChooser.setFileFilter(Utils.PNG_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        this.lastExportedFile = fileChooser.getSelectedFile();
+        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(),"png");
         processExporterAsLongTask(this, "Export to PNG image", new PNGImageExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
@@ -1071,6 +1079,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
           exporter.export(theFile);
           Log.info("Export has been completed: " + taskDescription);
         }
+        catch (ExportException ex){
+          Log.error("Can't make export for error", ex);
+          JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
         catch (Exception ex) {
           Log.error("Can't make export for error", ex);
           JOptionPane.showMessageDialog(frame, "Can't  make export for error, see the log", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1090,7 +1102,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
       fileChooser.setFileFilter(Utils.XML_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        this.lastExportedFile = fileChooser.getSelectedFile();
+        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(),"xml");
         processExporterAsLongTask(this, "Export to XML file", new XmlExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
@@ -1107,7 +1119,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
       fileChooser.setFileFilter(Utils.SVG_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        this.lastExportedFile = fileChooser.getSelectedFile();
+        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(),"svg");
         processExporterAsLongTask(this, "Export to SVG image", new SVGImageExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
@@ -1118,6 +1130,30 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     LongTaskDialog.cancel();
   }//GEN-LAST:event_formWindowClosed
 
+  private void menuFileExportAsJavaConstantsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileExportAsJavaConstantsActionPerformed
+    SelectLayersExportData toExport = prepareExportData();
+
+    final DialogSelectLayersForExport dlg = new DialogSelectLayersForExport(this, false, false, false, toExport);
+    dlg.setTitle("Select data to export as Java constants");
+    dlg.setVisible(true);
+    toExport = dlg.getResult();
+    if (toExport != null) {
+      final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
+      fileChooser.setFileFilter(Utils.JAVA_FILE_FILTER);
+      if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(),"java");
+        processExporterAsLongTask(this, "Export to Java source file", new JavaConstantExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
+      }
+    }
+  }//GEN-LAST:event_menuFileExportAsJavaConstantsActionPerformed
+
+  private static File ensureFileExtenstion(final File file, final String extension){
+    if (file == null) return null;
+    final String ext = FilenameUtils.getExtension(file.getName()).toLowerCase(Locale.ENGLISH);
+    if (!ext.isEmpty()) return file;
+    return new File(file.getParent(),FilenameUtils.getBaseName(file.getName())+'.'+extension);
+  }
+  
   private SelectLayersExportData prepareExportData() {
     final SelectLayersExportData result = new SelectLayersExportData();
 
@@ -1149,6 +1185,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private javax.swing.JMenuItem menuFileExit;
   private javax.swing.JMenu menuFileExportAs;
   private javax.swing.JMenuItem menuFileExportAsImage;
+  private javax.swing.JMenuItem menuFileExportAsJavaConstants;
   private javax.swing.JMenuItem menuFileExportAsSVG;
   private javax.swing.JMenuItem menuFileExportAsXML;
   private javax.swing.JMenuItem menuFileNew;

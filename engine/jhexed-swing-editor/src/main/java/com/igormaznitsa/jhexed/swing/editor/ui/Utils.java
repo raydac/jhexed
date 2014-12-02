@@ -52,6 +52,19 @@ public final class Utils {
     }
   };
 
+  public static final FileFilter JAVA_FILE_FILTER = new FileFilter() {
+
+    @Override
+    public boolean accept(File f) {
+      return f.isDirectory() || f.getName().toLowerCase(Locale.ENGLISH).endsWith(".java");
+    }
+
+    @Override
+    public String getDescription() {
+      return "Java class files (*.java)";
+    }
+  };
+
   public static final FileFilter PNG_FILE_FILTER = new FileFilter() {
 
     @Override
