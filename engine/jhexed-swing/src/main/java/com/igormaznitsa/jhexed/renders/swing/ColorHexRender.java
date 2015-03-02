@@ -16,7 +16,6 @@
 package com.igormaznitsa.jhexed.renders.swing;
 
 import com.igormaznitsa.jhexed.engine.*;
-import com.igormaznitsa.jhexed.engine.misc.HexPoint2D;
 import com.igormaznitsa.jhexed.engine.renders.HexEngineRender;
 import com.igormaznitsa.jhexed.renders.Utils;
 import java.awt.*;

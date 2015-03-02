@@ -48,7 +48,18 @@ public class HexMapPanel extends JPanel {
     setLayout(layout);
 
     this.mapImage = new SVGImageFieldComponent(this);
-    this.hexField = new HexFieldComponent(this, hexmodel);
+    
+    final HexMapPanel thePanel = this;
+    
+    this.hexField = new HexFieldComponent(this, hexmodel){
+      private static final long serialVersionUID = -1609785839309289037L;
+      @Override
+      public void afterPaint(final HexEngine<?> engine, final Graphics g) {
+        for(final HexMapPanelListener l : listeners){
+          l.onAfterPaint(thePanel, engine, g);
+        }
+      }
+    };
 
     this.hexField.setAntialiased(this.antialias);
 

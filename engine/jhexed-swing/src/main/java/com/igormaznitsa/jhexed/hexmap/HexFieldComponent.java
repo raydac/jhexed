@@ -110,12 +110,17 @@ class HexFieldComponent extends JComponent implements HexMapPanelInsideComponent
       if (this.engine != null) {
         engine.drawArea((Graphics2D) g, r, false);
       }
+      afterPaint(engine, g);
     }
     finally {
       this.engineLock.lock();
     }
   }
 
+  public void afterPaint(final HexEngine<?> engine, final Graphics g){
+    
+  }
+  
   public boolean changeEngineParameters(int orientation) {
     this.engineLock.lock();
     try {

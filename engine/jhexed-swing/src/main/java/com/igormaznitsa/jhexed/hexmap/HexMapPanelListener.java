@@ -15,6 +15,10 @@
  */
 package com.igormaznitsa.jhexed.hexmap;
 
+import com.igormaznitsa.jhexed.engine.HexEngine;
+import java.awt.Graphics;
+
 public interface HexMapPanelListener {
   void onZoomChanged(HexMapPanel source, float scale);
+  void onAfterPaint(HexMapPanel source, HexEngine<?> engine, Graphics g);
 }
