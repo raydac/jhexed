@@ -15,6 +15,7 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui;
 
+import com.igormaznitsa.jhexed.engine.HexEngine;
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.hexmap.HexMapPanelListener;
 import com.igormaznitsa.jhexed.hexmap.HexMapPanel;
@@ -97,7 +98,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private final Lookup lookupContainer;
   private final java.util.List<HexLayer> hexLayerList;
   private final Application application;
-
+  private final ApplicationGraphics applicationGraphics;
+  
   private static void setComponentForPosition(final JPanel panel, final UIComponentPosition position, final JComponent component) {
     if (component != null) {
       final Object layoutPosition;
@@ -165,6 +167,8 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     this.panelMainArea.add(hexMapPanelDesktop, BorderLayout.CENTER);
     hexMapPanelDesktop.setContentPane(hexMapPanel);
 
+    this.applicationGraphics = application.lookup(ApplicationGraphics.class);
+    
     this.frameLayers = null;
     this.frameToolOptions = null;
     this.frameTools = null;
@@ -300,6 +304,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
 
     this.lookupContainer = new ObjectLookup(this.hexMapPanel.getHexEngine(), this, Log.makeApplicationLog());
+    this.applicationGraphics = null;
   }
 
   private void registerInternalPlugins() {
@@ -1065,7 +1070,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   private static void processExporterAsLongTask(final JFrame frame, final String taskDescription, final Exporter exporter, final File theFile) {
     if (theFile.exists()) {
-      if (JOptionPane.showConfirmDialog(frame, "File '" + theFile.getName() + "' exists! To rewrite it?", "File exists", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
+      if (JOptionPane.showConfirmDialog(frame, "Override existing file '" + theFile.getName() + "'?", "File exists", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
         return;
       }
     }
@@ -1492,7 +1497,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void mouseWheelMoved(final MouseWheelEvent e) {
-//    if ((e.getModifiers() & MouseEvent.CTRL_MASK) != 0) 
+    if ((e.getModifiers() & MouseEvent.CTRL_MASK) != 0) 
     {
       final int rotation = e.getWheelRotation();
 
@@ -1598,6 +1603,13 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       }
     }
     repaint();
+  }
+
+  @Override
+  public void onAfterPaint(final HexMapPanel source, final HexEngine<?> engine, final Graphics g) {
+     if (this.applicationGraphics!=null){
+       this.applicationGraphics.afterFieldPaint(engine, g);
+     }
   }
 
 }

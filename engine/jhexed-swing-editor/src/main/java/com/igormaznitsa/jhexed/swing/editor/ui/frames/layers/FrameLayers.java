@@ -15,6 +15,7 @@
  */
 package com.igormaznitsa.jhexed.swing.editor.ui.frames.layers;
 
+import com.igormaznitsa.jhexed.engine.HexEngine;
 import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.swing.editor.ui.dialogs.EditLayerDialog;
 import com.igormaznitsa.jhexed.hexmap.HexMapPanel;
@@ -22,6 +23,7 @@ import com.igormaznitsa.jhexed.hexmap.HexMapPanelListener;
 import com.igormaznitsa.jhexed.swing.editor.model.*;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.AbstractToolFrame;
 import com.igormaznitsa.jhexed.swing.editor.ui.frames.FrameType;
+import java.awt.Graphics;
 import java.awt.geom.Path2D;
 import javax.swing.JOptionPane;
 
@@ -238,5 +240,9 @@ public class FrameLayers extends AbstractToolFrame implements HexMapPanelListene
       final LayerRecordPanel p = this.layerList.getModel().getElementAt(i);
       p.getLayer().updatePrerasterizedIcons(source.getHexShape());
     }
+  }
+
+  @Override
+  public void onAfterPaint(final HexMapPanel source, final HexEngine<?> engine, final Graphics g) {
   }
 }
