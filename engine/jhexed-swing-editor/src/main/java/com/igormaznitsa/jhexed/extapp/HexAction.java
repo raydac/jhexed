@@ -17,5 +17,6 @@ package com.igormaznitsa.jhexed.extapp;
 
 public enum HexAction {
   OVER,
-  CLICK
+  CLICK, 
+  POPUP_TRIGGER
 }

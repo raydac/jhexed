@@ -17,7 +17,9 @@ package com.igormaznitsa.jhexed.extapp;
 
 import com.igormaznitsa.jhexed.engine.misc.HexPosition;
 import com.igormaznitsa.jhexed.extapp.lookup.Lookup;
+import com.igormaznitsa.jhexed.hexmap.HexMapPanel;
 import java.awt.Image;
+import java.awt.event.MouseEvent;
 import java.io.InputStream;
 import javax.swing.JComponent;
 
@@ -31,5 +33,6 @@ public interface Application extends Lookup {
   JComponent getUIComponent(UIComponentPosition position);
   Image getApplicationIcon();
   String getTitle();
-  String processHexAction(final HexAction action, final HexPosition pos);
+  String processHexAction(final HexMapPanel hexMapPanel, MouseEvent mouseEvent, final HexAction action, final HexPosition pos);
+  boolean allowPopupTrigger();
 }

@@ -99,7 +99,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private final java.util.List<HexLayer> hexLayerList;
   private final Application application;
   private final ApplicationGraphics applicationGraphics;
-  
+
   private static void setComponentForPosition(final JPanel panel, final UIComponentPosition position, final JComponent component) {
     if (component != null) {
       final Object layoutPosition;
@@ -168,7 +168,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     hexMapPanelDesktop.setContentPane(hexMapPanel);
 
     this.applicationGraphics = application.lookup(ApplicationGraphics.class);
-    
+
     this.frameLayers = null;
     this.frameToolOptions = null;
     this.frameTools = null;
@@ -1062,7 +1062,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
       fileChooser.setFileFilter(Utils.PNG_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(),"png");
+        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(), "png");
         processExporterAsLongTask(this, "Export to PNG image", new PNGImageExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
@@ -1084,7 +1084,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
           exporter.export(theFile);
           Log.info("Export has been completed: " + taskDescription);
         }
-        catch (ExportException ex){
+        catch (ExportException ex) {
           Log.error("Can't make export for error", ex);
           JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -1107,7 +1107,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
       fileChooser.setFileFilter(Utils.XML_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(),"xml");
+        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(), "xml");
         processExporterAsLongTask(this, "Export to XML file", new XmlExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
@@ -1124,7 +1124,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
       fileChooser.setFileFilter(Utils.SVG_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(),"svg");
+        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(), "svg");
         processExporterAsLongTask(this, "Export to SVG image", new SVGImageExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
@@ -1146,19 +1146,23 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       final JFileChooser fileChooser = new JFileChooser(this.lastExportedFile);
       fileChooser.setFileFilter(Utils.JAVA_FILE_FILTER);
       if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(),"java");
+        this.lastExportedFile = ensureFileExtenstion(fileChooser.getSelectedFile(), "java");
         processExporterAsLongTask(this, "Export to Java source file", new JavaConstantExporter(getDocumentOptions(), toExport, this.cellComments), this.lastExportedFile);
       }
     }
   }//GEN-LAST:event_menuFileExportAsJavaConstantsActionPerformed
 
-  private static File ensureFileExtenstion(final File file, final String extension){
-    if (file == null) return null;
+  private static File ensureFileExtenstion(final File file, final String extension) {
+    if (file == null) {
+      return null;
+    }
     final String ext = FilenameUtils.getExtension(file.getName()).toLowerCase(Locale.ENGLISH);
-    if (!ext.isEmpty()) return file;
-    return new File(file.getParent(),FilenameUtils.getBaseName(file.getName())+'.'+extension);
+    if (!ext.isEmpty()) {
+      return file;
+    }
+    return new File(file.getParent(), FilenameUtils.getBaseName(file.getName()) + '.' + extension);
   }
-  
+
   private SelectLayersExportData prepareExportData() {
     final SelectLayersExportData result = new SelectLayersExportData();
 
@@ -1252,7 +1256,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       }
     }
     else {
-      this.hexMapPanel.setToolTipText(this.application.processHexAction(HexAction.OVER, position));
+      this.hexMapPanel.setToolTipText(this.application.processHexAction(this.hexMapPanel, null, HexAction.OVER, position));
     }
   }
 
@@ -1278,7 +1282,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     if (this.application != null) {
       if (e.getButton() == MouseEvent.BUTTON1) {
         final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
-        this.hexMapPanel.setToolTipText(this.application.processHexAction(HexAction.CLICK, hexNumber));
+        this.hexMapPanel.setToolTipText(this.application.processHexAction(this.hexMapPanel, e, HexAction.CLICK, hexNumber));
       }
     }
     else {
@@ -1294,8 +1298,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void mousePressed(final MouseEvent e) {
+    final boolean ctrlPressed = (e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0;
     if (this.application == null) {
-      if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0 && e.isPopupTrigger()) {
+      if (!ctrlPressed && e.isPopupTrigger()) {
         final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
         onPopup(e.getPoint(), hexNumber);
       }
@@ -1310,7 +1315,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
           }
           break;
           case MouseEvent.BUTTON3: {
-            if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
+            if (ctrlPressed) {
               this.dragging = true;
               this.hexMapPanelDesktop.initDrag(e.getPoint());
             }
@@ -1320,7 +1325,10 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       }
     }
     else {
-      if (e.getButton() == MouseEvent.BUTTON3){
+      if (!ctrlPressed && e.isPopupTrigger() && this.application.allowPopupTrigger()) {
+        this.application.processHexAction(this.hexMapPanel, e, HexAction.POPUP_TRIGGER, this.hexMapPanel.getHexPosition(e.getPoint()));
+      }
+      else if (e.getButton() == MouseEvent.BUTTON3) {
         this.dragging = true;
         this.hexMapPanelDesktop.initDrag(e.getPoint());
       }
@@ -1345,7 +1353,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       }
     }
     else {
-      if (e.getButton() == MouseEvent.BUTTON3){
+      if (e.getButton() == MouseEvent.BUTTON3) {
         this.dragging = false;
         this.hexMapPanelDesktop.endDrag();
       }
@@ -1497,8 +1505,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void mouseWheelMoved(final MouseWheelEvent e) {
-    if ((e.getModifiers() & MouseEvent.CTRL_MASK) != 0) 
-    {
+    if ((e.getModifiers() & MouseEvent.CTRL_MASK) != 0) {
       final int rotation = e.getWheelRotation();
 
       final Point point = e.getPoint();
@@ -1607,9 +1614,9 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
 
   @Override
   public void onAfterPaint(final HexMapPanel source, final HexEngine<?> engine, final Graphics g) {
-     if (this.applicationGraphics!=null){
-       this.applicationGraphics.afterFieldPaint(engine, g);
-     }
+    if (this.applicationGraphics != null) {
+      this.applicationGraphics.afterFieldPaint(engine, g);
+    }
   }
 
 }
