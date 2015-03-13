@@ -16,7 +16,7 @@ The Engine Core, it is implemented maximally platform independently and I guess 
 
 ## jhexed-swing
 
-it contains some Swing-based components for graphic operations. it uses the Apache™ Batik SVG Toolkit to parse and render SVG images. A Small example of usage the engine with Swing, you can find in wiki
+it contains some Swing-based components for graphic operations. it uses the Apache™ Batik SVG Toolkit to parse and render SVG images. [A Small example of usage the engine with Swing, you can find in wiki](https://github.com/raydac/jhexed/wiki/ExampleOfUsage)
 
 ## jhexed-swing-editor
 
