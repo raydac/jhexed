@@ -23,7 +23,7 @@ it contains some Swing-based components for graphic operations. it uses the Apac
 
 ## jhexed-swing-editor
 
-An Implementation of Swing-based Hexagonal Map Editor. it allows to create and edit layered hexagonal maps. Prebuilt versions for Java and Windows can be downloaded from my Google drive folder.
+An Implementation of Swing-based Hexagonal Map Editor. it allows to create and edit layered hexagonal maps. Prebuilt versions for Java and Windows can be downloaded from [my Google drive folder](https://drive.google.com/folderview?id=0BxHnNp97IgMRcERvNTI4SjZJN1k&usp=drive_web).
 ![Screenshot](https://github.com/raydac/jhexed/blob/master/files/mapeditorscreen.png)
 
 # How to use with Android
