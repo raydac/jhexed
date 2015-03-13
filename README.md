@@ -2,6 +2,9 @@
 
 It is a small Java engine allows to organize a hexagonal field and make some manipulations with it.
 
+# License
+The Framework is under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
 # Modules
 
 ## jhexed-engine
