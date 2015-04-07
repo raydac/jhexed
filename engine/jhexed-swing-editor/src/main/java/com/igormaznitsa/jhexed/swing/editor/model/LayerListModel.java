@@ -24,90 +24,154 @@ import com.igormaznitsa.jhexed.swing.editor.ui.frames.layers.LayerRecordPanel;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.ListModel;
 import javax.swing.event.*;
 
 public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineModel<LayerListModel>, LayerableHexValueSource {
+
   private final List<LayerRecordPanel> layers = new ArrayList<LayerRecordPanel>();
   private final List<ListDataListener> listeners = new ArrayList<ListDataListener>();
 
   private int cols;
   private int rows;
-  
+
   private final int initCols;
   private final int initRows;
-  
+
   private List<HexLayer> hexLayers;
-  
+
+  private final ReentrantLock locker = new ReentrantLock();
+
   public LayerListModel(final int cols, final int rows) {
     this.initCols = cols;
     this.initRows = rows;
     init();
   }
-  
+
   @Override
   public int getSize() {
-    return this.layers.size();
+    locker.lock();
+    try {
+      return this.layers.size();
+    }
+    finally {
+      locker.unlock();
+    }
   }
 
   @Override
   public LayerRecordPanel getElementAt(int index) {
-    return this.layers.get(index);
+    locker.lock();
+    try {
+      return this.layers.get(index);
+    }
+    finally {
+      locker.unlock();
+    }
   }
 
-  public HexFieldLayer makeNewLayerField(final String name, final String comments){
-    return new HexFieldLayer(name, comments, this.cols, this.rows);
+  public HexFieldLayer makeNewLayerField(final String name, final String comments) {
+    locker.lock();
+    try {
+      return new HexFieldLayer(name, comments, this.cols, this.rows);
+    }
+    finally {
+      locker.unlock();
+    }
   }
-  
-  public void addLayer(final HexFieldLayer f){
-    final LayerRecordPanel newPanel = new LayerRecordPanel(this,f);
-    this.layers.add(0,newPanel);
-    fireListenerEvent(ListDataEvent.INTERVAL_ADDED, this.layers.size()-1, this.layers.size() - 1);
+
+  public LayerRecordPanel addLayer(final HexFieldLayer f) {
+    int from = -1;
+    int to = -1;
+    LayerRecordPanel result = null;
+    locker.lock();
+    try {
+      result = new LayerRecordPanel(this, f);
+      this.layers.add(0, result);
+      from = this.layers.size() - 1;
+      to = this.layers.size() - 1;
+    }
+    finally {
+      locker.unlock();
+    }
+    fireListenerEvent(ListDataEvent.INTERVAL_ADDED, from, to);
+    return result;
   }
 
   public void removeLayer(final HexFieldLayer f) {
     int index = -1;
-    for(int i=0;i<this.layers.size();i++){
-      if (this.layers.get(i).getLayer() == f){
-        index = i;
-        break;
+    locker.lock();
+    try {
+      for (int i = 0; i < this.layers.size(); i++) {
+        if (this.layers.get(i).getHexField() == f) {
+          index = i;
+          break;
+        }
+      }
+      if (index >= 0) {
+        this.layers.remove(index);
       }
     }
-    
-    if (index>=0){
-      this.layers.remove(index);
-      fireListenerEvent(ListDataEvent.INTERVAL_REMOVED, index,index);
+    finally {
+      locker.unlock();
     }
-  }  
+    if (index >= 0) {
+      fireListenerEvent(ListDataEvent.INTERVAL_REMOVED, index, index);
+    }
+  }
 
-  private void fireListenerEvent(final int type, final int index0, final int index1){
+  private void fireListenerEvent(final int type, final int index0, final int index1) {
     final ListDataEvent evt = new ListDataEvent(this, type, index0, index1);
-    for(final ListDataListener l : this.listeners){
+    for (final ListDataListener l : this.listeners) {
       l.contentsChanged(evt);
     }
   }
 
-  public boolean up(final LayerRecordPanel panel){
-    final int index = this.layers.indexOf(panel);
-    if (index<=0) return false;
-    final LayerRecordPanel second = this.layers.get(index-1);
-    this.layers.set(index, second);
-    this.layers.set(index-1, panel);
-    fireListenerEvent(ListDataEvent.CONTENTS_CHANGED, index-1, index);
-    return true;
+  public boolean up(final LayerRecordPanel panel) {
+    boolean result = false;
+    int index = -1;
+    locker.lock();
+    try {
+      index = this.layers.indexOf(panel);
+      if (index > 0) {
+        final LayerRecordPanel second = this.layers.get(index - 1);
+        this.layers.set(index, second);
+        this.layers.set(index - 1, panel);
+        result = true;
+      }
+    }
+    finally {
+      locker.unlock();
+    }
+    if (result) {
+      fireListenerEvent(ListDataEvent.CONTENTS_CHANGED, index - 1, index);
+    }
+    return result;
   }
-  
 
-  public boolean down(final LayerRecordPanel panel){
-    final int index = this.layers.indexOf(panel);
-    if (index>=this.layers.size()-1) return false;
-    final LayerRecordPanel second = this.layers.get(index+1);
-    this.layers.set(index, second);
-    this.layers.set(index+1, panel);
-    fireListenerEvent(ListDataEvent.CONTENTS_CHANGED, index, index+1);
-    return true;
+  public boolean down(final LayerRecordPanel panel) {
+    boolean result = false;
+    int index = -1;
+    locker.lock();
+    try {
+      index = this.layers.indexOf(panel);
+      if (index < this.layers.size() - 1) {
+        final LayerRecordPanel second = this.layers.get(index + 1);
+        this.layers.set(index, second);
+        this.layers.set(index + 1, panel);
+        result = true;
+      }
+    }
+    finally {
+      locker.unlock();
+    }
+    if (result) {
+      fireListenerEvent(ListDataEvent.CONTENTS_CHANGED, index, index + 1);
+    }
+    return result;
   }
-  
+
   @Override
   public void addListDataListener(final ListDataListener l) {
     this.listeners.add(l);
@@ -119,8 +183,17 @@ public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineMod
   }
 
   public void changedItem(final LayerRecordPanel val) {
-    final int index = this.layers.indexOf(val);
-    fireListenerEvent(ListDataEvent.CONTENTS_CHANGED, index, index);
+    int index = -1;
+    locker.lock();
+    try {
+      index = this.layers.indexOf(val);
+    }
+    finally {
+      locker.unlock();
+    }
+    if (index >= 0) {
+      fireListenerEvent(ListDataEvent.CONTENTS_CHANGED, index, index);
+    }
   }
 
   @Override
@@ -149,12 +222,12 @@ public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineMod
 
   @Override
   public void setValueAt(final HexPosition pos, final LayerListModel value) {
- 
+
   }
 
   @Override
   public boolean isPositionValid(final int col, final int row) {
-    return col>=0 && row>=0 && col<this.cols && row<this.rows;
+    return col >= 0 && row >= 0 && col < this.cols && row < this.rows;
   }
 
   @Override
@@ -169,70 +242,96 @@ public class LayerListModel implements ListModel<LayerRecordPanel>, HexEngineMod
   @Override
   public void detachedFromEngine(final HexEngine<?> engine) {
   }
-  
+
   public boolean resize(final int cols, final int rows) {
-    if (this.cols!=cols || this.rows!=rows){
-      this.cols = cols;
-      this.rows = rows;
-      for(final LayerRecordPanel f : this.layers){
-        f.getLayer().resize(cols, rows);
+    locker.lock();
+    try {
+      if (this.cols != cols || this.rows != rows) {
+        this.cols = cols;
+        this.rows = rows;
+        for (final LayerRecordPanel f : this.layers) {
+          f.getHexField().resize(cols, rows);
+        }
+        return true;
       }
-      return true;
-    }else{
-      return false;
+      else {
+        return false;
+      }
+    }
+    finally {
+      locker.unlock();
     }
   }
 
   public byte[] toByteArray() throws IOException {
-    final ByteArrayOutputStream result = new ByteArrayOutputStream(256*1024);
-    
+    final ByteArrayOutputStream result = new ByteArrayOutputStream(256 * 1024);
     final DataOutputStream dout = new DataOutputStream(result);
-    
-    dout.writeInt(this.cols);
-    dout.writeInt(this.rows);
-    
-    dout.writeShort(this.layers.size());
-    for(final LayerRecordPanel p : this.layers){
-      p.getLayer().write(dout);
+
+    locker.lock();
+    try {
+
+      dout.writeInt(this.cols);
+      dout.writeInt(this.rows);
+
+      dout.writeShort(this.layers.size());
+      for (final LayerRecordPanel p : this.layers) {
+        p.getHexField().write(dout);
+      }
     }
-    
+    finally {
+      locker.unlock();
+    }
     return result.toByteArray();
+
   }
 
-  public void fromByteArray(final byte [] array) throws IOException {
+  public void fromByteArray(final byte[] array) throws IOException {
     final DataInputStream din = new DataInputStream(new ByteArrayInputStream(array));
-    this.cols = din.readInt();
-    this.rows = din.readInt();
-  
-    final int numberOfLayers = din.readUnsignedShort();
-    
     final List<HexFieldLayer> newLayers = new ArrayList<HexFieldLayer>();
-    
-    for(int i=0;i<numberOfLayers;i++){
-      newLayers.add(new HexFieldLayer(din));
+
+    locker.lock();
+    try {
+      this.cols = din.readInt();
+      this.rows = din.readInt();
+
+      final int numberOfLayers = din.readUnsignedShort();
+
+      for (int i = 0; i < numberOfLayers; i++) {
+        newLayers.add(new HexFieldLayer(din));
+      }
+
+      final int num = this.layers.size();
+      this.layers.clear();
+      fireListenerEvent(ListDataEvent.INTERVAL_REMOVED, 0, num);
+
+      for (final HexFieldLayer f : newLayers) {
+        this.layers.add(new LayerRecordPanel(this, f));
+      }
     }
-    
-    final int num = this.layers.size();
-    this.layers.clear();
-    fireListenerEvent(ListDataEvent.INTERVAL_REMOVED, 0, num);
-    
-    for(final HexFieldLayer f : newLayers){
-      this.layers.add(new LayerRecordPanel(this, f));
+    finally {
+      locker.unlock();
     }
     fireListenerEvent(ListDataEvent.INTERVAL_ADDED, 0, newLayers.size());
   }
 
   public void init() {
-    this.cols = this.initCols;
-    this.rows = this.initRows;
-    final int max = this.layers.size();
-    this.layers.clear();
-    this.fireListenerEvent(ListDataEvent.INTERVAL_REMOVED, 0, max-1);
+    int max;
+    locker.lock();
+    try {
+      this.cols = this.initCols;
+      this.rows = this.initRows;
+      max = this.layers.size();
+      this.layers.clear();
+    }
+    finally {
+      locker.unlock();
+    }
+    this.fireListenerEvent(ListDataEvent.INTERVAL_REMOVED, 0, max - 1);
   }
 
   @Override
   public Iterable<HexFieldValue> getHexStackAtPosition(final int col, final int row) {
-    return new HexIterator(this,col,row);
+    return new HexIterator(this, col, row);
   }
 
 }

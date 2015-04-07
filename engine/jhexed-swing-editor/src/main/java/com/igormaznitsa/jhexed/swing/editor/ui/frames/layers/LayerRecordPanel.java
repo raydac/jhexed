@@ -43,8 +43,9 @@ public class LayerRecordPanel extends javax.swing.JPanel implements HexLayer{
     revalidate();
     repaint();
   }
-  
-  public HexFieldLayer getLayer(){
+
+  @Override
+  public HexFieldLayer getHexField() {
     return this.layer;
   }
 

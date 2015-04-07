@@ -187,8 +187,8 @@ public class FrameLayers extends AbstractToolFrame implements HexMapPanelListene
   private void buttonDeleteLayerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteLayerActionPerformed
     final LayerRecordPanel thelayerpanel = this.layerList.getSelectedValue();
     if (thelayerpanel!=null){
-      if (JOptionPane.showConfirmDialog(null, "Do you really want to remove '"+thelayerpanel.getLayer().getLayerName()+'\'',"Delete layer",JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
-        this.layerList.delete(thelayerpanel.getLayer());
+      if (JOptionPane.showConfirmDialog(null, "Do you really want to remove '"+thelayerpanel.getHexField().getLayerName()+'\'',"Delete layer",JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
+        this.layerList.delete(thelayerpanel.getHexField());
         this.layerList.clearSelection();
         InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED,(Object)null);
         InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.HEX_FIELD_NEEDS_REPAINT);
@@ -222,13 +222,13 @@ public class FrameLayers extends AbstractToolFrame implements HexMapPanelListene
       case REQUEST_EVENT: {
         if (objects[0] == InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED){
           final LayerRecordPanel selected = this.layerList.getSelectedValue();
-          InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, selected == null ? null : selected.getLayer());
+          InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, selected == null ? null : selected.getHexField());
         }
       }break;
       case HEX_SHAPE : {
         this.hexShape = (Path2D)objects[0];
         for(int i=0;i<this.layerList.getModel().getSize();i++){
-          this.layerList.getModel().getElementAt(i).getLayer().updatePrerasterizedIcons(this.hexShape);
+          this.layerList.getModel().getElementAt(i).getHexField().updatePrerasterizedIcons(this.hexShape);
         }
       }break;
     }
@@ -238,7 +238,7 @@ public class FrameLayers extends AbstractToolFrame implements HexMapPanelListene
   public void onZoomChanged(final HexMapPanel source, final float scale) {
     for (int i=0; i< this.layerList.getModel().getSize(); i++){
       final LayerRecordPanel p = this.layerList.getModel().getElementAt(i);
-      p.getLayer().updatePrerasterizedIcons(source.getHexShape());
+      p.getHexField().updatePrerasterizedIcons(source.getHexShape());
     }
   }
 

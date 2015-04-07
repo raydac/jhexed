@@ -136,7 +136,7 @@ public class SelectLayerDialog extends AbstractDialog {
     final int [] selected = this.listOfLayers.getSelectedIndices();
     final HexFieldLayer [] temp = new HexFieldLayer[selected.length];
     for(int i=0;i<selected.length;i++){
-      temp[i] = ((LayerRecordPanel)this.listOfLayers.getModel().getElementAt(selected[i])).getLayer();
+      temp[i] = ((LayerRecordPanel)this.listOfLayers.getModel().getElementAt(selected[i])).getHexField();
     }
     this.result = temp;
     dispose();

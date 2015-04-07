@@ -33,14 +33,14 @@ public class Layers {
   public HexFieldLayer get(final String name){
     for(int i=0;i<this.model.getSize();i++){
       final LayerRecordPanel panel = this.model.getElementAt(i);
-      if (name.equalsIgnoreCase(panel.getLayer().getLayerName())){
-        return panel.getLayer();
+      if (name.equalsIgnoreCase(panel.getHexField().getLayerName())){
+        return panel.getHexField();
       }
     }
     return null;
   }
   
   public HexFieldLayer get(final int index){
-    return this.model.getElementAt(index).getLayer();
+    return this.model.getElementAt(index).getHexField();
   }
 }

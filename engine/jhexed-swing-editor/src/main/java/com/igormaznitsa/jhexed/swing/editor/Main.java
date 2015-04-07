@@ -19,8 +19,7 @@ import com.igormaznitsa.jhexed.extapp.Application;
 import com.igormaznitsa.jhexed.extapp.ApplicationContext;
 import com.igormaznitsa.jhexed.swing.editor.ui.MainForm;
 import java.util.*;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 public class Main {
 
@@ -44,6 +43,7 @@ public class Main {
           final JFrame frame;
           try{
             frame = new MainForm(theApplication);
+            theApplication.init((ApplicationContext)frame);
             frame.setVisible(true);
             SwingUtilities.invokeLater(new Runnable(){
               @Override

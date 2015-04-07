@@ -22,6 +22,10 @@ import java.util.List;
 
 public interface ApplicationContext extends Lookup {
   List<HexLayer> getHexLayers();
+  void upHexLayer(HexLayer layer);
+  void downHexLayer(HexLayer layer);
+  HexLayer makeHexLayer(String name, String comment);
+  void deleteHexLayer(HexLayer layer);
   SVGImage getBackgroundImage();
   void refreshUi();
   MapOptions getMapOptions();

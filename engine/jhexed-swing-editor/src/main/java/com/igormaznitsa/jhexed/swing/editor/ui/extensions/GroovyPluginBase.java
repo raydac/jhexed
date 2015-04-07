@@ -78,14 +78,14 @@ public class GroovyPluginBase {
   }
   
   public HexFieldLayer layer(final int index){
-    return this.layerListModel.getElementAt(index).getLayer();
+    return this.layerListModel.getElementAt(index).getHexField();
   }
   
   public HexFieldLayer layer(final String layerName) {
     for (int i = 0; i < this.layerListModel.getSize(); i++) {
       final LayerRecordPanel panel = this.layerListModel.getElementAt(i);
-      if (layerName.equalsIgnoreCase(panel.getLayer().getLayerName())) {
-        return panel.getLayer();
+      if (layerName.equalsIgnoreCase(panel.getHexField().getLayerName())) {
+        return panel.getHexField();
       }
     }
     return null;

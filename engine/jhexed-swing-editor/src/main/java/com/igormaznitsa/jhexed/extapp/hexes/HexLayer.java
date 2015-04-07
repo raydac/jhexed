@@ -16,6 +16,7 @@
 package com.igormaznitsa.jhexed.extapp.hexes;
 
 import com.igormaznitsa.jhexed.engine.misc.HexPosition;
+import com.igormaznitsa.jhexed.hexmap.HexFieldLayer;
 import com.igormaznitsa.jhexed.values.HexFieldValue;
 
 public interface HexLayer {
@@ -25,4 +26,5 @@ public interface HexLayer {
   void setValue(HexPosition pos, int value);
   int getMaxValue();
   HexFieldValue findHexViewValueForIndex(int value);
+  HexFieldLayer getHexField(); 
 }

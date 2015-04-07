@@ -47,7 +47,7 @@ final class HexIterator implements Iterable<HexFieldValue>, Iterator<HexFieldVal
     this.nextPresented = false;
     this.nextValue = null;
     while (this.index >= 0) {
-      final HexFieldLayer layer = this.model.getElementAt(this.index--).getLayer();
+      final HexFieldLayer layer = this.model.getElementAt(this.index--).getHexField();
       if (layer.isLayerVisible()) {
         this.nextValue = layer.getHexValueAtPos(this.col, this.row);
         this.nextPresented = true;

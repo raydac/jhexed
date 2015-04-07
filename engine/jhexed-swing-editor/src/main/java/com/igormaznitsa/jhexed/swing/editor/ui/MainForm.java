@@ -49,6 +49,7 @@ import java.awt.event.*;
 import java.awt.geom.Path2D;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -1171,7 +1172,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     result.setExportHexBorders(true);
 
     for (int i = 0; i < this.layers.getSize(); i++) {
-      final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
+      final HexFieldLayer field = this.layers.getElementAt(i).getHexField();
       result.addLayer(field.isLayerVisible(), field);
     }
 
@@ -1231,7 +1232,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         }
 
         for (int i = 0; i < this.layers.getSize(); i++) {
-          final HexFieldLayer field = this.layers.getElementAt(i).getLayer();
+          final HexFieldLayer field = this.layers.getElementAt(i).getHexField();
           if (field.isLayerVisible()) {
             final String layerName = field.getLayerName().isEmpty() ? "Untitled" : field.getLayerName();
             final HexFieldValue layerValue = field.getHexValueAtPos(position.getColumn(), position.getRow());
@@ -1394,7 +1395,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     if (this.application != null) {
       for (int i = 0; i < this.layers.getSize(); i++) {
         final LayerRecordPanel p = this.layers.getElementAt(i);
-        p.getLayer().updatePrerasterizedIcons(source.getHexShape());
+        p.getHexField().updatePrerasterizedIcons(source.getHexShape());
       }
     }
 
@@ -1432,7 +1433,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       break;
       case LAYER_NEEDS_EDITION: {
         final LayerRecordPanel panel = (LayerRecordPanel) objects[0];
-        final EditLayerDialog dlg = new EditLayerDialog(this, this.layers, panel.getLayer(), this.hexMapPanel.getHexShape());
+        final EditLayerDialog dlg = new EditLayerDialog(this, this.layers, panel.getHexField(), this.hexMapPanel.getHexShape());
         dlg.setVisible(true);
         final HexFieldLayer result = dlg.getResult();
         if (result != null) {
@@ -1617,6 +1618,79 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     if (this.applicationGraphics != null) {
       this.applicationGraphics.afterFieldPaint(engine, g);
     }
+  }
+
+  @Override
+  public void upHexLayer(final HexLayer layer) {
+    final Runnable run = new Runnable() {
+      @Override
+      public void run() {
+        if (layer instanceof LayerRecordPanel){
+          layers.up((LayerRecordPanel)layer);
+        }
+      }
+    };
+    if (SwingUtilities.isEventDispatchThread()){
+      run.run();
+    }else{
+      SwingUtilities.invokeLater(run);
+    }
+  }
+
+  @Override
+  public void downHexLayer(final HexLayer layer) {
+    final Runnable run = new Runnable() {
+      @Override
+      public void run() {
+        if (layer instanceof LayerRecordPanel) {
+          layers.down((LayerRecordPanel) layer);
+        }
+      }
+    };
+    if (SwingUtilities.isEventDispatchThread()) {
+      run.run();
+    }
+    else {
+      SwingUtilities.invokeLater(run);
+    }
+  }
+
+  @Override
+  public HexLayer makeHexLayer(final String name, final String comment) {
+    if (name == null) {
+      throw new NullPointerException("Name must not be null");
+    }
+    if (comment == null) {
+      throw new NullPointerException("Comments must not be null");
+    }
+
+    final AtomicReference<HexLayer> result = new AtomicReference<HexLayer>();
+    
+    final Runnable run = new Runnable() {
+      @Override
+      public void run() {
+        result.set(layers.addLayer(layers.makeNewLayerField(name, comment)));
+      }
+    };
+    
+    if (SwingUtilities.isEventDispatchThread()){
+      run.run();
+    }else{
+      try{
+        SwingUtilities.invokeAndWait(run);
+      }catch(Exception ex){
+        throw new RuntimeException(ex);
+      }
+    }
+    return result.get();
+  }
+
+  @Override
+  public void deleteHexLayer(final HexLayer layer) {
+    if (layer == null) {
+      return;
+    }
+    this.layers.removeLayer(layer.getHexField());
   }
 
 }

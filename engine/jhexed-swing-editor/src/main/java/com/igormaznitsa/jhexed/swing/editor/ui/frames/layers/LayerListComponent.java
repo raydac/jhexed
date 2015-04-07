@@ -176,7 +176,7 @@ public class LayerListComponent extends JList<LayerRecordPanel> implements ListS
   @Override
   public void valueChanged(final ListSelectionEvent e) {
     final int index = this.getSelectedIndex();
-    final HexFieldLayer layer = index < 0 ? null : (this.getModel().getElementAt(index)).getLayer();
+    final HexFieldLayer layer = index < 0 ? null : (this.getModel().getElementAt(index)).getHexField();
 
     InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, layer);
   }
