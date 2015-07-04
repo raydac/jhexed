@@ -30,7 +30,10 @@ If you like the software you can make some donation to the author
 An Implementation of Swing-based Hexagonal Map Editor. it allows to create and edit layered hexagonal maps. Prebuilt versions for Java and Windows can be downloaded from [my Google drive folder](https://drive.google.com/folderview?id=0BxHnNp97IgMRcERvNTI4SjZJN1k&usp=drive_web).
 ![Screenshot](https://github.com/raydac/jhexed/blob/master/files/mapeditorscreen.png)
 
-# How to use with Android
-
+# How to use with Android   
 The Engine can be used with Android [and there is a small example of usage under Android 2.1](https://github.com/raydac/jhexed/tree/master/samples/android/JHexedPhotoView)
 ![Screenshot](https://github.com/raydac/jhexed/blob/master/files/android_screen.jpg)
+
+# Donation   
+If you like the software you can make some donation to the author   
+[![https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Y7ND3NMFWGVWA)
