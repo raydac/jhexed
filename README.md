@@ -21,6 +21,10 @@ The Engine Core, it is implemented maximally platform independently and I guess 
 
 it contains some Swing-based components for graphic operations. it uses the Apache™ Batik SVG Toolkit to parse and render SVG images. [A Small example of usage the engine with Swing, you can find in wiki](https://github.com/raydac/jhexed/wiki/ExampleOfUsage)
 
+# Donation
+If you like the software you can make some donation to the author   
+[![https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2S5JQ9UU6YS64)
+
 ## jhexed-swing-editor
 
 An Implementation of Swing-based Hexagonal Map Editor. it allows to create and edit layered hexagonal maps. Prebuilt versions for Java and Windows can be downloaded from [my Google drive folder](https://drive.google.com/folderview?id=0BxHnNp97IgMRcERvNTI4SjZJN1k&usp=drive_web).
