@@ -177,7 +177,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     this.groovyShell = null;
     this.compilerConfiguration = null;
 
-    this.lookupContainer = new ObjectLookup(this.hexMapPanel.getHexEngine(), this, Log.makeApplicationLog());
+    this.lookupContainer = new ObjectLookup(this, this.hexMapPanel.getHexEngine(), this, Log.makeApplicationLog());
 
     final InputStream initialMap = application.getInitialMap(this);
     try {
@@ -304,7 +304,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       loadFromFile(file);
     }
 
-    this.lookupContainer = new ObjectLookup(this.hexMapPanel.getHexEngine(), this, Log.makeApplicationLog());
+    this.lookupContainer = new ObjectLookup(this, this.hexMapPanel.getHexEngine(), this, Log.makeApplicationLog());
     this.applicationGraphics = null;
   }
 

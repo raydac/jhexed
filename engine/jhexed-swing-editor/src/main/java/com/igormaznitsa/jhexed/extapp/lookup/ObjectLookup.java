@@ -27,7 +27,7 @@ public class ObjectLookup implements Lookup {
   public <T> T lookup(final Class<T> type, final Object ... args) {
     for (final Object obj : this.objects) {
       if (obj != null) {
-        if (obj.getClass().isAssignableFrom(type)) {
+        if (type.isInstance(obj)) {
           return type.cast(obj);
         }
       }
