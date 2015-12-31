@@ -101,7 +101,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private final Application application;
   private final ApplicationGraphics applicationGraphics;
 
-  private static void setComponentForPosition(final JPanel panel, final UIComponentPosition position, final JComponent component) {
+  private static void setComponentForPosition (final JPanel panel, final UIComponentPosition position, final JComponent component) {
     if (component != null) {
       final Object layoutPosition;
       switch (position) {
@@ -124,7 +124,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
-  public MainForm(final Application application) throws Exception {
+  public MainForm (final Application application) throws Exception {
     Log.info("Start in application mode, application \"" + application.getID() + '\"');
     this.application = application;
 
@@ -204,7 +204,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     this.hexMapPanel.setZoom(1.0f);
   }
 
-  public MainForm(final String fileToOpen) {
+  public MainForm (final String fileToOpen) {
     Log.info("Start in editor mode");
 
     this.application = null;
@@ -219,7 +219,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
       landfItem.addActionListener(new ActionListener() {
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed (ActionEvent e) {
           try {
             javax.swing.UIManager.setLookAndFeel(info.getClassName());
           }
@@ -237,7 +237,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     comments.addActionListener(new ActionListener() {
 
       @Override
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed (ActionEvent e) {
         // open dialog for cell comment
         final CellCommentDialog commentDialog = new CellCommentDialog(theFrame, "Commentaries for the cell at " + popupHex.getColumn() + "," + popupHex.getRow(), cellComments.getForHex(popupHex));
         commentDialog.setVisible(true);
@@ -308,7 +308,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     this.applicationGraphics = null;
   }
 
-  private void registerInternalPlugins() {
+  private void registerInternalPlugins () {
     for (final String f : INTERNAL_PLUGINS) {
       Reader reader = null;
       try {
@@ -332,12 +332,12 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
-  private void registerExternalPlugins(final String root) {
+  private void registerExternalPlugins (final String root) {
     final File plugins = new File(root, "plugins");
     if (plugins.isDirectory()) {
       final Collection<File> files = FileUtils.listFiles(plugins, FileFilterUtils.asFileFilter(new FilenameFilter() {
         @Override
-        public boolean accept(final File dir, final String name) {
+        public boolean accept (final File dir, final String name) {
           return name.endsWith(".groovy");
         }
       }), null);
@@ -369,7 +369,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
-  public void addedUndoStep(final HexFieldLayer[] layers) {
+  public void addedUndoStep (final HexFieldLayer[] layers) {
     boolean tooMany = false;
     for (final HexFieldLayer l : layers) {
       tooMany = tooMany || l.addUndo();
@@ -383,7 +383,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     updateRedoUndoForCurrentLayer();
   }
 
-  private void readAndParsePluginScript(final Reader reader) throws IOException {
+  private void readAndParsePluginScript (final Reader reader) throws IOException {
     final DelegatingScript script = (DelegatingScript) this.groovyShell.parse(reader);
     script.setDelegate(this.dsl);
     final String name = (String) script.invokeMethod("getPluginName", new Object[]{});
@@ -393,7 +393,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     menuItem.addActionListener(new ActionListener() {
 
       @Override
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed (ActionEvent e) {
         try {
           if (selectedLayer != null) {
             addedUndoStep(new HexFieldLayer[]{selectedLayer});
@@ -414,7 +414,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     menuPlugins.add(menuItem);
   }
 
-  private Rectangle loadPosition(final String prefix, final Rectangle dflt) {
+  private Rectangle loadPosition (final String prefix, final Rectangle dflt) {
     final int x = REGISTRY.getInt(prefix + ".X", dflt.x);
     final int y = REGISTRY.getInt(prefix + ".Y", dflt.y);
     final int width = REGISTRY.getInt(prefix + ".Width", dflt.width);
@@ -423,7 +423,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     return new Rectangle(x, y, width, height);
   }
 
-  private void loadSettings() {
+  private void loadSettings () {
     this.setBounds(loadPosition("mainForm", new Rectangle(10, 10, 800, 600)));
     if (this.frameLayers != null) {
       this.frameLayers.setBounds(loadPosition("frameLayers", new Rectangle(10, 10, this.frameLayers.getPreferredSize().width, frameLayers.getPreferredSize().height)));
@@ -442,14 +442,14 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     this.menuShowHexBorders.setSelected(REGISTRY.getBoolean("showHexBorders", true));
   }
 
-  private void writePosition(final String prefix, final Rectangle rect) {
+  private void writePosition (final String prefix, final Rectangle rect) {
     REGISTRY.putInt(prefix + ".X", rect.x);
     REGISTRY.putInt(prefix + ".Y", rect.y);
     REGISTRY.putInt(prefix + ".Width", rect.width);
     REGISTRY.putInt(prefix + ".Height", rect.height);
   }
 
-  private void saveSettings() {
+  private void saveSettings () {
     writePosition("mainForm", this.getBounds());
     writePosition("frameLayers", this.frameLayers.getBounds());
     writePosition("frameTools", this.frameTools.getBounds());
@@ -465,7 +465,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     REGISTRY.put("lookandfeel", javax.swing.UIManager.getLookAndFeel().getClass().getName());
   }
 
-  protected JInternalFrame createFrame() {
+  protected JInternalFrame createFrame () {
     JInternalFrame frame = new JInternalFrame("Some frame");
     frame.setBounds(30, 30, 300, 300);
     frame.setTitle("Some frame");
@@ -478,7 +478,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
    * WARNING: Do NOT modify this code. The content of this method is always
    * regenerated by the Form Editor.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings ("unchecked")
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
@@ -853,7 +853,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }//GEN-LAST:event_menuWindowOptionsActionPerformed
 
-  private void loadFromFile(final File file) {
+  private void loadFromFile (final File file) {
     if (file.isFile()) {
 
       try {
@@ -935,7 +935,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }//GEN-LAST:event_menuFileSaveAsActionPerformed
 
-  private boolean saveStateToFile(final File file) {
+  private boolean saveStateToFile (final File file) {
     try {
       final FileContainer fcontainer = new FileContainer();
       saveState(fcontainer);
@@ -957,7 +957,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
-  private void updateTheSourceFile(final File file) {
+  private void updateTheSourceFile (final File file) {
     if (file == null) {
       this.setTitle("JHexed Map Editor");
     }
@@ -1006,23 +1006,23 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     updateRedoUndoForCurrentLayer();
   }//GEN-LAST:event_menuEditRedoActionPerformed
 
-  public Path2D getHexShape() {
+  public Path2D getHexShape () {
     return this.hexMapPanel.getHexShape();
   }
 
-  private DocumentOptions getDocumentOptions() {
+  private DocumentOptions getDocumentOptions () {
     return new DocumentOptions(
-            this.hexMapPanel.getImage(),
-            this.layers.getColumnNumber(),
-            this.layers.getRowNumber(),
-            this.hexMapPanel.getHexOrientation(),
-            this.hexMapPanel.getHexRenderer().getLineWidth(),
-            this.hexMapPanel.getHexRenderer().getCommonBorderColor(),
-            this.documentComments
+        this.hexMapPanel.getImage(),
+        this.layers.getColumnNumber(),
+        this.layers.getRowNumber(),
+        this.hexMapPanel.getHexOrientation(),
+        this.hexMapPanel.getHexRenderer().getLineWidth(),
+        this.hexMapPanel.getHexRenderer().getCommonBorderColor(),
+        this.documentComments
     );
   }
 
-  private void setDocumentOptions(final DocumentOptions value) {
+  private void setDocumentOptions (final DocumentOptions value) {
     this.hexMapPanel.changeHexOrientation(value.getHexOrientation());
     this.layers.resize(value.getColumns(), value.getRows());
     this.hexMapPanel.getHexRenderer().setLineWidth(value.getLineWidth());
@@ -1069,7 +1069,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }//GEN-LAST:event_menuFileExportAsImageActionPerformed
 
-  private static void processExporterAsLongTask(final JFrame frame, final String taskDescription, final Exporter exporter, final File theFile) {
+  private static void processExporterAsLongTask (final JFrame frame, final String taskDescription, final Exporter exporter, final File theFile) {
     if (theFile.exists()) {
       if (JOptionPane.showConfirmDialog(frame, "Override existing file '" + theFile.getName() + "'?", "File exists", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
         return;
@@ -1079,7 +1079,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     new LongTaskDialog(frame, taskDescription, new Runnable() {
 
       @Override
-      public void run() {
+      public void run () {
         Log.info("Started export: " + taskDescription);
         try {
           exporter.export(theFile);
@@ -1153,7 +1153,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }//GEN-LAST:event_menuFileExportAsJavaConstantsActionPerformed
 
-  private static File ensureFileExtenstion(final File file, final String extension) {
+  private static File ensureFileExtenstion (final File file, final String extension) {
     if (file == null) {
       return null;
     }
@@ -1164,7 +1164,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     return new File(file.getParent(), FilenameUtils.getBaseName(file.getName()) + '.' + extension);
   }
 
-  private SelectLayersExportData prepareExportData() {
+  private SelectLayersExportData prepareExportData () {
     final SelectLayersExportData result = new SelectLayersExportData();
 
     result.setBackgroundImageExport(this.menuViewBackImage.isSelected());
@@ -1220,7 +1220,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   private javax.swing.JPanel panelMainArea;
   // End of variables declaration//GEN-END:variables
 
-  private void updateActivehexCoord(final HexPosition position) {
+  private void updateActivehexCoord (final HexPosition position) {
     if (this.application == null) {
       final String comment = this.cellComments.getForHex(position);
       this.labelCellUnderMouse.setText("Hex " + position.getColumn() + ',' + position.getRow() + ' ' + (comment == null ? "" : comment));
@@ -1261,7 +1261,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
-  private void useCurrentToolAtPosition(final HexPosition position) {
+  private void useCurrentToolAtPosition (final HexPosition position) {
     if (this.selectedToolType != null && this.selectedLayer != null && this.hexMapPanel.isValidPosition(position)) {
       updateActivehexCoord(position);
       this.selectedToolType.processTool(this.hexMapPanel.getHexEngine(), this.selectedLayer, position);
@@ -1269,7 +1269,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
-  private void onPopup(final Point mousePoint, final HexPosition hexNumber) {
+  private void onPopup (final Point mousePoint, final HexPosition hexNumber) {
     if (this.popupMenu != null) {
       this.popupHex = hexNumber;
       if (hexNumber != null && this.hexMapPanel.isValidPosition(hexNumber)) {
@@ -1279,7 +1279,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void mouseClicked(final MouseEvent e) {
+  public void mouseClicked (final MouseEvent e) {
     if (this.application != null) {
       if (e.getButton() == MouseEvent.BUTTON1) {
         final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
@@ -1298,7 +1298,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void mousePressed(final MouseEvent e) {
+  public void mousePressed (final MouseEvent e) {
     final boolean ctrlPressed = (e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0;
     if (this.application == null) {
       if (!ctrlPressed && e.isPopupTrigger()) {
@@ -1325,19 +1325,17 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         }
       }
     }
-    else {
-      if (!ctrlPressed && e.isPopupTrigger() && this.application.allowPopupTrigger()) {
-        this.application.processHexAction(this.hexMapPanel, e, HexAction.POPUP_TRIGGER, this.hexMapPanel.getHexPosition(e.getPoint()));
-      }
-      else if (e.getButton() == MouseEvent.BUTTON3) {
-        this.dragging = true;
-        this.hexMapPanelDesktop.initDrag(e.getPoint());
-      }
+    else if (!ctrlPressed && e.isPopupTrigger() && this.application.allowPopupTrigger()) {
+      this.application.processHexAction(this.hexMapPanel, e, HexAction.POPUP_TRIGGER, this.hexMapPanel.getHexPosition(e.getPoint()));
+    }
+    else if (e.getButton() == MouseEvent.BUTTON3) {
+      this.dragging = true;
+      this.hexMapPanelDesktop.initDrag(e.getPoint());
     }
   }
 
   @Override
-  public void mouseReleased(final MouseEvent e) {
+  public void mouseReleased (final MouseEvent e) {
     if (this.application == null) {
       if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0 && e.isPopupTrigger()) {
         final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
@@ -1353,45 +1351,41 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
         }
       }
     }
-    else {
-      if (e.getButton() == MouseEvent.BUTTON3) {
-        this.dragging = false;
-        this.hexMapPanelDesktop.endDrag();
-      }
+    else if (e.getButton() == MouseEvent.BUTTON3) {
+      this.dragging = false;
+      this.hexMapPanelDesktop.endDrag();
     }
   }
 
   @Override
-  public void mouseEntered(final MouseEvent e) {
+  public void mouseEntered (final MouseEvent e) {
   }
 
   @Override
-  public void mouseExited(final MouseEvent e) {
+  public void mouseExited (final MouseEvent e) {
     this.labelCellUnderMouse.setText("   ");
   }
 
   @Override
-  public void mouseDragged(final MouseEvent e) {
+  public void mouseDragged (final MouseEvent e) {
     if (SwingUtilities.isLeftMouseButton(e)) {
       final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
       useCurrentToolAtPosition(hexNumber);
     }
-    else {
-      if (this.dragging) {
-        this.hexMapPanelDesktop.processDrag(e.getPoint());
-      }
+    else if (this.dragging) {
+      this.hexMapPanelDesktop.processDrag(e.getPoint());
     }
   }
 
   @Override
-  public void mouseMoved(final MouseEvent e) {
+  public void mouseMoved (final MouseEvent e) {
     final HexPosition hexNumber = this.hexMapPanel.getHexPosition(e.getPoint());
     updateActivehexCoord(hexNumber);
     ToolTipManager.sharedInstance().mouseMoved(e);
   }
 
   @Override
-  public void onZoomChanged(final HexMapPanel source, final float scale) {
+  public void onZoomChanged (final HexMapPanel source, final float scale) {
     if (this.application != null) {
       for (int i = 0; i < this.layers.getSize(); i++) {
         final LayerRecordPanel p = this.layers.getElementAt(i);
@@ -1404,7 +1398,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void onAppBusEvent(final Object source, final InsideApplicationBus bus, final InsideApplicationBus.AppBusEvent event, final Object... objects) {
+  public void onAppBusEvent (final Object source, final InsideApplicationBus bus, final InsideApplicationBus.AppBusEvent event, final Object... objects) {
     switch (event) {
       case A_FRAME_CHANGED_ITS_STATUS: {
         if (objects[0] == this.frameLayers) {
@@ -1453,13 +1447,13 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
   }
 
-  public void saveState(final FileContainer container) throws IOException {
+  public void saveState (final FileContainer container) throws IOException {
     container.addSection(new FileContainerSection("docsettings", getDocumentOptions().toByteArray()));
     container.addSection(new FileContainerSection("layers", this.layers.toByteArray()));
     container.addSection(new FileContainerSection("cellcomments", this.cellComments.toByteArray()));
   }
 
-  public void loadState(final FileContainer container) throws IOException {
+  public void loadState (final FileContainer container) throws IOException {
     InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, (Object) null);
 
     final FileContainerSection docsettings = container.findSectionForName("docsettings");
@@ -1486,7 +1480,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     this.hexMapPanel.repaint();
   }
 
-  private void resetState() {
+  private void resetState () {
     this.documentComments = null;
     this.layers.init();
     this.hexMapPanel.init();
@@ -1497,7 +1491,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     InsideApplicationBus.getInstance().fireEvent(this, InsideApplicationBus.AppBusEvent.SELECTED_LAYER_CHANGED, (Object) null);
   }
 
-  private void updateRedoUndoForCurrentLayer() {
+  private void updateRedoUndoForCurrentLayer () {
     if (this.application == null) {
       this.menuEditUndo.setEnabled(!this.undoLayers.isEmpty());
       this.menuEditRedo.setEnabled(!this.redoLayers.isEmpty());
@@ -1505,7 +1499,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void mouseWheelMoved(final MouseWheelEvent e) {
+  public void mouseWheelMoved (final MouseWheelEvent e) {
     if ((e.getModifiers() & MouseEvent.CTRL_MASK) != 0) {
       final int rotation = e.getWheelRotation();
 
@@ -1537,12 +1531,12 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public java.util.List<HexLayer> getHexLayers() {
+  public java.util.List<HexLayer> getHexLayers () {
     return this.hexLayerList;
   }
 
   @Override
-  public void endWork() {
+  public void endWork () {
     if (this.application != null) {
       try {
         Log.info("Destroing application");
@@ -1555,12 +1549,12 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public <T> T lookup(final Class<T> type, final Object... args) {
+  public <T> T lookup (final Class<T> type, final Object... args) {
     return this.lookupContainer.lookup(type, args);
   }
 
   @Override
-  public void refreshUi() {
+  public void refreshUi () {
     if (SwingUtilities.isEventDispatchThread()) {
       hexMapPanel.revalidate();
       this.hexMapPanel.repaint();
@@ -1568,7 +1562,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     else {
       SwingUtilities.invokeLater(new Runnable() {
         @Override
-        public void run() {
+        public void run () {
           hexMapPanel.revalidate();
           hexMapPanel.repaint();
         }
@@ -1577,12 +1571,12 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public SVGImage getBackgroundImage() {
+  public SVGImage getBackgroundImage () {
     return this.hexMapPanel.getImage();
   }
 
   @Override
-  public MapOptions getMapOptions() {
+  public MapOptions getMapOptions () {
     final MapOptions options = new MapOptions();
 
     final LayerableHexValueSourceRender renderer = this.hexMapPanel.getHexRenderer();
@@ -1596,7 +1590,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void setMapOptions(final MapOptions options) {
+  public void setMapOptions (final MapOptions options) {
     if (options != null) {
       this.hexMapPanel.setShowBackImage(options.showBackgroundImage);
       this.hexMapPanel.setZoom(Math.max(0.2f, Math.min(10.0f, options.zoom)));
@@ -1614,34 +1608,35 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void onAfterPaint(final HexMapPanel source, final HexEngine<?> engine, final Graphics g) {
+  public void onAfterPaint (final HexMapPanel source, final HexEngine<?> engine, final Graphics g) {
     if (this.applicationGraphics != null) {
       this.applicationGraphics.afterFieldPaint(engine, g);
     }
   }
 
   @Override
-  public void upHexLayer(final HexLayer layer) {
+  public void upHexLayer (final HexLayer layer) {
     final Runnable run = new Runnable() {
       @Override
-      public void run() {
-        if (layer instanceof LayerRecordPanel){
-          layers.up((LayerRecordPanel)layer);
+      public void run () {
+        if (layer instanceof LayerRecordPanel) {
+          layers.up((LayerRecordPanel) layer);
         }
       }
     };
-    if (SwingUtilities.isEventDispatchThread()){
+    if (SwingUtilities.isEventDispatchThread()) {
       run.run();
-    }else{
+    }
+    else {
       SwingUtilities.invokeLater(run);
     }
   }
 
   @Override
-  public void downHexLayer(final HexLayer layer) {
+  public void downHexLayer (final HexLayer layer) {
     final Runnable run = new Runnable() {
       @Override
-      public void run() {
+      public void run () {
         if (layer instanceof LayerRecordPanel) {
           layers.down((LayerRecordPanel) layer);
         }
@@ -1656,7 +1651,7 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public HexLayer makeHexLayer(final String name, final String comment) {
+  public HexLayer makeHexLayer (final String name, final String comment) {
     if (name == null) {
       throw new NullPointerException("Name must not be null");
     }
@@ -1665,20 +1660,22 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
     }
 
     final AtomicReference<HexLayer> result = new AtomicReference<HexLayer>();
-    
+
     final Runnable run = new Runnable() {
       @Override
-      public void run() {
+      public void run () {
         result.set(layers.addLayer(layers.makeNewLayerField(name, comment)));
       }
     };
-    
-    if (SwingUtilities.isEventDispatchThread()){
+
+    if (SwingUtilities.isEventDispatchThread()) {
       run.run();
-    }else{
-      try{
+    }
+    else {
+      try {
         SwingUtilities.invokeAndWait(run);
-      }catch(Exception ex){
+      }
+      catch (Exception ex) {
         throw new RuntimeException(ex);
       }
     }
@@ -1686,11 +1683,33 @@ public class MainForm extends javax.swing.JFrame implements MouseListener, Mouse
   }
 
   @Override
-  public void deleteHexLayer(final HexLayer layer) {
+  public void deleteHexLayer (final HexLayer layer) {
     if (layer == null) {
       return;
     }
     this.layers.removeLayer(layer.getHexField());
+  }
+
+  @Override
+  public HexEngine<?> getHexEngine () {
+    return this.hexMapPanel.getHexEngine();
+  }
+
+  @Override
+  public HexLayer prerasterize (final HexLayer layer) {
+    layer.getHexField().updatePrerasterizedIcons(this.getHexShape());
+    return layer;
+  }
+
+  @Override
+  public HexLayer findHexLayerForName (final String name) {
+    for (int i = 0; i < this.layers.getSize(); i++) {
+      final HexLayer layer = this.layers.getElementAt(i);
+      if (name.equals(layer.getHexField().getLayerName())) {
+        return layer;
+      }
+    }
+    return null;
   }
 
 }

@@ -15,6 +15,7 @@
  */
 package com.igormaznitsa.jhexed.extapp;
 
+import com.igormaznitsa.jhexed.engine.HexEngine;
 import com.igormaznitsa.jhexed.extapp.hexes.HexLayer;
 import com.igormaznitsa.jhexed.extapp.lookup.Lookup;
 import com.igormaznitsa.jhexed.renders.svg.SVGImage;
@@ -22,9 +23,12 @@ import java.util.List;
 
 public interface ApplicationContext extends Lookup {
   List<HexLayer> getHexLayers();
+  HexEngine<?> getHexEngine();
   void upHexLayer(HexLayer layer);
   void downHexLayer(HexLayer layer);
+  HexLayer findHexLayerForName(String name);
   HexLayer makeHexLayer(String name, String comment);
+  HexLayer prerasterize(HexLayer layer);
   void deleteHexLayer(HexLayer layer);
   SVGImage getBackgroundImage();
   void refreshUi();

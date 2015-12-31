@@ -220,6 +220,13 @@ public class HexFieldLayer implements HexEngineModel<Byte> {
     this.setValueAtPos(pos.getColumn(), pos.getRow(), value);
   }
 
+  public void fillByValue(final int value){
+    if (value > 255) {
+      throw new IllegalArgumentException("Too big value, must be 0...255");
+    }
+    Arrays.fill(this.array, (byte)value);
+  }
+  
   public void setValueAtPos(final int col, final int row, final int i) {
     if (i > 255) {
       throw new IllegalArgumentException("Too big value, must be 0...255");

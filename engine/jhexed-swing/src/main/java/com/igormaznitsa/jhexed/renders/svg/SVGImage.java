@@ -34,7 +34,7 @@ public class SVGImage {
   private final byte[] originalNonParsedImageData;
   private final Dimension2D documentSize = new Dimension();
 
-  private static byte[] readFullInputStream(final InputStream in) throws IOException {
+  private static byte[] readFullInputStream (final InputStream in) throws IOException {
     final byte[] buffer = new byte[16384];
 
     final ByteArrayOutputStream result = new ByteArrayOutputStream(16384);
@@ -50,7 +50,7 @@ public class SVGImage {
     return result.toByteArray();
   }
 
-  private static GraphicsNode loadDiagramFromStream(final InputStream in, final Dimension2D docSize) throws IOException {
+  private static GraphicsNode loadDiagramFromStream (final InputStream in, final Dimension2D docSize) throws IOException {
     final String parser = XMLResourceDescriptor.getXMLParserClassName();
     final SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
     final SVGDocument doc = factory.createSVGDocument("http://www.igormaznitsa.com/jhexed/svg", in);
@@ -74,7 +74,7 @@ public class SVGImage {
     return result;
   }
 
-  public SVGImage(final File file) throws IOException {
+  public SVGImage (final File file) throws IOException {
     final FileInputStream inStream = new FileInputStream(file);
     try {
       this.originalNonParsedImageData = readFullInputStream(inStream);
@@ -90,7 +90,7 @@ public class SVGImage {
     }
   }
 
-  public SVGImage(final InputStream in, final boolean packed) throws IOException {
+  public SVGImage (final InputStream in, final boolean packed) throws IOException {
     final DataInputStream din = in instanceof DataInputStream ? (DataInputStream) in : new DataInputStream(in);
     if (packed) {
       final byte[] packedImageData = new byte[din.readInt()];
@@ -105,7 +105,7 @@ public class SVGImage {
     this.svgGraphicsNode = loadDiagramFromStream(new ByteArrayInputStream(this.originalNonParsedImageData), this.documentSize);
   }
 
-  public void write(final OutputStream out, final boolean zipped) throws IOException {
+  public void write (final OutputStream out, final boolean zipped) throws IOException {
     final DataOutputStream dout = out instanceof DataOutputStream ? (DataOutputStream) out : new DataOutputStream(out);
     if (zipped) {
       final byte[] packedImage = Utils.packByteArray(this.originalNonParsedImageData);
@@ -119,27 +119,27 @@ public class SVGImage {
     dout.writeBoolean(this.quality);
   }
 
-  public float getSVGWidth() {
+  public float getSVGWidth () {
     return (float) this.documentSize.getWidth();
   }
 
-  public float getSVGHeight() {
+  public float getSVGHeight () {
     return (float) this.documentSize.getHeight();
   }
 
-  public void setQuality(final boolean flag) {
+  public void setQuality (final boolean flag) {
     this.quality = flag;
   }
 
-  public boolean isQuality() {
+  public boolean isQuality () {
     return this.quality;
   }
 
-  public byte[] getImageData() {
+  public byte[] getImageData () {
     return this.originalNonParsedImageData;
   }
 
-  public void render(final Graphics2D g) throws IOException {
+  public void render (final Graphics2D g) throws IOException {
     final Object antialiasText = g.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING);
     final Object antialiasDraw = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
     final Object antialiasAlpha = g.getRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION);
@@ -154,7 +154,7 @@ public class SVGImage {
     }
   }
 
-  public BufferedImage rasterize(final int imageType) throws IOException {
+  public BufferedImage rasterize (final int imageType) throws IOException {
     final int svgWidth = Math.round(getSVGWidth());
     final int svgHeight = Math.round(getSVGHeight());
 
@@ -168,14 +168,14 @@ public class SVGImage {
     return result;
   }
 
-  public BufferedImage rasterize(final float scaleFactor, final int imageType) throws IOException {
+  public BufferedImage rasterize (final float scaleFactor, final int imageType) throws IOException {
     final int svgWidth = Math.round(getSVGWidth());
     final int svgHeight = Math.round(getSVGHeight());
 
     return this.rasterize(Math.round(svgWidth * scaleFactor), Math.round(svgHeight * scaleFactor), imageType);
   }
 
-  public BufferedImage rasterize(final int width, final int height, final int imageType) throws IOException {
+  public BufferedImage rasterize (final int width, final int height, final int imageType) throws IOException {
     final BufferedImage result = new BufferedImage(width, height, imageType);
     final float xfactor = (float) width / getSVGWidth();
     final float yfactor = (float) height / getSVGHeight();
@@ -190,7 +190,7 @@ public class SVGImage {
     return result;
   }
 
-  private static void processAntialias(final boolean flag, final Graphics2D g) {
+  private static void processAntialias (final boolean flag, final Graphics2D g) {
     if (flag) {
       g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -202,8 +202,8 @@ public class SVGImage {
       g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
     }
   }
-  
-  public GraphicsNode getSVGGraphicsNode(){
+
+  public GraphicsNode getSVGGraphicsNode () {
     return this.svgGraphicsNode;
   }
 }
